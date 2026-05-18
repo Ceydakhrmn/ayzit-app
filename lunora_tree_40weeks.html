@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<title>Lunora — 40 Haftalık Yaşam Ağacı</title>
+<style>
+  :root{
+    --trunk-caramel:#d4a574;     /* taze fidan: açık karamel */
+    --trunk-young:#b88654;
+    --trunk-mid:#9c6b3c;
+    --trunk-old:#7b4a24;
+    --trunk-shadow:#4a2810;
+    --trunk-highlight:#e0bb8c;
+    --leaf-deep:#0a4125;          /* iç katman: koyu orman yeşili */
+    --leaf-dark:#12623f;
+    --leaf-mid:#17794f;
+    --leaf-bright:#1f8f61;
+    --leaf-lime:#84cc16;          /* uç yapraklar: parlak lime */
+    --leaf-lime-hi:#bef264;
+    --leaf-yellow:#fde047;        /* en uç: sarımsı yeni filiz */
+    --water:#40bcd8;
+    --sun:#ffc940;
+    --pink:#ec4899;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+            background:linear-gradient(180deg,#fef3e2 0%,#fde2c4 50%,#f4c98a 100%);}
+  body{display:flex;flex-direction:column;align-items:center;padding:20px;gap:14px;min-height:100vh}
+  h1{color:#7c3aed;font-weight:800;font-size:20px;letter-spacing:-.4px}
+  .meta{color:#7c3aed;opacity:.75;font-size:12px;margin-top:-4px}
+
+  .stage{
+    width:380px;height:620px;border-radius:36px;
+    background:linear-gradient(180deg,#fde9d0 0%,#fbd9b2 55%,#e9b97a 100%);
+    box-shadow:0 30px 70px rgba(124,58,237,.18),0 8px 22px rgba(0,0,0,.06);
+    position:relative;overflow:hidden;
+  }
+
+  /* week badge */
+  .week{position:absolute;top:16px;left:16px;z-index:5;
+        background:rgba(255,255,255,.9);backdrop-filter:blur(8px);
+        padding:8px 14px;border-radius:20px;
+        box-shadow:0 4px 12px rgba(0,0,0,.08);
+        font-weight:700;font-size:13px;color:#7c3aed;
+        display:flex;align-items:center;gap:6px}
+  .week-num{font-size:18px;font-weight:800;color:#ec4899}
+
+  /* progress bar */
+  .progress{position:absolute;top:16px;right:16px;z-index:5;
+            width:120px;height:8px;border-radius:4px;
+            background:rgba(255,255,255,.55);overflow:hidden}
+  .progress-fill{height:100%;
+                 background:linear-gradient(90deg,#a78bfa,#ec4899);
+                 width:0;animation:progress 40s linear forwards}
+  @keyframes progress{to{width:100%}}
+
+  /* sun */
+  .sun{position:absolute;top:60px;right:48px;width:54px;height:54px;border-radius:50%;
+       background:radial-gradient(circle,#ffd54a 0%,#ffb627 75%);
+       box-shadow:0 0 50px rgba(255,180,40,.55),0 0 100px rgba(255,180,40,.25);
+       animation:sunGlow 5s ease-in-out infinite, sunRise 3s ease-out backwards;
+       opacity:0}
+  .sun::after{content:'';position:absolute;inset:-18px;border-radius:50%;
+              background:conic-gradient(from 0deg,transparent 0 8deg,rgba(255,200,60,.5) 8deg 14deg,transparent 14deg 30deg);
+              animation:rotate 50s linear infinite}
+  @keyframes sunGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+  @keyframes sunRise{0%{opacity:0;transform:translateY(20px)}100%{opacity:1;transform:translateY(0)}}
+  @keyframes rotate{to{transform:rotate(360deg)}}
+  .sun{animation-fill-mode:forwards;animation-delay:0s,1.5s;opacity:1}
+
+  /* clouds */
+  .cloud{position:absolute;background:rgba(255,255,255,.78);border-radius:50px;
+         box-shadow:0 4px 12px rgba(0,0,0,.04);animation:drift 35s linear infinite}
+  .cloud::before,.cloud::after{content:'';position:absolute;background:rgba(255,255,255,.78);border-radius:50%}
+  .c1{top:115px;left:-90px;width:75px;height:24px}
+  .c1::before{width:34px;height:34px;top:-15px;left:14px}
+  .c1::after{width:26px;height:26px;top:-10px;left:42px}
+  .c2{top:175px;left:-130px;width:55px;height:20px;animation-duration:48s;animation-delay:-15s;opacity:.65}
+  .c2::before{width:26px;height:26px;top:-12px;left:8px}
+  .c2::after{width:20px;height:20px;top:-8px;left:28px}
+  @keyframes drift{from{transform:translateX(0)}to{transform:translateX(560px)}}
+
+  /* ground */
+  .ground{position:absolute;left:0;right:0;bottom:0;height:120px;
+          background:linear-gradient(180deg,#e8a86a 0%,#c98855 55%,#a06a3c 100%);
+          border-top-left-radius:50% 30px;border-top-right-radius:50% 30px;z-index:1}
+  .grass{position:absolute;left:0;right:0;bottom:110px;height:18px;z-index:2;
+         background:radial-gradient(ellipse at 18% 100%,#1f8f61 0,transparent 16px),
+                    radial-gradient(ellipse at 36% 100%,#17794f 0,transparent 14px),
+                    radial-gradient(ellipse at 56% 100%,#1f8f61 0,transparent 16px),
+                    radial-gradient(ellipse at 76% 100%,#12623f 0,transparent 14px),
+                    radial-gradient(ellipse at 90% 100%,#1f8f61 0,transparent 12px)}
+
+  /* tree wrapper */
+  .tree-wrap{position:absolute;left:50%;bottom:108px;transform:translateX(-50%);
+             width:340px;height:480px;z-index:3}
+  svg{width:100%;height:100%;overflow:visible;display:block}
+
+  /* wind sway on branch groups (kısa gövdeye uygun originler) */
+  .sway-light{transform-origin:150px 360px;animation:sway 6s ease-in-out infinite}
+  .sway-mid{transform-origin:150px 295px;animation:sway 7s ease-in-out infinite reverse}
+  .sway-strong{transform-origin:150px 220px;animation:sway 5s ease-in-out infinite}
+  @keyframes sway{
+    0%,100%{transform:rotate(-1deg)}
+    50%{transform:rotate(1deg)}
+  }
+
+  /* leaf bud — visibility:hidden başlar, animasyon başlayınca visible olur (havada nokta yok) */
+  .bud{
+    visibility:hidden;
+    transform-origin:var(--ox,150px) var(--oy,150px);
+    transform:scale(0);
+    opacity:0;
+    animation:budAppear 1s ease-out var(--bud-delay,5s) forwards;
+  }
+  @keyframes budAppear{
+    0%{visibility:visible;transform:scale(0);opacity:0}
+    100%{visibility:visible;transform:scale(1);opacity:.85}
+  }
+
+  /* full leaf — visibility:hidden başlar, sadece animasyon başlayınca görünür olur */
+  .leaf{
+    visibility:hidden;
+    transform-origin:var(--ox,150px) var(--oy,150px);
+    transform:scale(0) rotate(var(--rot,0deg));
+    opacity:0;
+    animation:leafPop 1.4s cubic-bezier(.34,1.56,.64,1) var(--leaf-delay,12s) forwards,
+              leafFlutter 4s ease-in-out calc(var(--leaf-delay,12s) + 1.4s) infinite;
+  }
+  @keyframes leafPop{
+    0%  {visibility:visible;transform:scale(0) rotate(var(--rot,0deg));opacity:0}
+    60% {visibility:visible;transform:scale(1.2) rotate(calc(var(--rot,0deg) + 5deg));opacity:1}
+    100%{visibility:visible;transform:scale(1) rotate(var(--rot,0deg));opacity:1}
+  }
+  @keyframes leafFlutter{
+    0%,100%{transform:scale(1) rotate(var(--rot,0deg))}
+    50%{transform:scale(1.04) rotate(calc(var(--rot,0deg) + 3deg))}
+  }
+
+  /* sparkles at finale */
+  .sparkle{position:absolute;font-size:18px;opacity:0;pointer-events:none;
+           animation:sparkRise 2.4s ease-out forwards}
+  @keyframes sparkRise{
+    0%{opacity:0;transform:translateY(0) scale(.4) rotate(0)}
+    20%{opacity:1}
+    100%{opacity:0;transform:translateY(-110px) scale(.7) rotate(40deg)}
+  }
+
+  /* finale glow — "başarı" parıltısı */
+  .finale-glow{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+               width:340px;height:340px;border-radius:50%;
+               background:radial-gradient(circle,rgba(255,235,150,.5) 0%,transparent 65%);
+               opacity:0;animation:finaleGlow 6s ease-in-out 38s forwards;
+               pointer-events:none}
+  @keyframes finaleGlow{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+    50%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+    100%{opacity:.7;transform:translate(-50%,-50%) scale(1.1)}
+  }
+
+  /* finalde tüm taç hafifçe titrer — "bilgelik ağacı nefes alır" */
+  .tree-wrap.finale{animation:treeBreath 3s ease-in-out infinite}
+  @keyframes treeBreath{
+    0%,100%{transform:translateX(-50%) scale(1)}
+    50%{transform:translateX(-50%) scale(1.015)}
+  }
+
+  .controls{display:flex;gap:10px;margin-top:6px}
+  button{padding:10px 20px;border:none;border-radius:24px;background:#7c3aed;color:#fff;
+         font-weight:700;font-size:13px;letter-spacing:.5px;cursor:pointer;
+         box-shadow:0 4px 12px rgba(124,58,237,.3);transition:transform .15s}
+  button:hover{transform:translateY(-2px)}
+  button.alt{background:#fff;color:#7c3aed;border:2px solid #7c3aed}
+  .info{color:#7c3aed;font-size:11.5px;opacity:.8;text-align:center;max-width:380px;line-height:1.55}
+
+  /* trunk gradient overlay (3D depth, appears 30-40s) */
+  .trunk-shade{opacity:0;animation:shadeIn 4s ease-in 30s forwards}
+  @keyframes shadeIn{to{opacity:1}}
+</style>
+</head>
+<body>
+  <h1>🌳 Lunora — 40 Haftalık Yaşam Ağacı</h1>
+  <p class="meta">Her saniye = 1 hamilelik haftası · toplam 40 saniye</p>
+
+  <div class="stage" id="stage">
+    <div class="week"><span>📅</span> Hafta <span class="week-num" id="weekNum">1</span> / 40</div>
+    <div class="progress"><div class="progress-fill"></div></div>
+
+    <div class="sun"></div>
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+
+    <div class="finale-glow"></div>
+
+    <div class="ground"></div>
+    <div class="grass"></div>
+
+    <div class="tree-wrap">
+      <svg viewBox="0 0 300 480" xmlns="http://www.w3.org/2000/svg" id="treeSvg">
+        <defs>
+          <!-- Trunk gradient for 3D depth (week 30-40) -->
+          <linearGradient id="trunkGrad" x1="0" x2="1" y1="0" y2="0">
+            <stop offset="0%"   stop-color="#5a3418"/>
+            <stop offset="40%"  stop-color="#7b4a24"/>
+            <stop offset="60%"  stop-color="#9c6b3c"/>
+            <stop offset="100%" stop-color="#5a3418"/>
+          </linearGradient>
+          <!-- Inner-canopy leaf: deep forest green (koyu, doygun) -->
+          <radialGradient id="leafGrad" cx=".5" cy=".7" r=".7">
+            <stop offset="0%"  stop-color="#0a4125"/>
+            <stop offset="60%" stop-color="#17794f"/>
+            <stop offset="100%" stop-color="#1f8f61"/>
+          </radialGradient>
+          <!-- Outer-tip leaf: parlak lime → sarımsı (yeni filizleri temsil eder) -->
+          <radialGradient id="leafTipGrad" cx=".5" cy=".7" r=".7">
+            <stop offset="0%"  stop-color="#1f8f61"/>
+            <stop offset="50%" stop-color="#84cc16"/>
+            <stop offset="100%" stop-color="#fde047"/>
+          </radialGradient>
+        </defs>
+
+        <!-- ============ TRUNK (kısa, kalın) ============ -->
+        <path id="trunkPath"
+              d="M150,470 Q149,420 148,370 Q147,310 149,260 Q151,220 152,195"
+              fill="none"
+              stroke="#d4a574"
+              stroke-width="3"
+              stroke-linecap="round"
+              stroke-dasharray="290"
+              stroke-dashoffset="290">
+          <!-- Fidanın doğuşu -->
+          <animate attributeName="stroke-dashoffset" from="290" to="0" begin="0.5s" dur="5s" fill="freeze"/>
+          <!-- Hacimsel genişleme: 5-20s, 3 → 28px (~9×) — daha kalın -->
+          <animate attributeName="stroke-width"     from="3"   to="28" begin="5s"  dur="15s" fill="freeze"/>
+          <animate attributeName="stroke" from="#d4a574" to="#7b4a24" begin="8s" dur="12s" fill="freeze"/>
+        </path>
+
+        <!-- Trunk gradient overlay -->
+        <path class="trunk-shade"
+              d="M150,470 Q149,420 148,370 Q147,310 149,260 Q151,220 152,195"
+              fill="none"
+              stroke="url(#trunkGrad)"
+              stroke-width="28"
+              stroke-linecap="round"/>
+
+        <!-- Trunk highlight -->
+        <path class="trunk-shade"
+              d="M154,460 Q153,415 152,365 Q151,305 153,255 Q154,218 155,200"
+              fill="none"
+              stroke="#d6b48a"
+              stroke-width="5"
+              stroke-linecap="round"
+              opacity=".7"/>
+
+        <!-- Base widening: root flare -->
+        <path d="M115,478 L150,435 L185,478 Z" fill="#7b4a24" opacity="0">
+          <animate attributeName="opacity" from="0" to="1" begin="12s" dur="6s" fill="freeze"/>
+        </path>
+        <path d="M125,478 L150,445 L175,478 Z" fill="#9c6b3c" opacity="0">
+          <animate attributeName="opacity" from="0" to=".8" begin="14s" dur="5s" fill="freeze"/>
+        </path>
+
+        <!-- ============ ANA DALLAR (kısa gövdeye uygun, KALIN) ============ -->
+        <g class="sway-light">
+          <!-- LEFT main #1 — y=370 (en alt dal), uzun & aşağı eğimli — 6s -->
+          <path d="M148,370 Q115,350 85,310 Q62,278 48,240"
+                fill="none" stroke="#7b4a24" stroke-width="3" stroke-linecap="round"
+                stroke-dasharray="190" stroke-dashoffset="190">
+            <animate attributeName="stroke-dashoffset" from="190" to="0" begin="6s" dur="2.4s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="3" to="16" begin="7s" dur="11s" fill="freeze"/>
+          </path>
+          <!-- RIGHT main #1 — y=355, kısa — 7s -->
+          <path d="M150,355 Q180,340 210,310 Q230,288 248,260"
+                fill="none" stroke="#7b4a24" stroke-width="3" stroke-linecap="round"
+                stroke-dasharray="170" stroke-dashoffset="170">
+            <animate attributeName="stroke-dashoffset" from="170" to="0" begin="7s" dur="2.4s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="3" to="14" begin="8s" dur="11s" fill="freeze"/>
+          </path>
+        </g>
+
+        <g class="sway-mid">
+          <!-- LEFT main #2 — y=305, kısa+yukarı — 8.5s -->
+          <path d="M148,305 Q120,280 92,245 Q72,220 55,195"
+                fill="none" stroke="#7b4a24" stroke-width="3" stroke-linecap="round"
+                stroke-dasharray="160" stroke-dashoffset="160">
+            <animate attributeName="stroke-dashoffset" from="160" to="0" begin="8.5s" dur="2.2s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="3" to="13" begin="9.5s" dur="10s" fill="freeze"/>
+          </path>
+          <!-- RIGHT main #2 — y=292, uzun & yukarı — 9.5s -->
+          <path d="M150,292 Q188,265 218,225 Q240,200 258,170"
+                fill="none" stroke="#7b4a24" stroke-width="3" stroke-linecap="round"
+                stroke-dasharray="180" stroke-dashoffset="180">
+            <animate attributeName="stroke-dashoffset" from="180" to="0" begin="9.5s" dur="2.4s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="3" to="12" begin="10.5s" dur="10s" fill="freeze"/>
+          </path>
+        </g>
+
+        <g class="sway-strong">
+          <!-- LEFT upper #3 — y=240 — 11s -->
+          <path d="M149,240 Q128,205 108,175 Q90,150 75,128"
+                fill="none" stroke="#7b4a24" stroke-width="3" stroke-linecap="round"
+                stroke-dasharray="155" stroke-dashoffset="155">
+            <animate attributeName="stroke-dashoffset" from="155" to="0" begin="11s" dur="2s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="3" to="11" begin="12s" dur="8s" fill="freeze"/>
+          </path>
+          <!-- RIGHT upper #3 — y=222 — 11.8s -->
+          <path d="M151,222 Q172,190 192,160 Q210,140 226,118"
+                fill="none" stroke="#7b4a24" stroke-width="3" stroke-linecap="round"
+                stroke-dasharray="150" stroke-dashoffset="150">
+            <animate attributeName="stroke-dashoffset" from="150" to="0" begin="11.8s" dur="2s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="3" to="11" begin="12.8s" dur="8s" fill="freeze"/>
+          </path>
+          <!-- TOP-LEFT crown — y=200 → 132,62 -->
+          <path d="M152,200 Q145,165 138,130 Q135,100 132,72"
+                fill="none" stroke="#7b4a24" stroke-width="3" stroke-linecap="round"
+                stroke-dasharray="135" stroke-dashoffset="135">
+            <animate attributeName="stroke-dashoffset" from="135" to="0" begin="13s" dur="2s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="3" to="9" begin="14s" dur="7s" fill="freeze"/>
+          </path>
+          <!-- TOP-RIGHT crown — y=200 → 175,68 -->
+          <path d="M152,200 Q160,165 170,130 Q175,100 178,68"
+                fill="none" stroke="#7b4a24" stroke-width="3" stroke-linecap="round"
+                stroke-dasharray="135" stroke-dashoffset="135">
+            <animate attributeName="stroke-dashoffset" from="135" to="0" begin="13.5s" dur="2s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="3" to="9" begin="14.5s" dur="7s" fill="freeze"/>
+          </path>
+        </g>
+
+        <!-- ============ KILCAL DALLAR (15s sonrası — yaprakların yuvaları, KALIN) ============ -->
+        <g class="sway-mid">
+          <path d="M85,310 Q70,295 55,285" fill="none" stroke="#9c6b3c" stroke-width="1.5" stroke-linecap="round"
+                stroke-dasharray="35" stroke-dashoffset="35">
+            <animate attributeName="stroke-dashoffset" from="35" to="0" begin="15s" dur="1.4s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="1.5" to="5" begin="16s" dur="6s" fill="freeze"/>
+          </path>
+          <path d="M85,310 Q98,295 105,280" fill="none" stroke="#9c6b3c" stroke-width="1.5" stroke-linecap="round"
+                stroke-dasharray="30" stroke-dashoffset="30">
+            <animate attributeName="stroke-dashoffset" from="30" to="0" begin="15.4s" dur="1.4s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="1.5" to="4.5" begin="16.4s" dur="6s" fill="freeze"/>
+          </path>
+          <path d="M210,310 Q225,295 238,282" fill="none" stroke="#9c6b3c" stroke-width="1.5" stroke-linecap="round"
+                stroke-dasharray="32" stroke-dashoffset="32">
+            <animate attributeName="stroke-dashoffset" from="32" to="0" begin="15.7s" dur="1.4s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="1.5" to="5" begin="16.7s" dur="6s" fill="freeze"/>
+          </path>
+          <path d="M210,310 Q198,294 192,278" fill="none" stroke="#9c6b3c" stroke-width="1.5" stroke-linecap="round"
+                stroke-dasharray="28" stroke-dashoffset="28">
+            <animate attributeName="stroke-dashoffset" from="28" to="0" begin="16s" dur="1.4s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="1.5" to="4.5" begin="17s" dur="6s" fill="freeze"/>
+          </path>
+          <path d="M92,245 Q78,230 65,218" fill="none" stroke="#9c6b3c" stroke-width="1.5" stroke-linecap="round"
+                stroke-dasharray="32" stroke-dashoffset="32">
+            <animate attributeName="stroke-dashoffset" from="32" to="0" begin="16.3s" dur="1.4s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="1.5" to="4.5" begin="17.3s" dur="5s" fill="freeze"/>
+          </path>
+          <path d="M218,225 Q235,210 248,200" fill="none" stroke="#9c6b3c" stroke-width="1.5" stroke-linecap="round"
+                stroke-dasharray="32" stroke-dashoffset="32">
+            <animate attributeName="stroke-dashoffset" from="32" to="0" begin="16.7s" dur="1.4s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="1.5" to="4.5" begin="17.7s" dur="5s" fill="freeze"/>
+          </path>
+          <path d="M108,175 Q96,162 84,150" fill="none" stroke="#9c6b3c" stroke-width="1.5" stroke-linecap="round"
+                stroke-dasharray="28" stroke-dashoffset="28">
+            <animate attributeName="stroke-dashoffset" from="28" to="0" begin="17s" dur="1.3s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="1.5" to="4" begin="18s" dur="5s" fill="freeze"/>
+          </path>
+          <path d="M192,160 Q205,147 216,138" fill="none" stroke="#9c6b3c" stroke-width="1.5" stroke-linecap="round"
+                stroke-dasharray="28" stroke-dashoffset="28">
+            <animate attributeName="stroke-dashoffset" from="28" to="0" begin="17.4s" dur="1.3s" fill="freeze"/>
+            <animate attributeName="stroke-width" from="1.5" to="4" begin="18.4s" dur="5s" fill="freeze"/>
+          </path>
+        </g>
+
+        <!-- BUDS and LEAVES will be injected by JavaScript at branch tips -->
+        <g id="leafLayer"></g>
+
+      </svg>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="replay()">▶ TEKRAR OYNAT (40 sn)</button>
+    <button class="alt" onclick="jumpTo(0)">⏮ Başa</button>
+    <button class="alt" onclick="jumpTo(20)">⏩ 20. Hafta</button>
+    <button class="alt" onclick="jumpTo(38)">⏭ Final</button>
+  </div>
+  <p class="info">
+    <b>0–5 sn:</b> Kısa karamel gövde aşağıdan yukarı çizilir &nbsp;·&nbsp;
+    <b>5–20 sn:</b> Gövde 9× kalınlaşır, koyulaşır &nbsp;·&nbsp;
+    <b>6–15 sn:</b> Asimetrik kalın ana dallar açar &nbsp;·&nbsp;
+    <b>15–19 sn:</b> Kılcal dallar &nbsp;·&nbsp;
+    <b>Her dalın bitişinden sonra:</b> Tomurcuk ucunda belirir, ardından yaprak patlar (havada nokta yok) &nbsp;·&nbsp;
+    <b>16 sn+:</b> İç katman yaprakları &nbsp;·&nbsp;
+    <b>22–39 sn:</b> Layering ile taç dolar — 380+ yaprak &nbsp;·&nbsp;
+    <b>40 sn:</b> ✨ Bilgelik ağacı + parıltı
+  </p>
+
+<script>
+/* =====================================================
+   Leaf bud + leaf generation
+   Branch tip positions (from SVG paths above)
+   ===================================================== */
+// Branch tips: bud delay = ilgili dalın bitiş saniyesi + 0.3s
+// (yapraklar dalın ucu çizildikten SONRA belirir, öncesinde havada nokta yok)
+const branchTips = [
+  // ana dal uçları (her dal bitiş zamanı SVG'de stroke-dashoffset bitişiyle eşleşir)
+  {x: 48,  y: 240, delay: 8.7,  lime:true},   // LEFT #1 finishes 8.4s
+  {x: 248, y: 260, delay: 9.7,  lime:true},   // RIGHT #1 finishes 9.4s
+  {x: 55,  y: 195, delay: 11.0, lime:true},   // LEFT #2 finishes 10.7s
+  {x: 258, y: 170, delay: 12.2, lime:true},   // RIGHT #2 finishes 11.9s
+  {x: 75,  y: 128, delay: 13.3, lime:true},   // LEFT #3 finishes 13.0s
+  {x: 226, y: 118, delay: 14.1, lime:true},   // RIGHT #3 finishes 13.8s
+  {x: 132, y: 72,  delay: 15.3, lime:true},   // CROWN LEFT finishes 15.0s
+  {x: 178, y: 68,  delay: 15.8, lime:true},   // CROWN RIGHT finishes 15.5s
+
+  // kılcal dal uçları (kılcallar 16.4-18.7s arası tamamlanır)
+  {x: 55,  y: 285, delay: 16.7, lime:false},
+  {x: 105, y: 280, delay: 17.1, lime:false},
+  {x: 238, y: 282, delay: 17.4, lime:false},
+  {x: 192, y: 278, delay: 17.7, lime:false},
+  {x: 65,  y: 218, delay: 18.0, lime:false},
+  {x: 248, y: 200, delay: 18.4, lime:false},
+  {x: 84,  y: 150, delay: 18.6, lime:false},
+  {x: 216, y: 138, delay: 19.0, lime:false},
+];
+
+/* Inner-canopy leaves (kısa gövdeye uygun pozisyonlar) — 30 yaprak */
+const innerLeaves = [
+  {x:130, y:215, rot:-15}, {x:170, y:210, rot:15},
+  {x:115, y:170, rot:-25}, {x:185, y:165, rot:25},
+  {x:140, y:130, rot:-10}, {x:160, y:125, rot:10},
+  {x:125, y:265, rot:-20}, {x:175, y:265, rot:20},
+  {x:148, y:100, rot:0},   {x:152, y:185, rot:5},
+  {x:100, y:215, rot:-30}, {x:200, y:215, rot:30},
+  {x:148, y:155, rot:-5},  {x:148, y:85, rot:8},
+  // ek iç katman yaprakları
+  {x:118, y:195, rot:-22}, {x:182, y:190, rot:22},
+  {x:135, y:170, rot:-12}, {x:165, y:165, rot:12},
+  {x:108, y:240, rot:-28}, {x:192, y:235, rot:28},
+  {x:145, y:115, rot:-8},  {x:155, y:110, rot:8},
+  {x:128, y:140, rot:-18}, {x:172, y:138, rot:18},
+  {x:142, y:75,  rot:-4},  {x:158, y:78,  rot:4},
+  {x:120, y:285, rot:-25}, {x:180, y:280, rot:25},
+  {x:148, y:200, rot:0},   {x:148, y:250, rot:0},
+];
+
+/* Outer-tip leaves (lime-bright) — many around each branch tip */
+const outerLeavesPerTip = 9;
+
+const leafLayer = document.getElementById('leafLayer');
+const svgNS = "http://www.w3.org/2000/svg";
+
+function teardropPath(cx, cy, size, rot){
+  // teardrop pointing up, scaled, then rotated around cx,cy
+  // base shape (centered at 0,0, point up): control points create teardrop
+  return `M ${cx},${cy - size}
+          C ${cx + size*0.7},${cy - size*0.7} ${cx + size*0.7},${cy + size*0.4} ${cx},${cy + size*0.5}
+          C ${cx - size*0.7},${cy + size*0.4} ${cx - size*0.7},${cy - size*0.7} ${cx},${cy - size}
+          Z`;
+}
+
+function makeLeaf(cx, cy, size, rot, fillUrl, delay, isBud=false){
+  const g = document.createElementNS(svgNS, 'g');
+  g.classList.add(isBud ? 'bud' : 'leaf');
+  g.style.setProperty('--ox', cx + 'px');
+  g.style.setProperty('--oy', cy + 'px');
+  g.style.setProperty('--rot', rot + 'deg');
+  g.style.setProperty(isBud ? '--bud-delay' : '--leaf-delay', delay + 's');
+
+  if(isBud){
+    const c = document.createElementNS(svgNS,'circle');
+    c.setAttribute('cx', cx); c.setAttribute('cy', cy);
+    c.setAttribute('r', 2.5); c.setAttribute('fill', '#65a30d');
+    g.appendChild(c);
+  } else {
+    const p = document.createElementNS(svgNS,'path');
+    p.setAttribute('d', teardropPath(cx, cy, size, 0));
+    p.setAttribute('fill', fillUrl);
+    p.setAttribute('transform', `rotate(${rot} ${cx} ${cy})`);
+    p.setAttribute('opacity', '.95');
+    g.appendChild(p);
+    // add subtle vein
+    const v = document.createElementNS(svgNS,'line');
+    v.setAttribute('x1', cx); v.setAttribute('y1', cy - size*0.85);
+    v.setAttribute('x2', cx); v.setAttribute('y2', cy + size*0.4);
+    v.setAttribute('stroke', '#0a4125');
+    v.setAttribute('stroke-width', '0.6');
+    v.setAttribute('opacity', '.5');
+    v.setAttribute('transform', `rotate(${rot} ${cx} ${cy})`);
+    g.appendChild(v);
+  }
+  return g;
+}
+
+/* 1. Inject buds at branch tips (5-12s) */
+branchTips.forEach((t, i) => {
+  leafLayer.appendChild(makeLeaf(t.x, t.y, 0, 0, null, t.delay, true));
+});
+
+/* 2. İç-taç yaprakları — TÜM ana dallar bittikten sonra (16s+) */
+innerLeaves.forEach((leaf, i) => {
+  const delay = 16 + (i * 0.18);  // 16-21.4s arası dağılır
+  const size = 11 + Math.random() * 4;
+  leafLayer.appendChild(makeLeaf(leaf.x, leaf.y, size, leaf.rot, 'url(#leafGrad)', delay));
+});
+
+/* 3. Uç yapraklar — her dalın TOMURCUĞUNDAN sonra patlar (her tip kendi delay'inden ~1.2s sonra) */
+branchTips.forEach((tip, ti) => {
+  for(let i = 0; i < outerLeavesPerTip; i++){
+    const angle = (i / outerLeavesPerTip) * Math.PI * 2 + (ti * 0.7);
+    const r = 14 + Math.random() * 8;
+    const lx = tip.x + Math.cos(angle) * r;
+    const ly = tip.y + Math.sin(angle) * r * 0.85;
+    const size = 9 + Math.random() * 4;
+    const rot = (angle * 180 / Math.PI) - 90 + (Math.random() * 20 - 10);
+    // tomurcuk belirdikten 1.2s sonra ilk yaprak, sonra her yaprak 0.1s arayla
+    const delay = tip.delay + 1.2 + i * 0.1;
+    const fill = tip.lime ? 'url(#leafTipGrad)' : 'url(#leafGrad)';
+    leafLayer.appendChild(makeLeaf(lx, ly, size, rot, fill, delay));
+  }
+});
+
+/* 4. Layering — TÜM dallar + ilk yapraklar bittikten sonra (22s+) */
+//    Birinci dalga (22-28s): 70 yaprak
+for(let i = 0; i < 70; i++){
+  const angle = Math.random() * Math.PI * 2;
+  const r = 40 + Math.random() * 85;
+  const cx = 150 + Math.cos(angle) * r;
+  const cy = 155 + Math.sin(angle) * r * 0.78;
+  if(cy > 305) continue;
+  const size = 8 + Math.random() * 5;
+  const rot = Math.random() * 360;
+  const delay = 22 + i * 0.085;
+  const isLime = Math.random() < 0.45;
+  leafLayer.appendChild(makeLeaf(cx, cy, size, rot, isLime ? 'url(#leafTipGrad)' : 'url(#leafGrad)', delay));
+}
+//    İkinci dalga (28-34s): 80 yaprak
+for(let i = 0; i < 80; i++){
+  const angle = Math.random() * Math.PI * 2;
+  const r = 25 + Math.random() * 110;
+  const cx = 150 + Math.cos(angle) * r;
+  const cy = 145 + Math.sin(angle) * r * 0.72;
+  if(cy > 300) continue;
+  const size = 7 + Math.random() * 6;
+  const rot = Math.random() * 360;
+  const delay = 28 + i * 0.075;
+  const isLime = Math.random() < 0.5;
+  leafLayer.appendChild(makeLeaf(cx, cy, size, rot, isLime ? 'url(#leafTipGrad)' : 'url(#leafGrad)', delay));
+}
+//    Üçüncü dalga (34-39s): 60 yaprak — final, sarımsı uçlar
+for(let i = 0; i < 60; i++){
+  const angle = Math.random() * Math.PI * 2;
+  const r = 35 + Math.random() * 105;
+  const cx = 150 + Math.cos(angle) * r;
+  const cy = 140 + Math.sin(angle) * r * 0.7;
+  if(cy > 290) continue;
+  const size = 6 + Math.random() * 6;
+  const rot = Math.random() * 360;
+  const delay = 34 + i * 0.083;
+  const isLime = Math.random() < 0.7;
+  leafLayer.appendChild(makeLeaf(cx, cy, size, rot, isLime ? 'url(#leafTipGrad)' : 'url(#leafGrad)', delay));
+}
+
+/* ============ Week counter ============ */
+let startTime = Date.now();
+const weekEl = document.getElementById('weekNum');
+function updateWeek(){
+  const elapsed = (Date.now() - startTime) / 1000;
+  const week = Math.min(40, Math.max(1, Math.ceil(elapsed)));
+  weekEl.textContent = week;
+  if(elapsed < 41) requestAnimationFrame(updateWeek);
+}
+updateWeek();
+
+/* ============ Finale: bilgelik ağacı + sparkles (38s+) ============ */
+function spawnSparkles(){
+  setTimeout(() => {
+    // Tüm ağaca "nefes alma" titreşim ekle
+    document.querySelector('.tree-wrap')?.classList.add('finale');
+
+    const stage = document.getElementById('stage');
+    const emojis = ['✨','💖','🌸','💛','⭐','🌟'];
+    let count = 0;
+    const interval = setInterval(() => {
+      if(count++ > 22){ clearInterval(interval); return; }
+      const s = document.createElement('div');
+      s.className = 'sparkle';
+      s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      s.style.left = (50 + Math.random() * 280) + 'px';
+      s.style.top  = (160 + Math.random() * 220) + 'px';
+      stage.appendChild(s);
+      setTimeout(() => s.remove(), 2400);
+    }, 180);
+  }, 38000);
+}
+spawnSparkles();
+
+/* ============ Controls ============ */
+function replay(){
+  const stage = document.getElementById('stage');
+  const newStage = stage.cloneNode(true);
+  stage.parentNode.replaceChild(newStage, stage);
+  startTime = Date.now();
+  // re-trigger any listeners
+  location.reload();
+}
+function jumpTo(sec){
+  // restart and fast-forward via animation-delay trick: simplest = reload with hash
+  location.hash = '#t=' + sec;
+  location.reload();
+}
+// honor hash on load: shift all anims back by jump time
+window.addEventListener('DOMContentLoaded', () => {
+  const m = location.hash.match(/t=(\d+)/);
+  if(!m) return;
+  const skip = parseInt(m[1]);
+  document.querySelectorAll('[style*="--bud-delay"], [style*="--leaf-delay"]').forEach(el => {
+    const bd = el.style.getPropertyValue('--bud-delay');
+    const ld = el.style.getPropertyValue('--leaf-delay');
+    if(bd) el.style.setProperty('--bud-delay', Math.max(0, parseFloat(bd) - skip) + 's');
+    if(ld) el.style.setProperty('--leaf-delay', Math.max(0, parseFloat(ld) - skip) + 's');
+  });
+  // shift SVG <animate> begin attributes
+  document.querySelectorAll('animate').forEach(a => {
+    const begin = parseFloat(a.getAttribute('begin'));
+    if(!isNaN(begin)){
+      a.setAttribute('begin', Math.max(0, begin - skip) + 's');
+    }
+  });
+  // shift CSS animation delays via stylesheet override
+  const style = document.createElement('style');
+  style.textContent = `
+    .progress-fill{animation-delay:${-skip}s !important}
+    .finale-glow{animation-delay:${Math.max(0, 38-skip)}s !important}
+    .sun{animation-delay:0s, ${Math.max(0, 1.5-skip)}s !important}
+  `;
+  document.head.appendChild(style);
+  startTime = Date.now() - skip*1000;
+});
+</script>
+</body>
+</html>

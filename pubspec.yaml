@@ -25,6 +25,7 @@ dependencies:
   fl_chart: ^0.70.2
   characters: ^1.4.0
   flutter_local_notifications: ^18.0.1
+  lottie: ^3.1.2
 
 dev_dependencies:
   flutter_test:
@@ -48,4 +49,5 @@ flutter:
     - assets/logo.png
     - assets/logo_new.png
     - assets/exercises/
+    - assets/animations/
 

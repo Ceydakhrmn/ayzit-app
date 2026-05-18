@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<title>Lunora — Ağaç Büyümesi</title>
+<style>
+  :root{
+    --bg-1:#fff8f0;
+    --bg-2:#ffeed8;
+    --trunk:#7b4a24;
+    --trunk-dark:#5a3418;
+    --leaf-1:#0a4125;
+    --leaf-2:#12623f;
+    --leaf-3:#17794f;
+    --leaf-4:#1f8f61;
+    --water:#40bcd8;
+    --sun:#fffa2f;
+    --pink:#f9a8d4;
+    --pink-dark:#ec4899;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:linear-gradient(180deg,#ffe8c8 0%,#ffd8b0 50%,#ffc998 100%);font-family:-apple-system,BlinkMacSystemFont,system-ui,sans-serif}
+  body{display:flex;flex-direction:column;align-items:center;padding:24px;gap:16px}
+  h1{color:#7c3aed;font-weight:800;letter-spacing:-.5px;font-size:22px}
+  .stage{
+    width:380px;height:580px;border-radius:36px;
+    background:linear-gradient(180deg,#fef3e2 0%,#fde2c4 60%,#f4c98a 100%);
+    box-shadow:0 30px 80px rgba(124,58,237,.18),0 8px 24px rgba(0,0,0,.06);
+    position:relative;overflow:hidden;
+  }
+  /* sun */
+  .sun{position:absolute;top:42px;right:42px;width:64px;height:64px;border-radius:50%;
+       background:radial-gradient(circle,#ffd54a 0%,#ffb627 70%);
+       box-shadow:0 0 60px rgba(255,200,40,.7),0 0 120px rgba(255,200,40,.35);
+       animation:sunGlow 4s ease-in-out infinite}
+  .sun::before,.sun::after{content:'';position:absolute;inset:-22px;border-radius:50%;
+       background:conic-gradient(from 0deg,transparent 0 8deg,rgba(255,210,80,.55) 8deg 14deg,transparent 14deg 30deg);
+       animation:rotate 30s linear infinite}
+  .sun::after{animation-duration:45s;animation-direction:reverse;opacity:.5}
+  @keyframes sunGlow{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+  @keyframes rotate{to{transform:rotate(360deg)}}
+
+  /* clouds */
+  .cloud{position:absolute;background:rgba(255,255,255,.85);border-radius:50px;
+         box-shadow:0 4px 12px rgba(0,0,0,.05);animation:drift 28s linear infinite}
+  .cloud::before,.cloud::after{content:'';position:absolute;background:rgba(255,255,255,.85);border-radius:50%}
+  .c1{top:90px;left:-80px;width:70px;height:22px}
+  .c1::before{width:32px;height:32px;top:-14px;left:12px}
+  .c1::after{width:24px;height:24px;top:-8px;left:38px}
+  .c2{top:160px;left:-120px;width:50px;height:18px;animation-duration:38s;animation-delay:-12s;opacity:.7}
+  .c2::before{width:24px;height:24px;top:-10px;left:8px}
+  .c2::after{width:18px;height:18px;top:-6px;left:26px}
+  @keyframes drift{from{transform:translateX(0)}to{transform:translateX(560px)}}
+
+  /* ground */
+  .ground{position:absolute;left:0;right:0;bottom:0;height:140px;
+          background:linear-gradient(180deg,#e8a86a 0%,#c98855 60%,#a06a3c 100%);
+          border-top-left-radius:50% 30px;border-top-right-radius:50% 30px}
+  .grass{position:absolute;left:0;right:0;bottom:130px;height:18px;
+         background:radial-gradient(ellipse at 20% 100%,#1f8f61 0,transparent 18px),
+                    radial-gradient(ellipse at 38% 100%,#17794f 0,transparent 14px),
+                    radial-gradient(ellipse at 62% 100%,#1f8f61 0,transparent 16px),
+                    radial-gradient(ellipse at 80% 100%,#12623f 0,transparent 14px)}
+
+  /* tree svg sits centered */
+  .tree-wrap{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);
+             width:300px;height:420px}
+  svg{width:100%;height:100%;overflow:visible}
+
+  /* path drawing animation */
+  .grow{
+    stroke-dasharray:var(--len,400);
+    stroke-dashoffset:var(--len,400);
+    animation:draw var(--dur,2s) ease-out forwards;
+    animation-delay:var(--delay,0s);
+  }
+  @keyframes draw{to{stroke-dashoffset:0}}
+
+  .leaf{
+    transform-origin:var(--ox,50%) var(--oy,50%);
+    transform:scale(0);
+    animation:pop .9s cubic-bezier(.34,1.56,.64,1) forwards;
+    animation-delay:var(--delay,0s);
+  }
+  @keyframes pop{
+    0%{transform:scale(0) rotate(-30deg)}
+    70%{transform:scale(1.15) rotate(5deg)}
+    100%{transform:scale(1) rotate(0)}
+  }
+
+  .fruit{
+    transform-origin:center;
+    transform:scale(0);
+    animation:fruitPop 1.2s cubic-bezier(.34,1.56,.64,1) forwards;
+    animation-delay:var(--delay,12s);
+  }
+  @keyframes fruitPop{
+    0%{transform:scale(0)}
+    60%{transform:scale(1.2)}
+    100%{transform:scale(1)}
+  }
+
+  /* falling water drops at start */
+  .drop{position:absolute;width:6px;height:10px;background:var(--water);
+        border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;
+        top:-20px;opacity:0;
+        animation:fall 2.4s ease-in forwards;
+        box-shadow:0 0 6px rgba(64,188,216,.6)}
+  .drop:nth-child(1){left:42%;animation-delay:.2s}
+  .drop:nth-child(2){left:48%;animation-delay:.6s}
+  .drop:nth-child(3){left:55%;animation-delay:1.0s}
+  .drop:nth-child(4){left:46%;animation-delay:1.4s}
+  .drop:nth-child(5){left:52%;animation-delay:1.8s}
+  @keyframes fall{
+    0%{transform:translateY(0);opacity:0}
+    20%{opacity:1}
+    85%{opacity:1;transform:translateY(420px) scaleY(1)}
+    100%{transform:translateY(440px) scaleY(.2);opacity:0}
+  }
+
+  /* heart sparkles when fully grown */
+  .sparkle{position:absolute;font-size:18px;opacity:0;
+           animation:spark 2s ease-out forwards}
+  @keyframes spark{
+    0%{opacity:0;transform:translateY(0) scale(.4)}
+    30%{opacity:1;transform:translateY(-30px) scale(1)}
+    100%{opacity:0;transform:translateY(-90px) scale(.6) rotate(20deg)}
+  }
+
+  .controls{display:flex;gap:10px;margin-top:8px}
+  button{padding:10px 18px;border:none;border-radius:24px;background:#7c3aed;color:#fff;
+         font-weight:700;font-size:13px;letter-spacing:.5px;cursor:pointer;
+         box-shadow:0 4px 12px rgba(124,58,237,.3);transition:transform .15s}
+  button:hover{transform:translateY(-2px)}
+  .info{color:#7c3aed;font-size:12px;opacity:.8;text-align:center;max-width:380px;line-height:1.5}
+</style>
+</head>
+<body>
+  <h1>🌳 Lunora — Yaşam Ağacı</h1>
+  <div class="stage" id="stage">
+    <div class="sun"></div>
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="ground"></div>
+    <div class="grass"></div>
+
+    <!-- water drops at start -->
+    <div class="drop"></div>
+    <div class="drop"></div>
+    <div class="drop"></div>
+    <div class="drop"></div>
+    <div class="drop"></div>
+
+    <div class="tree-wrap">
+      <svg viewBox="0 0 300 420" xmlns="http://www.w3.org/2000/svg">
+        <!-- trunk: drawn first, longest -->
+        <!-- main trunk -->
+        <path class="grow" d="M150,420 Q150,360 148,300 Q146,240 150,180"
+              fill="none" stroke="#7b4a24" stroke-width="22" stroke-linecap="round"
+              style="--len:280;--dur:3s;--delay:.5s"/>
+
+        <!-- trunk highlight -->
+        <path class="grow" d="M156,400 Q156,340 154,280 Q152,220 156,170"
+              fill="none" stroke="#a06b3a" stroke-width="6" stroke-linecap="round"
+              style="--len:260;--dur:3s;--delay:.6s"/>
+
+        <!-- LEFT branches (drawn after trunk) -->
+        <path class="grow" d="M148,260 Q120,250 90,230 Q70,218 55,200"
+              fill="none" stroke="#7b4a24" stroke-width="11" stroke-linecap="round"
+              style="--len:140;--dur:1.5s;--delay:3.5s"/>
+        <path class="grow" d="M148,220 Q115,205 85,180 Q65,164 50,148"
+              fill="none" stroke="#7b4a24" stroke-width="9" stroke-linecap="round"
+              style="--len:135;--dur:1.4s;--delay:4.2s"/>
+        <path class="grow" d="M150,190 Q130,170 110,150 Q92,135 80,120"
+              fill="none" stroke="#7b4a24" stroke-width="7" stroke-linecap="round"
+              style="--len:115;--dur:1.3s;--delay:5.0s"/>
+
+        <!-- RIGHT branches -->
+        <path class="grow" d="M150,250 Q180,235 210,215 Q230,202 245,185"
+              fill="none" stroke="#7b4a24" stroke-width="11" stroke-linecap="round"
+              style="--len:140;--dur:1.5s;--delay:3.8s"/>
+        <path class="grow" d="M150,210 Q185,195 215,170 Q235,154 250,138"
+              fill="none" stroke="#7b4a24" stroke-width="9" stroke-linecap="round"
+              style="--len:135;--dur:1.4s;--delay:4.5s"/>
+        <path class="grow" d="M150,180 Q170,160 190,140 Q208,125 220,110"
+              fill="none" stroke="#7b4a24" stroke-width="7" stroke-linecap="round"
+              style="--len:115;--dur:1.3s;--delay:5.3s"/>
+
+        <!-- top branches -->
+        <path class="grow" d="M150,170 Q145,140 142,110 Q140,90 138,75"
+              fill="none" stroke="#7b4a24" stroke-width="6" stroke-linecap="round"
+              style="--len:100;--dur:1.2s;--delay:5.5s"/>
+        <path class="grow" d="M150,170 Q156,140 162,108 Q166,88 170,72"
+              fill="none" stroke="#7b4a24" stroke-width="6" stroke-linecap="round"
+              style="--len:100;--dur:1.2s;--delay:5.7s"/>
+
+        <!-- LEAVES (groups of layered leaves at branch tips) -->
+        <!-- leaf cluster: left low -->
+        <g class="leaf" style="--ox:55px;--oy:200px;--delay:6.0s">
+          <ellipse cx="55" cy="200" rx="38" ry="34" fill="#0a4125"/>
+          <ellipse cx="48" cy="195" rx="28" ry="26" fill="#12623f"/>
+          <ellipse cx="62" cy="206" rx="22" ry="20" fill="#17794f"/>
+          <ellipse cx="55" cy="195" rx="14" ry="12" fill="#1f8f61"/>
+        </g>
+        <!-- left mid -->
+        <g class="leaf" style="--ox:50px;--oy:148px;--delay:6.4s">
+          <ellipse cx="50" cy="148" rx="40" ry="35" fill="#0a4125"/>
+          <ellipse cx="44" cy="142" rx="30" ry="26" fill="#12623f"/>
+          <ellipse cx="58" cy="154" rx="22" ry="20" fill="#17794f"/>
+          <ellipse cx="50" cy="144" rx="14" ry="12" fill="#1f8f61"/>
+        </g>
+        <!-- left top -->
+        <g class="leaf" style="--ox:80px;--oy:120px;--delay:6.8s">
+          <ellipse cx="80" cy="120" rx="34" ry="30" fill="#0a4125"/>
+          <ellipse cx="74" cy="114" rx="24" ry="22" fill="#12623f"/>
+          <ellipse cx="86" cy="124" rx="18" ry="16" fill="#1f8f61"/>
+        </g>
+        <!-- right low -->
+        <g class="leaf" style="--ox:245px;--oy:185px;--delay:6.2s">
+          <ellipse cx="245" cy="185" rx="38" ry="34" fill="#0a4125"/>
+          <ellipse cx="252" cy="180" rx="28" ry="26" fill="#12623f"/>
+          <ellipse cx="238" cy="190" rx="22" ry="20" fill="#17794f"/>
+          <ellipse cx="245" cy="180" rx="14" ry="12" fill="#1f8f61"/>
+        </g>
+        <!-- right mid -->
+        <g class="leaf" style="--ox:250px;--oy:138px;--delay:6.6s">
+          <ellipse cx="250" cy="138" rx="40" ry="35" fill="#0a4125"/>
+          <ellipse cx="256" cy="132" rx="30" ry="26" fill="#12623f"/>
+          <ellipse cx="242" cy="144" rx="22" ry="20" fill="#17794f"/>
+          <ellipse cx="250" cy="134" rx="14" ry="12" fill="#1f8f61"/>
+        </g>
+        <!-- right top -->
+        <g class="leaf" style="--ox:220px;--oy:110px;--delay:7.0s">
+          <ellipse cx="220" cy="110" rx="34" ry="30" fill="#0a4125"/>
+          <ellipse cx="226" cy="104" rx="24" ry="22" fill="#12623f"/>
+          <ellipse cx="214" cy="114" rx="18" ry="16" fill="#1f8f61"/>
+        </g>
+        <!-- crown left -->
+        <g class="leaf" style="--ox:138px;--oy:75px;--delay:7.4s">
+          <ellipse cx="138" cy="75" rx="42" ry="38" fill="#0a4125"/>
+          <ellipse cx="130" cy="68" rx="32" ry="28" fill="#12623f"/>
+          <ellipse cx="146" cy="80" rx="22" ry="20" fill="#17794f"/>
+          <ellipse cx="138" cy="70" rx="14" ry="12" fill="#1f8f61"/>
+        </g>
+        <!-- crown right -->
+        <g class="leaf" style="--ox:170px;--oy:72px;--delay:7.6s">
+          <ellipse cx="170" cy="72" rx="42" ry="38" fill="#0a4125"/>
+          <ellipse cx="178" cy="66" rx="32" ry="28" fill="#12623f"/>
+          <ellipse cx="162" cy="78" rx="22" ry="20" fill="#17794f"/>
+          <ellipse cx="170" cy="68" rx="14" ry="12" fill="#1f8f61"/>
+        </g>
+        <!-- crown top -->
+        <g class="leaf" style="--ox:154px;--oy:40px;--delay:7.8s">
+          <ellipse cx="154" cy="40" rx="48" ry="42" fill="#0a4125"/>
+          <ellipse cx="146" cy="32" rx="34" ry="30" fill="#12623f"/>
+          <ellipse cx="162" cy="46" rx="24" ry="22" fill="#17794f"/>
+          <ellipse cx="154" cy="34" rx="16" ry="14" fill="#1f8f61"/>
+        </g>
+
+        <!-- fruits / flowers (pink) -->
+        <g class="fruit" style="--delay:9.0s">
+          <circle cx="68" cy="200" r="6" fill="#ec4899"/>
+          <circle cx="65" cy="197" r="2" fill="#fbcfe8"/>
+        </g>
+        <g class="fruit" style="--delay:9.2s">
+          <circle cx="232" cy="190" r="6" fill="#ec4899"/>
+          <circle cx="229" cy="187" r="2" fill="#fbcfe8"/>
+        </g>
+        <g class="fruit" style="--delay:9.4s">
+          <circle cx="60" cy="148" r="7" fill="#ec4899"/>
+          <circle cx="57" cy="145" r="2" fill="#fbcfe8"/>
+        </g>
+        <g class="fruit" style="--delay:9.6s">
+          <circle cx="240" cy="140" r="7" fill="#ec4899"/>
+          <circle cx="237" cy="137" r="2" fill="#fbcfe8"/>
+        </g>
+        <g class="fruit" style="--delay:9.8s">
+          <circle cx="148" cy="55" r="8" fill="#ec4899"/>
+          <circle cx="145" cy="52" r="2" fill="#fbcfe8"/>
+        </g>
+        <g class="fruit" style="--delay:10.0s">
+          <circle cx="178" cy="60" r="7" fill="#ec4899"/>
+          <circle cx="175" cy="57" r="2" fill="#fbcfe8"/>
+        </g>
+        <g class="fruit" style="--delay:10.2s">
+          <circle cx="120" cy="90" r="6" fill="#ec4899"/>
+          <circle cx="117" cy="87" r="2" fill="#fbcfe8"/>
+        </g>
+        <g class="fruit" style="--delay:10.4s">
+          <circle cx="200" cy="92" r="6" fill="#ec4899"/>
+          <circle cx="197" cy="89" r="2" fill="#fbcfe8"/>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button onclick="replay()">▶ TEKRAR OYNAT</button>
+  </div>
+  <p class="info">Lottie animasyonundan ilham alınmış, SVG + CSS ile yapılmış sürüm.<br>
+     Su damlaları → tohum filizlenir → gövde uzar → dallar açar → yapraklar belirir → çiçekler patlar.</p>
+
+<script>
+  function replay(){
+    const stage = document.getElementById('stage');
+    const clone = stage.cloneNode(true);
+    stage.parentNode.replaceChild(clone, stage);
+    clone.id = 'stage';
+    // re-bind sparkle spawning
+    spawnSparklesAfter(11000);
+  }
+  function spawnSparklesAfter(ms){
+    setTimeout(()=>{
+      const stage = document.getElementById('stage');
+      const tree = stage.querySelector('.tree-wrap');
+      const emojis = ['✨','💖','🌸','💛'];
+      let i = 0;
+      const t = setInterval(()=>{
+        if(i++ > 14){ clearInterval(t); return; }
+        const s = document.createElement('div');
+        s.className = 'sparkle';
+        s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+        s.style.left = (40 + Math.random()*220) + 'px';
+        s.style.top  = (60 + Math.random()*80) + 'px';
+        tree.appendChild(s);
+        setTimeout(()=>s.remove(), 2200);
+      }, 250);
+    }, ms);
+  }
+  spawnSparklesAfter(11000);
+</script>
+</body>
+</html>

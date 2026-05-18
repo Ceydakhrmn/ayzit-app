@@ -98,6 +98,8 @@ class CycleProvider extends ChangeNotifier {
   DateTime? _periodActualStart;
   DateTime? _periodEndDate;
   AppMode _appMode = AppMode.reglTakip;
+  // Pregnancy: last menstrual period (LMP) - used to compute current pregnancy week
+  DateTime? _pregnancyStartDate;
   bool _reminderPeriodStart = true;
   bool _reminderPeriodEnd = false;
   bool _reminderOvulation = false;
@@ -113,6 +115,30 @@ class CycleProvider extends ChangeNotifier {
   int get periodLength => _periodLength;
   bool get isPeriodActive => _isPeriodActive;
   AppMode get appMode => _appMode;
+  DateTime? get pregnancyStartDate => _pregnancyStartDate;
+
+  /// Current pregnancy week (1..40) based on LMP date.
+  /// Returns 1 if no LMP set or computed week < 1.
+  int get pregnancyWeek {
+    final lmp = _pregnancyStartDate;
+    if (lmp == null) return 1;
+    final days = DateTime.now().difference(lmp).inDays;
+    final week = (days ~/ 7) + 1;
+    if (week < 1) return 1;
+    if (week > 40) return 40;
+    return week;
+  }
+
+  /// Trimester for a given week:
+  ///   1st: 1..12
+  ///   2nd: 13..27
+  ///   3rd: 28..40
+  int trimesterForWeek(int week) {
+    if (week <= 12) return 1;
+    if (week <= 27) return 2;
+    return 3;
+  }
+
   bool get reminderPeriodStart => _reminderPeriodStart;
   bool get reminderPeriodEnd => _reminderPeriodEnd;
   bool get reminderOvulation => _reminderOvulation;
@@ -190,6 +216,12 @@ class CycleProvider extends ChangeNotifier {
       _periodEndDate = (cycle['periodEndDate'] as Timestamp?)?.toDate();
 
       _appMode = _parseAppMode(data['appMode'] as String?);
+
+      // Pregnancy LMP date
+      final pregnancy = (data['pregnancy'] as Map<String, dynamic>?) ?? const {};
+      _pregnancyStartDate =
+          (pregnancy['startDate'] as Timestamp?)?.toDate();
+
 
       final reminders =
           (data['reminders'] as Map<String, dynamic>?) ?? const {};
@@ -354,6 +386,17 @@ class CycleProvider extends ChangeNotifier {
     _appMode = mode;
     notifyListeners();
     _updateUserDoc({'appMode': mode.name});
+  }
+
+  // ── Pregnancy LMP date ──
+  void updatePregnancyStartDate(DateTime date) {
+    _pregnancyStartDate = date;
+    notifyListeners();
+    _updateUserDoc({
+      'pregnancy': {
+        'startDate': Timestamp.fromDate(date),
+      },
+    });
   }
 
   // ── Reminders ──
