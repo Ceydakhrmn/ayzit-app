@@ -1,20 +1,17 @@
 // =============================================
 // screens/main_shell.dart
 // 4-tab bottom navigation shell (shown when user is authenticated):
-//   0 — Calendar (HomeScreen) — or PregnancyTreeScreen when appMode == hamileTakip
+//   0 — Calendar (HomeScreen) — same calendar in every app mode
 //   1 — Exercise (ExerciseScreen)
 //   2 — Social
 //   3 — Profile
 // =============================================
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../core/theme/app_background.dart';
-import '../providers/cycle_provider.dart';
 import 'exercise_screen.dart';
 import 'home_screen.dart';
-import 'pregnancy/pregnancy_tree_screen.dart';
 import 'profile/profile_screen.dart';
 import 'social/social_screen.dart';
 
@@ -52,13 +49,6 @@ class _MainShellState extends State<MainShell> {
 
   @override
   Widget build(BuildContext context) {
-    // Watch the app mode so tab 0 swaps between the calendar and the
-    // pregnancy tree screen automatically when the user changes mode.
-    final appMode = context.select<CycleProvider, AppMode>((p) => p.appMode);
-    final Widget firstTab = appMode == AppMode.hamileTakip
-        ? const PregnancyTreeScreen()
-        : const HomeScreen();
-
     return AppBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
@@ -68,7 +58,7 @@ class _MainShellState extends State<MainShell> {
         physics: const ClampingScrollPhysics(),
         onPageChanged: (i) => setState(() => _index = i),
         children: [
-          firstTab,
+          const HomeScreen(),
           const ExerciseScreen(),
           const SocialScreen(),
           const ProfileScreen(),

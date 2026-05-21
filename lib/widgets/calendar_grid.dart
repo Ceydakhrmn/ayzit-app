@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../data/pregnancy_data.dart';
 import '../providers/cycle_provider.dart';
 import '../utils/phase_colors.dart';
 import 'day_cell.dart';
@@ -67,12 +68,27 @@ class CalendarGrid extends StatelessWidget {
 
             // Bu ayın günleri
             final date = DateTime(month.year, month.month, dayIndex + 1);
-            final phase = provider.phaseOf(date);
-            final style = phaseStyle(phase);
             final isToday = _isToday(date);
             final isSelected = provider.selectedDay != null &&
                 _isSameDay(provider.selectedDay!, date);
 
+            // Hamile takip modunda faz renkleri yerine kilometre taşı
+            // noktaları gösterilir, arka plan nötr kalır.
+            if (provider.appMode == AppMode.hamileTakip) {
+              final dots = milestonesForDate(date, provider.pregnancyStartDate)
+                  .map((m) => m.color)
+                  .toList();
+              return DayCell(
+                label: '${date.day}',
+                isToday: isToday,
+                isSelected: isSelected,
+                dots: dots,
+                onTap: () => provider.selectDay(date),
+              );
+            }
+
+            final phase = provider.phaseOf(date);
+            final style = phaseStyle(phase);
             return DayCell(
               label: '${date.day}',
               backgroundColor: style.background,

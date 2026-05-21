@@ -8,6 +8,8 @@ import '../widgets/info_card.dart';
 import '../widgets/note_card.dart';
 import '../widgets/mood_card.dart';
 import '../widgets/cycle_summary_card.dart';
+import '../widgets/pregnancy/baby_development_card.dart';
+import '../widgets/pregnancy/important_days_card.dart';
 
 void showLegendDialog(BuildContext context) {
   showDialog(
@@ -143,9 +145,35 @@ class _LegendRow extends StatelessWidget {
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  /// Tam genişlikte "BELİRTİ GİR" butonu (her iki modda kullanılır).
+  Widget _symptomButton(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton.icon(
+        onPressed: () => showSymptomSheet(context),
+        icon: const Icon(Icons.add, size: 16),
+        label: const Text('BELİRTİ GİR'),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFFA78BFA),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 14),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          textStyle: const TextStyle(
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
+            letterSpacing: 0.5,
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CycleProvider>();
+    final isPregnancy = provider.appMode == AppMode.hamileTakip;
 
     return SafeArea(
       child: Column(
@@ -178,84 +206,79 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 8),
                 const CalendarGrid(),
                 const SizedBox(height: 16),
-                const InfoCard(),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () => showSymptomSheet(context),
-                        icon: const Icon(Icons.add, size: 16),
-                        label: const Text('BELİRTİ GİR'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFFA78BFA),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
-                            letterSpacing: 0.5,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          if (provider.isPeriodActive) {
-                            provider.endPeriod();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Regl bitirildi!'),
-                                duration: Duration(seconds: 2),
-                              ),
-                            );
-                          } else {
-                            final selected = provider.selectedDay;
-                            final startDate = selected ?? DateTime.now();
-                            provider.startPeriod(startDate);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  selected != null
-                                      ? '${startDate.day}/${startDate.month} tarihinden regl başlatıldı!'
-                                      : 'Regl başlatıldı!',
+
+                // ── Hamile takip modu ──
+                if (isPregnancy) ...[
+                  const ImportantDaysCard(),
+                  const BabyDevelopmentCard(),
+                  const SizedBox(height: 12),
+                  _symptomButton(context),
+                  const SizedBox(height: 16),
+                  const NoteCard(),
+                  const SizedBox(height: 20),
+                ]
+                // ── Regl / hamile kalma modu ──
+                else ...[
+                  const InfoCard(),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: _symptomButton(context)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            if (provider.isPeriodActive) {
+                              provider.endPeriod();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Regl bitirildi!'),
+                                  duration: Duration(seconds: 2),
                                 ),
-                                duration: const Duration(seconds: 2),
-                              ),
-                            );
-                          }
-                        },
-                        icon: const Icon(Icons.water_drop, size: 16),
-                        label: Text(provider.isPeriodActive
-                            ? 'REGL BİTİR'
-                            : 'REGL BAŞLAT'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF7C3AED),
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          textStyle: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13,
-                            letterSpacing: 0.5,
+                              );
+                            } else {
+                              final selected = provider.selectedDay;
+                              final startDate = selected ?? DateTime.now();
+                              provider.startPeriod(startDate);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    selected != null
+                                        ? '${startDate.day}/${startDate.month} tarihinden regl başlatıldı!'
+                                        : 'Regl başlatıldı!',
+                                  ),
+                                  duration: const Duration(seconds: 2),
+                                ),
+                              );
+                            }
+                          },
+                          icon: const Icon(Icons.water_drop, size: 16),
+                          label: Text(provider.isPeriodActive
+                              ? 'REGL BİTİR'
+                              : 'REGL BAŞLAT'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFF7C3AED),
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(24),
+                            ),
+                            textStyle: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const NoteCard(),
-                const SizedBox(height: 16),
-                const CycleSummaryCard(),
-                const SizedBox(height: 20),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const NoteCard(),
+                  const SizedBox(height: 16),
+                  const CycleSummaryCard(),
+                  const SizedBox(height: 20),
+                ],
               ],
             ),
           ),

@@ -1,6 +1,7 @@
 // =============================================
 // widgets/day_cell.dart
-// Takvimdeki tek bir gün kutusu
+// Takvimdeki tek bir gün kutusu.
+// Hamile takip modunda gün altında kilometre taşı noktaları gösterir.
 // =============================================
 
 import 'package:flutter/material.dart';
@@ -14,6 +15,9 @@ class DayCell extends StatelessWidget {
   final bool isSelected;
   final VoidCallback? onTap;
 
+  /// Hamile modunda gün altında gösterilen kilometre taşı noktaları (en fazla 3).
+  final List<Color> dots;
+
   const DayCell({
     super.key,
     required this.label,
@@ -23,6 +27,7 @@ class DayCell extends StatelessWidget {
     this.isToday = false,
     this.isSelected = false,
     this.onTap,
+    this.dots = const [],
   });
 
   @override
@@ -30,6 +35,7 @@ class DayCell extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final bg = backgroundColor ?? (isDark ? const Color(0xFF2D2840) : const Color(0xFFF1F1F1));
     final fg = textColor ?? (isDark ? const Color(0xFFD1D5DB) : const Color(0xFF555555));
+    final hasDots = dots.isNotEmpty && !isOtherMonth;
 
     return GestureDetector(
       onTap: isOtherMonth ? null : onTap,
@@ -46,17 +52,40 @@ class DayCell extends StatelessWidget {
                   ? Border.all(color: isDark ? Colors.white : Colors.black, width: 2.5)
                   : null,
         ),
-        child: Center(
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: isOtherMonth
-                  ? (isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.4))
-                  : fg,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Gün numarası — nokta varsa biraz yukarı kayar.
+            Padding(
+              padding: EdgeInsets.only(bottom: hasDots ? 8 : 0),
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: isOtherMonth
+                      ? (isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.4))
+                      : fg,
+                ),
+              ),
             ),
-          ),
+            if (hasDots)
+              Positioned(
+                bottom: 5,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (final c in dots.take(3))
+                      Container(
+                        width: 5,
+                        height: 5,
+                        margin: const EdgeInsets.symmetric(horizontal: 1),
+                        decoration: BoxDecoration(shape: BoxShape.circle, color: c),
+                      ),
+                  ],
+                ),
+              ),
+          ],
         ),
       ),
     );
