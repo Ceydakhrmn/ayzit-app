@@ -49,6 +49,10 @@ service cloud.firestore {
       match /cycleMoods/{dateKey} {
         allow read, write: if isOwner(uid);
       }
+
+      match /appointments/{id} {
+        allow read, write: if isOwner(uid);
+      }
     }
 
     // ── Usernames (unique reservation) ─────────────────────

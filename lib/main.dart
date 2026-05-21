@@ -23,6 +23,7 @@ import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'firebase_options.dart';
 import 'l10n/app_localizations.dart';
+import 'providers/appointment_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cycle_provider.dart';
 
@@ -67,6 +68,7 @@ class LunoraApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => CycleProvider()),
+        ChangeNotifierProvider(create: (_) => AppointmentProvider()),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
       ],
       child: Consumer<ThemeProvider>(

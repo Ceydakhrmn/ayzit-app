@@ -341,7 +341,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
 
 /// Verilen hafta için gelişim bilgisini döndürür (1..40 arası kırpılır).
 PregnancyWeekInfo pregnancyWeekInfo(int week) {
-  final w = week.clamp(1, 40);
+  final w = week.clamp(1, 40).toInt();
   return kPregnancyWeeks[w - 1];
 }
 

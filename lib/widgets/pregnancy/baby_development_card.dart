@@ -1,9 +1,9 @@
 // =============================================
 // widgets/pregnancy/baby_development_card.dart
 // Hamile takip modunda "BEBEĞİN GELİŞİMİ" kartı.
-// Seçili gün (yoksa bugün) için gebelik haftasını hesaplar,
-// embriyo/fetüs siluetini, gelişim metnini ve meyve/boyut
-// karşılaştırmasını gösterir.
+// Kullanıcı ileri/geri oklarıyla ya da hafta seçiciyle 1-40 arası
+// herhangi bir haftayı inceleyebilir. Embriyo/fetüs siluetini,
+// gelişim metnini ve meyve/boyut karşılaştırmasını gösterir.
 // =============================================
 
 import 'package:flutter/material.dart';
@@ -14,23 +14,28 @@ import '../../providers/cycle_provider.dart';
 import 'embryo_painter.dart';
 import 'fruit_painter.dart';
 
-class BabyDevelopmentCard extends StatelessWidget {
+class BabyDevelopmentCard extends StatefulWidget {
   const BabyDevelopmentCard({super.key});
+
+  @override
+  State<BabyDevelopmentCard> createState() => _BabyDevelopmentCardState();
+}
+
+class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
+  // Kullanıcının gözden geçirdiği hafta. null ise bugünkü hafta gösterilir.
+  int? _viewWeek;
 
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CycleProvider>();
-    final lmp = provider.pregnancyStartDate;
     final cs = Theme.of(context).colorScheme;
 
-    // Seçili gün varsa onun haftası, yoksa bugünkü hafta.
-    final selected = provider.selectedDay;
-    final int week = selected != null
-        ? (pregnancyWeekForDate(selected, lmp) ?? provider.pregnancyWeek)
-        : provider.pregnancyWeek;
+    final currentWeek = provider.pregnancyWeek;
+    final week = (_viewWeek ?? currentWeek).clamp(1, 40).toInt();
     final info = pregnancyWeekInfo(week);
     final trimester = provider.trimesterForWeek(week);
-    final progress = (week / 40).clamp(0.0, 1.0);
+    final progress = (week / 40.0).clamp(0.0, 1.0).toDouble();
+    final browsing = _viewWeek != null && _viewWeek != currentWeek;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -57,11 +62,51 @@ class BabyDevelopmentCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
+          // ── Hafta gezinme ──
+          Row(
+            children: [
+              _NavButton(
+                icon: Icons.chevron_left,
+                enabled: week > 1,
+                onTap: () => setState(() => _viewWeek = week - 1),
+              ),
+              Expanded(
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(10),
+                  onTap: () => _openWeekPicker(context, currentWeek),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          '$week. Hafta',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w800,
+                            color: cs.onSurface,
+                          ),
+                        ),
+                        Icon(Icons.arrow_drop_down,
+                            size: 20,
+                            color: cs.onSurface.withValues(alpha: 0.5)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              _NavButton(
+                icon: Icons.chevron_right,
+                enabled: week < 40,
+                onTap: () => setState(() => _viewWeek = week + 1),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Siluet
               Container(
                 width: 96,
                 height: 96,
@@ -73,32 +118,18 @@ class BabyDevelopmentCard extends StatelessWidget {
               ),
               const SizedBox(width: 14),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      '$week. Hafta',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: cs.onSurface,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      info.summary,
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        height: 1.35,
-                        color: cs.onSurface.withValues(alpha: 0.75),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  info.summary,
+                  style: TextStyle(
+                    fontSize: 12.5,
+                    height: 1.4,
+                    color: cs.onSurface.withValues(alpha: 0.78),
+                  ),
                 ),
               ),
             ],
           ),
-          // Meyve / boyut satırı
+          // ── Meyve / boyut satırı ──
           if (info.fruit != FruitShape.none && info.sizeText.isNotEmpty) ...[
             const SizedBox(height: 12),
             Container(
@@ -126,7 +157,6 @@ class BabyDevelopmentCard extends StatelessWidget {
             ),
           ],
           const SizedBox(height: 12),
-          // 40 haftalık ilerleme çubuğu
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
@@ -137,15 +167,126 @@ class BabyDevelopmentCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            '40 haftalık yolculuğun %${(progress * 100).round()}\'i',
-            style: TextStyle(
-              fontSize: 10.5,
-              color: cs.onSurface.withValues(alpha: 0.5),
-            ),
+          Row(
+            children: [
+              Text(
+                '40 haftalık yolculuğun %${(progress * 100).round()}\'i',
+                style: TextStyle(
+                  fontSize: 10.5,
+                  color: cs.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+              const Spacer(),
+              if (browsing)
+                GestureDetector(
+                  onTap: () => setState(() => _viewWeek = null),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.today,
+                          size: 13, color: Color(0xFF9333EA)),
+                      const SizedBox(width: 3),
+                      Text(
+                        'Bugüne dön ($currentWeek. hf.)',
+                        style: const TextStyle(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF9333EA),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  void _openWeekPicker(BuildContext context, int currentWeek) {
+    showModalBottomSheet(
+      context: context,
+      showDragHandle: true,
+      builder: (ctx) {
+        final cs = Theme.of(ctx).colorScheme;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Hafta seç',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 12),
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 40,
+                gridDelegate:
+                    const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 6,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  childAspectRatio: 1,
+                ),
+                itemBuilder: (_, i) {
+                  final w = i + 1;
+                  final isCurrent = w == currentWeek;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() => _viewWeek = w);
+                      Navigator.pop(ctx);
+                    },
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isCurrent
+                            ? const Color(0xFF9333EA)
+                            : cs.surfaceContainerHighest,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        '$w',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: isCurrent ? Colors.white : cs.onSurface,
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _NavButton extends StatelessWidget {
+  final IconData icon;
+  final bool enabled;
+  final VoidCallback onTap;
+  const _NavButton({
+    required this.icon,
+    required this.enabled,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return IconButton(
+      onPressed: enabled ? onTap : null,
+      visualDensity: VisualDensity.compact,
+      icon: Icon(icon),
+      iconSize: 26,
+      color: const Color(0xFF9333EA),
+      disabledColor: cs.onSurface.withValues(alpha: 0.2),
     );
   }
 }
