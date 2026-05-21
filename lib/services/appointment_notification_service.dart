@@ -88,6 +88,8 @@ class AppointmentNotificationService {
           tz.TZDateTime.from(when, tz.local),
           _details(),
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
         );
       }
       slot++;
