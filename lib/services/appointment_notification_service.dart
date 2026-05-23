@@ -1,8 +1,9 @@
 // =============================================
 // services/appointment_notification_service.dart
 // Randevular için yerel bildirim planlar.
-// Her randevuya 3 hatırlatma: 1 gün önce, randevu sabahı (09:00),
-// ve randevudan 1 saat önce. Geçmişte kalan zamanlar atlanır.
+// Her randevuya 4 hatırlatma: 1 gün önce, randevu sabahı (09:00),
+// 1 saat önce, ve randevu saatinde. Geçmişte kalan zamanlar atlanır.
+// Randevu eklenince anında bir onay bildirimi gösterilir.
 // =============================================
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -61,6 +62,18 @@ class AppointmentNotificationService {
     return const NotificationDetails(android: android, iOS: ios);
   }
 
+  /// Randevu eklenir eklenmez gösterilen anında onay bildirimi.
+  /// Kullanıcıya bildirimlerin çalıştığını ve hatırlatmaların kurulduğunu gösterir.
+  Future<void> showAddedConfirmation(Appointment a) async {
+    await init();
+    await _plugin.show(
+      a.notificationBaseId + 9,
+      'Randevu eklendi',
+      '${a.title} — hatırlatmalar kuruldu.',
+      _details(),
+    );
+  }
+
   /// Bir randevu için hatırlatmaları planlar. Önce eski bildirimlerini iptal eder.
   Future<void> scheduleForAppointment(Appointment a) async {
     await init();
@@ -75,6 +88,7 @@ class AppointmentNotificationService {
       dt.subtract(const Duration(days: 1)): 'Yarın: ${a.title} ($clock)',
       DateTime(dt.year, dt.month, dt.day, 9, 0): 'Bugün: ${a.title} ($clock)',
       dt.subtract(const Duration(hours: 1)): '1 saat sonra: ${a.title}',
+      dt: 'Randevu saati geldi: ${a.title}',
     };
 
     var slot = 0;
@@ -98,7 +112,7 @@ class AppointmentNotificationService {
 
   /// Bir randevuya ait tüm bildirimleri iptal eder.
   Future<void> cancelForAppointment(Appointment a) async {
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 4; i++) {
       await _plugin.cancel(a.notificationBaseId + i);
     }
   }

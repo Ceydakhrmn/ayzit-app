@@ -24,6 +24,11 @@ class BabyDevelopmentCard extends StatefulWidget {
 class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
   // Kullanıcının gözden geçirdiği hafta. null ise bugünkü hafta gösterilir.
   int? _viewWeek;
+  // Takvim seçimini izlemek için: en son senkronlanan gün.
+  DateTime? _syncedDay;
+
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +36,16 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
     final cs = Theme.of(context).colorScheme;
 
     final currentWeek = provider.pregnancyWeek;
+
+    // Takvimde bir güne tıklanınca kart o günün haftasına geçer.
+    final selected = provider.selectedDay;
+    if (selected != null &&
+        (_syncedDay == null || !_isSameDay(selected, _syncedDay!))) {
+      _syncedDay = selected;
+      _viewWeek = pregnancyWeekForDate(selected, provider.pregnancyStartDate) ??
+          currentWeek;
+    }
+
     final week = (_viewWeek ?? currentWeek).clamp(1, 40).toInt();
     final info = pregnancyWeekInfo(week);
     final trimester = provider.trimesterForWeek(week);
@@ -140,13 +155,13 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
               ),
               child: Row(
                 children: [
-                  FruitIcon(shape: info.fruit, size: 36),
-                  const SizedBox(width: 10),
+                  FruitIcon(shape: info.fruit, size: 58),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       info.sizeText,
                       style: TextStyle(
-                        fontSize: 12.5,
+                        fontSize: 13.5,
                         fontWeight: FontWeight.w600,
                         color: cs.onSurface.withValues(alpha: 0.8),
                       ),

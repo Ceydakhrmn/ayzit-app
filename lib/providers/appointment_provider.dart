@@ -1,11 +1,3 @@
-// =============================================
-// providers/appointment_provider.dart
-// Kullanıcının randevularını Firestore ile senkronize tutar:
-//   users/{uid}/appointments/{autoId}
-// Auth değişiminde aboneliği yeniler. Randevu eklenince /
-// güncellenince yerel bildirimleri planlar.
-// =============================================
-
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -110,10 +102,12 @@ class AppointmentProvider extends ChangeNotifier {
       note: note,
     );
     final ref = await _col(uid).add(temp.toMap());
-    // Snapshot dinleyici de planlar ama anında geri bildirim için burada da yap.
-    await AppointmentNotificationService.instance.scheduleForAppointment(
-      Appointment(id: ref.id, title: title, dateTime: dateTime, note: note),
-    );
+    final created =
+        Appointment(id: ref.id, title: title, dateTime: dateTime, note: note);
+    // Hatırlatmaları planla + anında onay bildirimi göster.
+    final svc = AppointmentNotificationService.instance;
+    await svc.scheduleForAppointment(created);
+    await svc.showAddedConfirmation(created);
   }
 
   Future<void> deleteAppointment(Appointment a) async {
