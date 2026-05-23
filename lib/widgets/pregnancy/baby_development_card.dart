@@ -1,9 +1,15 @@
 // =============================================
 // widgets/pregnancy/baby_development_card.dart
 // Hamile takip modunda "BEBEĞİN GELİŞİMİ" kartı.
-// Kullanıcı ileri/geri oklarıyla ya da hafta seçiciyle 1-40 arası
-// herhangi bir haftayı inceleyebilir. Embriyo/fetüs siluetini,
-// gelişim metnini ve meyve/boyut karşılaştırmasını gösterir.
+//
+// Düzen: yatay Row —
+//   SOL %40  : bebeğin biyolojik gelişim çizimi (döllenme → hücre
+//              bölünmesi → embriyo → fetüs → bebek), haftaya göre evre
+//              değiştiren, yumuşakça hareket eden animasyon.
+//   SAĞ %60  : seçilen haftanın "X Hafta Y Gün" bilgisi + meyve boyutu.
+//
+// Takvimde bir güne tıklamak, ‹ › okları ve hafta seçici kartı o
+// haftaya taşır.
 // =============================================
 
 import 'package:flutter/material.dart';
@@ -24,7 +30,7 @@ class BabyDevelopmentCard extends StatefulWidget {
 class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
   // Kullanıcının gözden geçirdiği hafta. null ise bugünkü hafta gösterilir.
   int? _viewWeek;
-  // Takvim seçimini izlemek için: en son senkronlanan gün.
+  // Takvim seçimini izlemek için en son senkronlanan gün.
   DateTime? _syncedDay;
 
   bool _isSameDay(DateTime a, DateTime b) =>
@@ -34,6 +40,8 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
   Widget build(BuildContext context) {
     final provider = context.watch<CycleProvider>();
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lmp = provider.pregnancyStartDate;
 
     final currentWeek = provider.pregnancyWeek;
 
@@ -42,25 +50,38 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
     if (selected != null &&
         (_syncedDay == null || !_isSameDay(selected, _syncedDay!))) {
       _syncedDay = selected;
-      _viewWeek = pregnancyWeekForDate(selected, provider.pregnancyStartDate) ??
-          currentWeek;
+      _viewWeek = pregnancyWeekForDate(selected, lmp) ?? currentWeek;
     }
 
     final week = (_viewWeek ?? currentWeek).clamp(1, 40).toInt();
     final info = pregnancyWeekInfo(week);
+    final stage = embryoStageForWeek(week);
     final trimester = provider.trimesterForWeek(week);
     final progress = (week / 40.0).clamp(0.0, 1.0).toDouble();
     final browsing = _viewWeek != null && _viewWeek != currentWeek;
 
+    // Hafta + gün başlığı ("13 Hafta 3 Gün"). Gün yalnızca bugünkü haftada.
+    final String weekLabel;
+    if (week == currentWeek && lmp != null) {
+      final dayInWeek = DateTime.now().difference(lmp).inDays % 7;
+      weekLabel = '$week Hafta $dayInWeek Gün';
+    } else {
+      weekLabel = '$week. Hafta';
+    }
+
+    final cardBg =
+        isDark ? const Color(0xFF2A2440) : const Color(0xFFF3EFFB);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: cs.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(16),
+        color: cardBg,
+        borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Başlık satırı
           Row(
             children: [
               const _DotLabel(
@@ -78,100 +99,121 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
             ],
           ),
           const SizedBox(height: 8),
-          // ── Hafta gezinme ──
-          Row(
-            children: [
-              _NavButton(
-                icon: Icons.chevron_left,
-                enabled: week > 1,
-                onTap: () => setState(() => _viewWeek = week - 1),
-              ),
-              Expanded(
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(10),
-                  onTap: () => _openWeekPicker(context, currentWeek),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '$week. Hafta',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: cs.onSurface,
-                          ),
-                        ),
-                        Icon(Icons.arrow_drop_down,
-                            size: 20,
-                            color: cs.onSurface.withValues(alpha: 0.5)),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              _NavButton(
-                icon: Icons.chevron_right,
-                enabled: week < 40,
-                onTap: () => setState(() => _viewWeek = week + 1),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
+
+          // ── Kahraman satır: SOL biyolojik gelişim · SAĞ metin ──
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Container(
-                width: 96,
-                height: 96,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: cs.surface.withValues(alpha: 0.6),
+              // SOL %40 — biyolojik gelişim çizimi
+              Expanded(
+                flex: 40,
+                child: SizedBox(
+                  height: 140,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 450),
+                    switchInCurve: Curves.easeOut,
+                    switchOutCurve: Curves.easeIn,
+                    child: FittedBox(
+                      key: ValueKey(stage),
+                      fit: BoxFit.contain,
+                      child: EmbryoIcon(stage: stage, size: 130),
+                    ),
+                  ),
                 ),
-                child: EmbryoIcon(stage: info.stage, size: 96),
               ),
               const SizedBox(width: 14),
+
+              // SAĞ %60 — hafta/gün + meyve boyutu
               Expanded(
-                child: Text(
-                  info.summary,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    height: 1.4,
-                    color: cs.onSurface.withValues(alpha: 0.78),
-                  ),
+                flex: 60,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Hafta gezinme satırı
+                    Row(
+                      children: [
+                        _NavButton(
+                          icon: Icons.chevron_left,
+                          enabled: week > 1,
+                          onTap: () => setState(() => _viewWeek = week - 1),
+                        ),
+                        Expanded(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(10),
+                            onTap: () =>
+                                _openWeekPicker(context, currentWeek),
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 4),
+                              child: Text(
+                                weekLabel,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: cs.onSurface,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        _NavButton(
+                          icon: Icons.chevron_right,
+                          enabled: week < 40,
+                          onTap: () => setState(() => _viewWeek = week + 1),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    // Meyve / boyut satırı
+                    if (info.fruit != FruitShape.none &&
+                        info.sizeText.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 8),
+                        decoration: BoxDecoration(
+                          color: cs.surface.withValues(alpha: 0.55),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            FruitIcon(shape: info.fruit, size: 46),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                'Bebeğiniz ${info.sizeText.toLowerCase()}',
+                                style: TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                  height: 1.3,
+                                  color:
+                                      cs.onSurface.withValues(alpha: 0.8),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
                 ),
               ),
             ],
           ),
-          // ── Meyve / boyut satırı ──
-          if (info.fruit != FruitShape.none && info.sizeText.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              decoration: BoxDecoration(
-                color: cs.surface.withValues(alpha: 0.6),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                children: [
-                  FruitIcon(shape: info.fruit, size: 58),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      info.sizeText,
-                      style: TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.w600,
-                        color: cs.onSurface.withValues(alpha: 0.8),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+
+          const SizedBox(height: 14),
+          // Gelişim açıklaması
+          Text(
+            info.summary,
+            style: TextStyle(
+              fontSize: 12.5,
+              height: 1.4,
+              color: cs.onSurface.withValues(alpha: 0.78),
             ),
-          ],
+          ),
           const SizedBox(height: 12),
+
+          // 40 haftalık ilerleme
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
@@ -195,14 +237,13 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
               if (browsing)
                 GestureDetector(
                   onTap: () => setState(() => _viewWeek = null),
-                  child: Row(
+                  child: const Row(
                     children: [
-                      const Icon(Icons.today,
-                          size: 13, color: Color(0xFF9333EA)),
-                      const SizedBox(width: 3),
+                      Icon(Icons.today, size: 13, color: Color(0xFF9333EA)),
+                      SizedBox(width: 3),
                       Text(
-                        'Bugüne dön ($currentWeek. hf.)',
-                        style: const TextStyle(
+                        'Bugüne dön',
+                        style: TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF9333EA),
@@ -298,8 +339,10 @@ class _NavButton extends StatelessWidget {
     return IconButton(
       onPressed: enabled ? onTap : null,
       visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
       icon: Icon(icon),
-      iconSize: 26,
+      iconSize: 24,
       color: const Color(0xFF9333EA),
       disabledColor: cs.onSurface.withValues(alpha: 0.2),
     );

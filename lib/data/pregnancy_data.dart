@@ -32,12 +32,27 @@ enum FruitShape {
 
 // ── Embriyo / fetüs siluet aşamaları (embryo_painter.dart bunları çizer) ──
 enum EmbryoStage {
-  cellCluster, // 1-4. hafta — hücre topu
-  embryoTadpole, // 5-9. hafta — kuyruklu embriyo
-  earlyFetus, // 10-13. hafta — büyük başlı erken fetüs
-  fetus, // 14-22. hafta — kıvrılmış bebek
-  plumpFetus, // 23-31. hafta — dolgunlaşan bebek
-  fullTerm, // 32-40. hafta — doğuma hazır bebek
+  fertilization, // 1-2. hafta — sperm + yumurta (döllenme)
+  cellCluster, // 3-4. hafta — blastosist / implantasyon
+  embryoTadpole, // 5-6. hafta — C şeklinde embriyo + ilk kalp atışı
+  earlyFetus, // 7-8. hafta — kafası belirginleşen embriyo
+  fetus, // 9-10. hafta — el/ayak beliren minik fetüs
+  plumpFetus, // 11-12. hafta — başı belirgin, kımıldayan fetüs
+  matureFetus, // 13-28. hafta — olgun, uyuyan fetüs
+  fullTerm, // 29-40. hafta — doğuma hazır, baş aşağı bebek
+}
+
+/// Verilen gebelik haftasının biyolojik gelişim evresi (8 evreli tıbbi akış).
+EmbryoStage embryoStageForWeek(int week) {
+  final w = week.clamp(1, 40);
+  if (w <= 2) return EmbryoStage.fertilization;
+  if (w <= 4) return EmbryoStage.cellCluster;
+  if (w <= 6) return EmbryoStage.embryoTadpole;
+  if (w <= 8) return EmbryoStage.earlyFetus;
+  if (w <= 10) return EmbryoStage.fetus;
+  if (w <= 12) return EmbryoStage.plumpFetus;
+  if (w <= 28) return EmbryoStage.matureFetus;
+  return EmbryoStage.fullTerm;
 }
 
 class PregnancyWeekInfo {
@@ -62,21 +77,21 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     summary: 'Henüz yola çıkmadın sayılır — bu hafta vücudun hazırlık yapıyor.',
     sizeText: '',
     fruit: FruitShape.none,
-    stage: EmbryoStage.cellCluster,
+    stage: EmbryoStage.fertilization,
   ),
   PregnancyWeekInfo(
     week: 2,
     summary: 'Yumurtan olgunlaşıyor, döllenme bu haftanın sonunda olabilir.',
     sizeText: '',
     fruit: FruitShape.none,
-    stage: EmbryoStage.cellCluster,
+    stage: EmbryoStage.fertilization,
   ),
   PregnancyWeekInfo(
     week: 3,
     summary: 'Sperm ve yumurta buluştu! Minik bir hücre yolculuğa başladı.',
     sizeText: 'Bir haşhaş tohumu kadar.',
     fruit: FruitShape.tinySeed,
-    stage: EmbryoStage.cellCluster,
+    stage: EmbryoStage.fertilization,
   ),
   PregnancyWeekInfo(
     week: 4,

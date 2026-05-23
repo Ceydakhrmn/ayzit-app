@@ -87,7 +87,7 @@ class AppointmentProvider extends ChangeNotifier {
     });
   }
 
-  // ── Yazma işlemleri ──
+  // ── Yazma işlemleri kısmı ──
   Future<void> addAppointment({
     required String title,
     required DateTime dateTime,

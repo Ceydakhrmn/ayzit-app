@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/cycle_provider.dart';
 import '../widgets/calendar_grid.dart';
 import 'symptom_sheet.dart';
+import 'settings_screen.dart';
 import '../widgets/month_header.dart';
 import '../widgets/info_card.dart';
 import '../widgets/note_card.dart';
@@ -10,6 +11,7 @@ import '../widgets/mood_card.dart';
 import '../widgets/cycle_summary_card.dart';
 import '../widgets/pregnancy/appointments_card.dart';
 import '../widgets/pregnancy/baby_development_card.dart';
+import '../widgets/pregnancy/growth_garden_card.dart';
 import '../widgets/pregnancy/important_days_card.dart';
 
 void showLegendDialog(BuildContext context) {
@@ -181,18 +183,17 @@ class HomeScreen extends StatelessWidget {
       children: [
         Container(
           color: Theme.of(context).colorScheme.surface,
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 0),
+          padding: const EdgeInsets.fromLTRB(16, 6, 4, 6),
           child: Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.mood, color: Color(0xFF7C3AED)),
-                onPressed: () => showMoodDialog(context),
-                tooltip: 'Ruh halini gir',
-              ),
               const Spacer(),
               IconButton(
-                icon: const Icon(Icons.info_outline, color: Color(0xFF7C3AED)),
-                onPressed: () => showLegendDialog(context),
+                icon: const Icon(Icons.settings_outlined,
+                    color: Color(0xFF7C3AED)),
+                tooltip: 'Ayarlar',
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                ),
               ),
             ],
           ),
@@ -218,6 +219,8 @@ class HomeScreen extends StatelessWidget {
                   _symptomButton(context),
                   const SizedBox(height: 16),
                   const NoteCard(),
+                  const SizedBox(height: 12),
+                  const GrowthGardenCard(),
                   const SizedBox(height: 20),
                 ]
                 // ── Regl / hamile kalma modu ──

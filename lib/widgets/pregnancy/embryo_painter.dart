@@ -68,6 +68,7 @@ class _EmbryoPainter extends CustomPainter {
   static const _skinLight = Color(0xFFFCDDC8);
   static const _detail = Color(0xFF7A4A38);
   static const _hair = Color(0xFF6D4C41);
+  static const _sperm = Color(0xFF4DB6AC);
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -83,6 +84,9 @@ class _EmbryoPainter extends CustomPainter {
     canvas.translate(-50, -50);
 
     switch (stage) {
+      case EmbryoStage.fertilization:
+        _fertilization(canvas);
+        break;
       case EmbryoStage.cellCluster:
         _cellCluster(canvas);
         break;
@@ -90,16 +94,19 @@ class _EmbryoPainter extends CustomPainter {
         _tadpole(canvas);
         break;
       case EmbryoStage.earlyFetus:
-        _drawBaby(canvas, scale: 0.78);
+        _earlyFetus(canvas);
         break;
       case EmbryoStage.fetus:
-        _drawBaby(canvas, scale: 1.0);
+        _drawBaby(canvas, scale: 0.72);
         break;
       case EmbryoStage.plumpFetus:
-        _drawBaby(canvas, scale: 1.12, chubby: true);
+        _drawBaby(canvas, scale: 0.9);
+        break;
+      case EmbryoStage.matureFetus:
+        _drawBaby(canvas, scale: 1.08, chubby: true);
         break;
       case EmbryoStage.fullTerm:
-        _drawBaby(canvas, scale: 1.24, chubby: true);
+        _drawBaby(canvas, scale: 1.26, chubby: true, headDown: true);
         break;
     }
     canvas.restore();
@@ -117,7 +124,57 @@ class _EmbryoPainter extends CustomPainter {
     ..strokeCap = StrokeCap.round
     ..strokeJoin = StrokeJoin.round;
 
-  // ── 1-4. hafta: hücre topu (morula) ──
+  // ── 1-3. hafta: döllenme (sperm + yumurta) ──
+  void _fertilization(Canvas canvas) {
+    // ışık halkası
+    final halo = Paint()
+      ..shader = const RadialGradient(colors: [
+        Color(0x33F6C6A8),
+        Color(0x00F6C6A8),
+      ]).createShader(Rect.fromCircle(center: const Offset(54, 52), radius: 46));
+    canvas.drawCircle(const Offset(54, 52), 46, halo);
+
+    const eggC = Offset(58, 52);
+    // dış zar (zona pellucida)
+    canvas.drawCircle(eggC, 27, _fill(_skinLight));
+    // yumurta gövdesi
+    canvas.drawCircle(eggC, 21, _fill(_skin));
+    // ışık parıltısı
+    canvas.drawCircle(eggC.translate(-7, -7), 7, _fill(_skinLight));
+    // çekirdek
+    canvas.drawCircle(eggC, 8, _fill(_skinDark.withValues(alpha: 0.55)));
+
+    // arka plandaki soluk yardımcı spermler
+    _drawSperm(canvas, const Offset(22, 33), 0.45, 0.32);
+    _drawSperm(canvas, const Offset(18, 71), -0.4, 0.32);
+    // ana sperm — yumurtaya değiyor
+    _drawSperm(canvas, const Offset(33, 53), 0.0, 1.0);
+
+    // döllenme parıltısı (temas noktası)
+    canvas.drawCircle(const Offset(40, 53), 5, _fill(const Color(0x99FFE082)));
+  }
+
+  // Bir sperm çizer: kafa + dalgalı kuyruk. [c] kafa merkezi,
+  // [tilt] kuyruk eğimi, [op] opaklık.
+  void _drawSperm(Canvas canvas, Offset c, double tilt, double op) {
+    final col = _sperm.withValues(alpha: op);
+    // kafa
+    canvas.drawOval(
+      Rect.fromCenter(center: c, width: 14, height: 10),
+      _fill(col),
+    );
+    canvas.drawCircle(c.translate(-2.5, -2.5), 2.5,
+        _fill(Colors.white.withValues(alpha: op * 0.8)));
+    // dalgalı kuyruk (sola doğru)
+    final t = c.dy + tilt * 14;
+    final tail = Path()
+      ..moveTo(c.dx - 7, c.dy)
+      ..quadraticBezierTo(c.dx - 16, c.dy - 7 + tilt * 8, c.dx - 24, t)
+      ..quadraticBezierTo(c.dx - 31, t + 8, c.dx - 38, t - 2 + tilt * 4);
+    canvas.drawPath(tail, _stroke(col, 2.6));
+  }
+
+  // ── 4. hafta: hücre topu (morula) ──
   void _cellCluster(Canvas canvas) {
     final halo = Paint()
       ..shader = const RadialGradient(colors: [
@@ -136,7 +193,7 @@ class _EmbryoPainter extends CustomPainter {
     }
   }
 
-  // ── 5-9. hafta: kuyruklu embriyo ──
+  // ── 5-6. hafta: C şeklinde embriyo + ilk kalp atışı ──
   void _tadpole(Canvas canvas) {
     final body = Path()
       ..moveTo(58, 30)
@@ -156,9 +213,48 @@ class _EmbryoPainter extends CustomPainter {
     canvas.drawCircle(const Offset(56, 58), 4, _fill(const Color(0x66F4511E)));
   }
 
-  // ── 10+ hafta: kıvrılmış, sevimli bebek ──
-  void _drawBaby(Canvas canvas, {required double scale, bool chubby = false}) {
+  // ── 7-8. hafta: kafası belirginleşen embriyo ──
+  void _earlyFetus(Canvas canvas) {
+    // gövde — küçük, kıvrık
+    final body = Path()
+      ..moveTo(54, 47)
+      ..quadraticBezierTo(74, 53, 70, 70)
+      ..quadraticBezierTo(66, 84, 50, 82)
+      ..quadraticBezierTo(40, 81, 42, 67)
+      ..quadraticBezierTo(44, 54, 54, 47)
+      ..close();
+    canvas.drawPath(body, _fill(_skin));
+    canvas.drawPath(body, _stroke(_skinDark, 2));
+    // kol ve bacak tomurcukları
+    canvas.drawLine(
+        const Offset(47, 62), const Offset(36, 68), _stroke(_skin, 7));
+    canvas.drawLine(
+        const Offset(58, 74), const Offset(55, 87), _stroke(_skin, 8));
+    // büyük baş
+    canvas.drawCircle(const Offset(45, 37), 22, _fill(_skin));
+    canvas.drawCircle(const Offset(45, 37), 22, _stroke(_skinDark, 2));
+    // göz
+    canvas.drawCircle(const Offset(38, 39), 3.4, _fill(_detail));
+    canvas.drawCircle(const Offset(36.8, 37.8), 1.2, _fill(Colors.white));
+    // hafif gülümseme
+    canvas.drawArc(
+      Rect.fromCircle(center: const Offset(41, 46), radius: 4),
+      0.2, 2.5, false, _stroke(_detail, 1.6),
+    );
+    // kalp parıltısı
+    canvas.drawCircle(
+        const Offset(54, 60), 3.5, _fill(const Color(0x66F4511E)));
+  }
+
+  // ── 9+ hafta: kıvrılmış, sevimli bebek ──
+  void _drawBaby(Canvas canvas,
+      {required double scale, bool chubby = false, bool headDown = false}) {
     canvas.save();
+    // Doğuma hazır bebek baş aşağı döner — dikeyde aynalama.
+    if (headDown) {
+      canvas.translate(0, 104);
+      canvas.scale(1, -1);
+    }
     canvas.translate(50, 52);
     canvas.scale(scale * 0.95);
     canvas.translate(-50, -52);
