@@ -52,12 +52,12 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBcIcUmsjUzxggPk6uCRWPikaOCl8G94Ak',
-    appId: '1:198781995461:ios:6a532f05849a58e03963ac',
+    appId: '1:198781995461:ios:e33525b7eedb3bda3963ac',
     messagingSenderId: '198781995461',
     projectId: 'lunora-app',
     storageBucket: 'lunora-app.firebasestorage.app',
-    iosClientId: '198781995461-6pc1ka1avqqej02cbsp86goblhnpbhd7.apps.googleusercontent.com',
-    iosBundleId: 'com.example.yeniUygulama',
+    iosClientId: '198781995461-u32dapcnh4v7ipbcd77ab0kpsu3j3sjb.apps.googleusercontent.com',
+    iosBundleId: 'com.lunora.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
