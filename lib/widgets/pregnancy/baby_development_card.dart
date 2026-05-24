@@ -79,6 +79,7 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Başlık satırı
@@ -205,6 +206,8 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
           // Gelişim açıklaması
           Text(
             info.summary,
+            maxLines: 4,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 12.5,
               height: 1.4,
@@ -263,10 +266,16 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
+      isScrollControlled: true,
       builder: (ctx) {
         final cs = Theme.of(ctx).colorScheme;
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        return SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 0,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -322,6 +331,7 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
     );
   }
 }
+
 
 class _NavButton extends StatelessWidget {
   final IconData icon;
