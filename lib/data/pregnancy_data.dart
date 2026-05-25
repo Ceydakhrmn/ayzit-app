@@ -90,15 +90,15 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 3,
     summary: 'Sperm ve yumurta buluştu! Zigot oluştu ve '
         'rahme doğru yolculuğa başladı.',
-    sizeText: 'Bir haşhaş tohumu kadar.',
-    fruit: FruitShape.tinySeed,
+    sizeText: '',
+    fruit: FruitShape.none,
     stage: EmbryoStage.fertilization,
   ),
   PregnancyWeekInfo(
     week: 4,
     summary: 'Hücreler çoğaldı, blastosist rahim duvarına tutundu. '
         'hCG hormonu yükseliyor.',
-    sizeText: 'Bir haşhaş tohumu kadar.',
+    sizeText: 'bir haşhaş tohumu büyüklüğünde',
     fruit: FruitShape.tinySeed,
     stage: EmbryoStage.cellCluster,
   ),
@@ -106,7 +106,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 5,
     summary: 'Kalp, beyin ve omurga taslakları şekilleniyor. '
         'Minik kalp bu hafta atmaya hazırlanıyor.',
-    sizeText: 'Bir elma çekirdeği kadar.',
+    sizeText: 'bir elma çekirdeği büyüklüğünde',
     fruit: FruitShape.tinySeed,
     stage: EmbryoStage.embryoTadpole,
   ),
@@ -114,7 +114,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 6,
     summary: 'İlk kalp atışı bu hafta! Ultrasonda duyulabilir. '
         'Kol ve bacak tomurcukları belirmeye başladı.',
-    sizeText: 'Bir bezelye kadar.',
+    sizeText: 'bir bezelye büyüklüğünde',
     fruit: FruitShape.smallRound,
     stage: EmbryoStage.embryoTadpole,
   ),
@@ -122,7 +122,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 7,
     summary: 'Beyni saniyede 100 yeni nöron üretiyor. '
         'Yüz hatları, göz çukurları belirginleşiyor.',
-    sizeText: 'Bir yaban mersini kadar.',
+    sizeText: 'bir yaban mersini büyüklüğünde',
     fruit: FruitShape.smallRound,
     stage: EmbryoStage.embryoTadpole,
   ),
@@ -130,7 +130,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 8,
     summary: 'Parmaklar ayrışıyor, bilek ve dirsekler kıpırdıyor. '
         'Kulak kepçeleri oluşuyor.',
-    sizeText: 'Bir ahududu kadar.',
+    sizeText: 'bir ahududu büyüklüğünde',
     fruit: FruitShape.raspberry,
     stage: EmbryoStage.embryoTadpole,
   ),
@@ -138,7 +138,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 9,
     summary: 'Minik kuyruk tamamen geride kaldı. '
         'Kas hareketleri başladı, yutkunabiliyor.',
-    sizeText: 'Bir yeşil zeytin kadar.',
+    sizeText: 'bir yeşil zeytin büyüklüğünde',
     fruit: FruitShape.smallRound,
     stage: EmbryoStage.fetus,
   ),
@@ -146,7 +146,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 10,
     summary: 'Hayati organların tümü yerleşti — artık fetüs dönemi başladı. '
         'Tırnaklar oluşmaya başladı.',
-    sizeText: 'Bir erik kurusu kadar.',
+    sizeText: 'bir erik kurusu büyüklüğünde',
     fruit: FruitShape.smallRound,
     stage: EmbryoStage.fetus,
   ),
@@ -154,7 +154,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 11,
     summary: 'Saç folikülleri ve saç oluşumu bu hafta başlıyor! '
         'Bebek artık ışığa tepki verebiliyor.',
-    sizeText: 'Bir misket limonu kadar.',
+    sizeText: 'bir misket limonu büyüklüğünde',
     fruit: FruitShape.citrus,
     stage: EmbryoStage.plumpFetus,
   ),
@@ -162,7 +162,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 12,
     summary: 'İlk trimester bitiyor! Refleksleri gelişti, '
         'esniyor ve bükülebiliyor.',
-    sizeText: 'Bir erik kadar.',
+    sizeText: 'bir erik büyüklüğünde',
     fruit: FruitShape.smallRound,
     stage: EmbryoStage.plumpFetus,
   ),
@@ -170,7 +170,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 13,
     summary: 'İkinci trimester başladı! Minik parmak izleri oluştu, '
         'kemikler sertleşmeye başladı.',
-    sizeText: 'Bir şeftali kadar.',
+    sizeText: 'bir şeftali büyüklüğünde',
     fruit: FruitShape.citrus,
     stage: EmbryoStage.matureFetus,
   ),
@@ -178,7 +178,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 14,
     summary: 'Yüz ifadeleri yapabiliyor: kaş çatıyor, gülümsüyor. '
         'Troid bezi çalışmaya başladı.',
-    sizeText: 'Bir limon kadar.',
+    sizeText: 'bir limon büyüklüğünde',
     fruit: FruitShape.citrus,
     stage: EmbryoStage.matureFetus,
   ),
@@ -186,7 +186,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 15,
     summary: 'Sesini duyabiliyor, ışığı algılamaya başladı. '
         'Kemik iliği kan hücreleri üretiyor.',
-    sizeText: 'Bir portakal kadar.',
+    sizeText: 'bir portakal büyüklüğünde',
     fruit: FruitShape.citrus,
     stage: EmbryoStage.matureFetus,
   ),
@@ -194,7 +194,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 16,
     summary: 'Kasları güçleniyor, ilk tekmeler yakın! '
         'Gözleri yavaş yavaş açılmaya başladı.',
-    sizeText: 'Bir avokado kadar.',
+    sizeText: 'bir avokado büyüklüğünde',
     fruit: FruitShape.avocado,
     stage: EmbryoStage.matureFetus,
   ),
@@ -202,7 +202,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 17,
     summary: 'Yağ depolamaya başladı, derisi pürüzsüzleşiyor. '
         'İşitme duyusu gelişiyor.',
-    sizeText: 'Bir soğan kadar.',
+    sizeText: 'bir soğan büyüklüğünde',
     fruit: FruitShape.apple,
     stage: EmbryoStage.matureFetus,
   ),
@@ -210,7 +210,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 18,
     summary: 'Esniyor, hıçkırıyor — yakında sen de hissedeceksin! '
         'Sinir sistemi hızla gelişiyor.',
-    sizeText: 'Bir tatlı patates kadar.',
+    sizeText: 'bir tatlı patates büyüklüğünde',
     fruit: FruitShape.pear,
     stage: EmbryoStage.matureFetus,
   ),
@@ -218,7 +218,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 19,
     summary: 'Deriyi koruyan vernix tabakası oluştu. '
         'Duyu organları olgunlaşıyor.',
-    sizeText: 'Bir mango kadar.',
+    sizeText: 'bir mango büyüklüğünde',
     fruit: FruitShape.pear,
     stage: EmbryoStage.matureFetus,
   ),
@@ -226,7 +226,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 20,
     summary: 'Yarı yoldasın! Bebek artık seni net duyuyor, '
         'sesine alışıyor.',
-    sizeText: 'Bir muz kadar.',
+    sizeText: 'bir muz büyüklüğünde',
     fruit: FruitShape.banana,
     stage: EmbryoStage.matureFetus,
   ),
@@ -234,7 +234,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 21,
     summary: 'Yutkunma hareketleri yapıyor, sindirim sistemi çalışıyor. '
         'Kaşlar ve kirpikler belirginleşti.',
-    sizeText: 'Bir nar kadar.',
+    sizeText: 'bir nar büyüklüğünde',
     fruit: FruitShape.apple,
     stage: EmbryoStage.matureFetus,
   ),
@@ -242,7 +242,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 22,
     summary: 'Kaş ve kirpikleri belirginleşti, dudak hareketleri yapıyor. '
         'Görme siniri gelişiyor.',
-    sizeText: 'Bir papaya kadar.',
+    sizeText: 'bir papaya büyüklüğünde',
     fruit: FruitShape.pear,
     stage: EmbryoStage.matureFetus,
   ),
@@ -250,7 +250,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 23,
     summary: 'Derisi hâlâ buruşuk ama hızla kilo alıyor. '
         'Akciğer gelişimi hızlanıyor.',
-    sizeText: 'Bir greyfurt kadar.',
+    sizeText: 'bir greyfurt büyüklüğünde',
     fruit: FruitShape.citrus,
     stage: EmbryoStage.matureFetus,
   ),
@@ -258,7 +258,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 24,
     summary: 'Akciğerleri nefes almaya hazırlanıyor, surfaktan üretiyor. '
         'Denge duyusu çalışıyor.',
-    sizeText: 'Bir kavun kadar.',
+    sizeText: 'bir kavun büyüklüğünde',
     fruit: FruitShape.melon,
     stage: EmbryoStage.matureFetus,
   ),
@@ -266,7 +266,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 25,
     summary: 'Saçları belirginleşti, deri altı yağ dokusu birikmeye başladı. '
         'Elleri kavrayabiliyor.',
-    sizeText: 'Bir karnıbahar kadar.',
+    sizeText: 'bir karnıbahar büyüklüğünde',
     fruit: FruitShape.leafy,
     stage: EmbryoStage.matureFetus,
   ),
@@ -274,7 +274,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 26,
     summary: 'Gözlerini açıp kapatabiliyor, ışık ve karanlık farkını '
         'hissediyor.',
-    sizeText: 'Bir lahana kadar.',
+    sizeText: 'bir lahana büyüklüğünde',
     fruit: FruitShape.leafy,
     stage: EmbryoStage.matureFetus,
   ),
@@ -282,7 +282,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 27,
     summary: 'Üçüncü trimester başladı! Beyni hızla kıvrımlanıyor, '
         'rüya görebiliyor.',
-    sizeText: 'Bir şalgam kadar.',
+    sizeText: 'bir şalgam büyüklüğünde',
     fruit: FruitShape.smallRound,
     stage: EmbryoStage.matureFetus,
   ),
@@ -290,7 +290,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 28,
     summary: 'Gözler ışığa tepki veriyor. Artık "tekme sayarı" '
         'kullanabilirsin — günde 10 tekme hedef.',
-    sizeText: 'Bir patlıcan kadar.',
+    sizeText: 'bir patlıcan büyüklüğünde',
     fruit: FruitShape.eggplant,
     stage: EmbryoStage.matureFetus,
   ),
@@ -298,7 +298,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 29,
     summary: 'Kasları ve akciğerleri olgunlaşmaya devam ediyor. '
         'Kalsiyum ihtiyacı arttı.',
-    sizeText: 'Bir bal kabağı kadar.',
+    sizeText: 'bir bal kabağı büyüklüğünde',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
@@ -306,7 +306,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 30,
     summary: 'Beyin kıvrımları artıyor, daha da akıllı oluyor! '
         'Kilo alımı hızlandı.',
-    sizeText: 'Bir salatalık kadar.',
+    sizeText: 'bir salatalık büyüklüğünde',
     fruit: FruitShape.longGreen,
     stage: EmbryoStage.fullTerm,
   ),
@@ -314,7 +314,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 31,
     summary: 'Tüm duyuları çalışıyor. Vücudu ısısını düzenlemeye '
         'başlıyor.',
-    sizeText: 'Bir hindistan cevizi kadar.',
+    sizeText: 'bir hindistan cevizi büyüklüğünde',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
@@ -322,7 +322,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 32,
     summary: 'Tırnakları parmak uçlarına ulaştı. '
         'Büyük olasılıkla baş aşağı döndü.',
-    sizeText: 'Bir kabak kadar.',
+    sizeText: 'bir kabak büyüklüğünde',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
@@ -330,7 +330,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 33,
     summary: 'Kemikleri sertleşiyor, kafatası hâlâ esneme kabiliyetinde — '
         'doğum kanalından geçmek için.',
-    sizeText: 'Bir durian meyvesi kadar.',
+    sizeText: 'bir durian büyüklüğünde',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
@@ -338,7 +338,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 34,
     summary: 'Bağışıklık sistemi güçleniyor, anneden antikorlar geçiyor. '
         'Doğuma hazırlanıyor.',
-    sizeText: 'Bir tatlı kabak kadar.',
+    sizeText: 'bir tatlı kabak büyüklüğünde',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
@@ -346,7 +346,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 35,
     summary: 'Böbrekleri tam gelişti, hızla yağlanıyor. '
         'Kasılmalar (Braxton Hicks) hissedebilirsin.',
-    sizeText: 'Bir kokonat kadar.',
+    sizeText: 'bir kokonat büyüklüğünde',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
@@ -354,7 +354,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 36,
     summary: 'Doğum pozisyonuna geçiyor — başı aşağıda. '
         'Haftalık NST kontrolleri başlıyor.',
-    sizeText: 'Bir tatlı kavun kadar.',
+    sizeText: 'bir tatlı kavun büyüklüğünde',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
@@ -362,7 +362,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 37,
     summary: 'Erken term — artık her an hazır! '
         'Akciğerleri tamamen olgun.',
-    sizeText: 'Bir kış kavunu kadar.',
+    sizeText: 'bir kış kavunu büyüklüğünde',
     fruit: FruitShape.longGreen,
     stage: EmbryoStage.fullTerm,
   ),
@@ -370,7 +370,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 38,
     summary: 'Organları tamamen olgun. Kavrama refleksi çok güçlü — '
         'doğar doğmaz seni tutacak.',
-    sizeText: 'Bir kestane kabağı kadar.',
+    sizeText: 'bir kestane kabağı büyüklüğünde',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
@@ -378,7 +378,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 39,
     summary: 'Doğum çok yakın! Son rötuşlar tamamlanıyor, '
         'çantanı hazırla.',
-    sizeText: 'Bir karpuz kadar.',
+    sizeText: 'bir karpuz büyüklüğünde',
     fruit: FruitShape.watermelon,
     stage: EmbryoStage.fullTerm,
   ),
@@ -386,7 +386,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 40,
     summary: 'Hoş geldin günü çok yakın! Bebek tamamen hazır. '
         'Doğum çantanı yanında tut.',
-    sizeText: 'Bir jack meyvesi kadar.',
+    sizeText: 'bir jack meyvesi büyüklüğünde',
     fruit: FruitShape.watermelon,
     stage: EmbryoStage.fullTerm,
   ),
