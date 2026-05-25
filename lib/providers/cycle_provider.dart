@@ -100,6 +100,9 @@ class CycleProvider extends ChangeNotifier {
   AppMode _appMode = AppMode.reglTakip;
   // Pregnancy: last menstrual period (LMP) - used to compute current pregnancy week
   DateTime? _pregnancyStartDate;
+  // Bahçe: Firestore'da saklanan hafta ve son dokunma tarihi.
+  int? _gardenWeek;
+  DateTime? _lastGardenTapDate;
   bool _reminderPeriodStart = true;
   bool _reminderPeriodEnd = false;
   bool _reminderOvulation = false;
@@ -117,26 +120,87 @@ class CycleProvider extends ChangeNotifier {
   AppMode get appMode => _appMode;
   DateTime? get pregnancyStartDate => _pregnancyStartDate;
 
-  /// Current pregnancy week (1..40) based on LMP date.
-  /// Returns 1 if no LMP set or computed week < 1.
+  /// Tahmini Doğum Tarihi (TDT) = SAT + 280 gün.
+  DateTime? get estimatedDueDate {
+    final lmp = _pregnancyStartDate;
+    if (lmp == null) return null;
+    return lmp.add(const Duration(days: 280));
+  }
+
+  /// Mevcut gebelik haftası (1..40). SAT girilmediyse 1 döner.
   int get pregnancyWeek {
     final lmp = _pregnancyStartDate;
     if (lmp == null) return 1;
     final days = DateTime.now().difference(lmp).inDays;
+    if (days < 0) return 1;
     final week = (days ~/ 7) + 1;
-    if (week < 1) return 1;
-    if (week > 40) return 40;
-    return week;
+    return week.clamp(1, 40);
   }
 
-  /// Trimester for a given week:
-  ///   1st: 1..12
-  ///   2nd: 13..27
-  ///   3rd: 28..40
+  /// Mevcut hafta içindeki gün (0–6).
+  int get pregnancyDayInWeek {
+    final lmp = _pregnancyStartDate;
+    if (lmp == null) return 0;
+    final days = DateTime.now().difference(lmp).inDays;
+    return days < 0 ? 0 : days % 7;
+  }
+
+  /// Toplam geçen gün sayısı.
+  int get pregnancyTotalDays {
+    final lmp = _pregnancyStartDate;
+    if (lmp == null) return 0;
+    return DateTime.now().difference(lmp).inDays.clamp(0, 280);
+  }
+
+  /// 42. haftayı geçtiyse true — "Doğum gerçekleşti mi?" uyarısı gösterilmeli.
+  bool get isPostTerm {
+    final lmp = _pregnancyStartDate;
+    if (lmp == null) return false;
+    return DateTime.now().difference(lmp).inDays > 294; // 42 hafta
+  }
+
+  /// Trimester hesabı:
+  ///   1. Trimester: 1–12. hafta
+  ///   2. Trimester: 13–26. hafta
+  ///   3. Trimester: 27–40. hafta
   int trimesterForWeek(int week) {
     if (week <= 12) return 1;
-    if (week <= 27) return 2;
+    if (week <= 26) return 2;
     return 3;
+  }
+
+  // ── Büyüme Bahçesi ────────────────────────────────────────────────────
+
+  /// Bahçe'de gösterilen hafta. Firestore'dan gelmezse gerçek haftayı kullanır.
+  int get gardenWeek => (_gardenWeek ?? pregnancyWeek).clamp(1, 40);
+
+  /// Kullanıcı bu hafta bahçeye dokunabilir mi (7 gün bekleme).
+  bool get canTapGarden {
+    final last = _lastGardenTapDate;
+    if (last == null) return true;
+    return DateTime.now().difference(last).inDays >= 7;
+  }
+
+  /// Yeni dokunmaya kaç gün kaldı.
+  int get gardenCooldownDays {
+    final last = _lastGardenTapDate;
+    if (last == null) return 0;
+    final elapsed = DateTime.now().difference(last).inDays;
+    return (7 - elapsed).clamp(0, 7);
+  }
+
+  /// Bahçeyi bir hafta ilerletir ve son dokunma tarihini kaydeder.
+  Future<void> advanceGardenWeek() async {
+    final next = (gardenWeek + 1).clamp(1, 40);
+    _gardenWeek = next;
+    _lastGardenTapDate = DateTime.now();
+    notifyListeners();
+    await _updateUserDoc({
+      'pregnancy': {
+        'gardenWeek': next,
+        'lastGardenTap': Timestamp.fromDate(_lastGardenTapDate!),
+      },
+    });
   }
 
   bool get reminderPeriodStart => _reminderPeriodStart;
@@ -217,10 +281,13 @@ class CycleProvider extends ChangeNotifier {
 
       _appMode = _parseAppMode(data['appMode'] as String?);
 
-      // Pregnancy LMP date
+      // Pregnancy LMP date + bahçe durumu
       final pregnancy = (data['pregnancy'] as Map<String, dynamic>?) ?? const {};
       _pregnancyStartDate =
           (pregnancy['startDate'] as Timestamp?)?.toDate();
+      _gardenWeek = (pregnancy['gardenWeek'] as num?)?.toInt();
+      _lastGardenTapDate =
+          (pregnancy['lastGardenTap'] as Timestamp?)?.toDate();
 
 
       final reminders =

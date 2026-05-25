@@ -1,48 +1,45 @@
 // =============================================
 // data/pregnancy_data.dart
-// Gebelik takip modu için statik veri:
-//   • PregnancyWeekInfo  — 40 haftalık bebek gelişim bilgisi
-//   • PregnancyMilestone — LMP'ye göre hesaplanan kilometre taşları
-// Tüm hesaplamalar son adet tarihinden (LMP) gün farkıyla yapılır.
+// 40 haftalık gebelik gelişim verisi, kilometre taşları
+// ve yardımcı hesaplama fonksiyonları.
 // =============================================
 
 import 'package:flutter/material.dart';
 
-// ── Meyve / boyut arketipleri (fruit_painter.dart bunları çizer) ──
+// ── Meyve / boyut arketipleri ──────────────────────────────────────────────
 enum FruitShape {
   none,
-  tinySeed, // haşhaş, susam
-  smallRound, // mercimek, yaban mersini, kiraz, incir
-  raspberry, // ahududu
-  strawberry, // çilek
-  citrus, // limon, misket limonu, şeftali, greyfurt
-  apple, // elma, domates
-  avocado, // avokado
-  pear, // armut
-  pepper, // dolmalık biber
-  banana, // muz
-  carrot, // havuç
-  longGreen, // salatalık, kabak, kereviz, pırasa
-  corn, // mısır
-  leafy, // marul, lahana, karnabahar, pazı
-  eggplant, // patlıcan
-  melon, // kavun, bal kabağı, hindistan cevizi
-  watermelon, // karpuz
+  tinySeed,    // haşhaş, elma çekirdeği
+  smallRound,  // bezelye, yaban mersini, zeytin, erik kurusu, nar, şalgam, erik
+  raspberry,   // ahududu
+  strawberry,  // (painter'da var, geriye dönük uyumluluk)
+  citrus,      // misket limonu, şeftali, limon, portakal, greyfurt
+  avocado,     // avokado
+  apple,       // soğan (yuvarlak)
+  pear,        // tatlı patates, mango, papaya
+  pepper,      // (painter'da var, geriye dönük uyumluluk)
+  banana,      // muz
+  carrot,      // (painter'da var, geriye dönük uyumluluk)
+  leafy,       // karnıbahar, lahana
+  longGreen,   // salatalık, kabak, kış kavunu
+  corn,        // (painter'da var, geriye dönük uyumluluk)
+  eggplant,    // patlıcan
+  melon,       // bal kabağı, hindistan cevizi, kavun, durian, tatlı kabak
+  watermelon,  // karpuz, jack meyvesi
 }
 
-// ── Embriyo / fetüs siluet aşamaları (embryo_painter.dart bunları çizer) ──
+// ── Embriyo / fetüs siluet aşamaları ──────────────────────────────────────
 enum EmbryoStage {
-  fertilization, // 1-2. hafta — sperm + yumurta (döllenme)
-  cellCluster, // 3-4. hafta — blastosist / implantasyon
-  embryoTadpole, // 5-6. hafta — C şeklinde embriyo + ilk kalp atışı
-  earlyFetus, // 7-8. hafta — kafası belirginleşen embriyo
-  fetus, // 9-10. hafta — el/ayak beliren minik fetüs
-  plumpFetus, // 11-12. hafta — başı belirgin, kımıldayan fetüs
-  matureFetus, // 13-28. hafta — olgun, uyuyan fetüs
-  fullTerm, // 29-40. hafta — doğuma hazır, baş aşağı bebek
+  fertilization,  // 1-2. hafta
+  cellCluster,    // 3-4. hafta
+  embryoTadpole,  // 5-6. hafta
+  earlyFetus,     // 7-8. hafta
+  fetus,          // 9-10. hafta
+  plumpFetus,     // 11-12. hafta
+  matureFetus,    // 13-28. hafta
+  fullTerm,       // 29-40. hafta
 }
 
-/// Verilen gebelik haftasının biyolojik gelişim evresi (8 evreli tıbbi akış).
 EmbryoStage embryoStageForWeek(int week) {
   final w = week.clamp(1, 40);
   if (w <= 2) return EmbryoStage.fertilization;
@@ -55,10 +52,11 @@ EmbryoStage embryoStageForWeek(int week) {
   return EmbryoStage.fullTerm;
 }
 
+// ── Haftalık gelişim modeli ────────────────────────────────────────────────
 class PregnancyWeekInfo {
   final int week;
-  final String summary; // bebeğin gelişimi metni
-  final String sizeText; // boyut karşılaştırması ("" ise gösterme)
+  final String summary;
+  final String sizeText;
   final FruitShape fruit;
   final EmbryoStage stage;
 
@@ -74,314 +72,358 @@ class PregnancyWeekInfo {
 const List<PregnancyWeekInfo> kPregnancyWeeks = [
   PregnancyWeekInfo(
     week: 1,
-    summary: 'Henüz yola çıkmadın sayılır — bu hafta vücudun hazırlık yapıyor.',
+    summary: 'Henüz yola çıkmadın sayılır — vücudun hazırlık yapıyor, '
+        'uterus yumurtayı karşılamak için kalınlaşıyor.',
     sizeText: '',
     fruit: FruitShape.none,
     stage: EmbryoStage.fertilization,
   ),
   PregnancyWeekInfo(
     week: 2,
-    summary: 'Yumurtan olgunlaşıyor, döllenme bu haftanın sonunda olabilir.',
+    summary: 'Yumurtan olgunlaşıyor. Bu haftanın sonunda ovulasyon '
+        'gerçekleşebilir — döllenme için en verimli dönem.',
     sizeText: '',
     fruit: FruitShape.none,
     stage: EmbryoStage.fertilization,
   ),
   PregnancyWeekInfo(
     week: 3,
-    summary: 'Sperm ve yumurta buluştu! Minik bir hücre yolculuğa başladı.',
+    summary: 'Sperm ve yumurta buluştu! Zigot oluştu ve '
+        'rahme doğru yolculuğa başladı.',
     sizeText: 'Bir haşhaş tohumu kadar.',
     fruit: FruitShape.tinySeed,
     stage: EmbryoStage.fertilization,
   ),
   PregnancyWeekInfo(
     week: 4,
-    summary: 'Hücreler çoğaldı, minik bir top oldu ve rahmine tutundu.',
+    summary: 'Hücreler çoğaldı, blastosist rahim duvarına tutundu. '
+        'hCG hormonu yükseliyor.',
     sizeText: 'Bir haşhaş tohumu kadar.',
     fruit: FruitShape.tinySeed,
     stage: EmbryoStage.cellCluster,
   ),
   PregnancyWeekInfo(
     week: 5,
-    summary: 'Kalbi atmaya hazırlanıyor, temel organların taslağı çiziliyor.',
-    sizeText: 'Bir susam tanesi kadar.',
+    summary: 'Kalp, beyin ve omurga taslakları şekilleniyor. '
+        'Minik kalp bu hafta atmaya hazırlanıyor.',
+    sizeText: 'Bir elma çekirdeği kadar.',
     fruit: FruitShape.tinySeed,
     stage: EmbryoStage.embryoTadpole,
   ),
   PregnancyWeekInfo(
     week: 6,
-    summary: 'İlk kalp atışı bu hafta! Minicik ama çarpıyor.',
-    sizeText: 'Bir mercimek kadar.',
+    summary: 'İlk kalp atışı bu hafta! Ultrasonda duyulabilir. '
+        'Kol ve bacak tomurcukları belirmeye başladı.',
+    sizeText: 'Bir bezelye kadar.',
     fruit: FruitShape.smallRound,
     stage: EmbryoStage.embryoTadpole,
   ),
   PregnancyWeekInfo(
     week: 7,
-    summary: 'Kol ve bacak tomurcukları belirdi, beyni hızla büyüyor.',
+    summary: 'Beyni saniyede 100 yeni nöron üretiyor. '
+        'Yüz hatları, göz çukurları belirginleşiyor.',
     sizeText: 'Bir yaban mersini kadar.',
     fruit: FruitShape.smallRound,
     stage: EmbryoStage.embryoTadpole,
   ),
   PregnancyWeekInfo(
     week: 8,
-    summary: 'Minik parmaklar oluşuyor, kıpırdamaya başladı bile.',
+    summary: 'Parmaklar ayrışıyor, bilek ve dirsekler kıpırdıyor. '
+        'Kulak kepçeleri oluşuyor.',
     sizeText: 'Bir ahududu kadar.',
     fruit: FruitShape.raspberry,
     stage: EmbryoStage.embryoTadpole,
   ),
   PregnancyWeekInfo(
     week: 9,
-    summary: 'Minik kuyruğu kayboldu, artık gerçek bir bebek silueti var.',
-    sizeText: 'Bir kiraz kadar.',
+    summary: 'Minik kuyruk tamamen geride kaldı. '
+        'Kas hareketleri başladı, yutkunabiliyor.',
+    sizeText: 'Bir yeşil zeytin kadar.',
     fruit: FruitShape.smallRound,
-    stage: EmbryoStage.embryoTadpole,
+    stage: EmbryoStage.fetus,
   ),
   PregnancyWeekInfo(
     week: 10,
-    summary: 'Hayati organların hepsi yerinde — şimdi büyüme zamanı.',
-    sizeText: 'Bir çilek kadar.',
-    fruit: FruitShape.strawberry,
-    stage: EmbryoStage.earlyFetus,
+    summary: 'Hayati organların tümü yerleşti — artık fetüs dönemi başladı. '
+        'Tırnaklar oluşmaya başladı.',
+    sizeText: 'Bir erik kurusu kadar.',
+    fruit: FruitShape.smallRound,
+    stage: EmbryoStage.fetus,
   ),
   PregnancyWeekInfo(
     week: 11,
-    summary: 'Tırnaklar ve saç folikülleri oluşuyor.',
-    sizeText: 'Bir incir kadar.',
-    fruit: FruitShape.smallRound,
-    stage: EmbryoStage.earlyFetus,
+    summary: 'Saç folikülleri ve saç oluşumu bu hafta başlıyor! '
+        'Bebek artık ışığa tepki verebiliyor.',
+    sizeText: 'Bir misket limonu kadar.',
+    fruit: FruitShape.citrus,
+    stage: EmbryoStage.plumpFetus,
   ),
   PregnancyWeekInfo(
     week: 12,
-    summary: 'İlk trimester bitiyor! Refleksleri gelişti, esniyor bile.',
-    sizeText: 'Bir misket limonu kadar.',
-    fruit: FruitShape.citrus,
-    stage: EmbryoStage.earlyFetus,
+    summary: 'İlk trimester bitiyor! Refleksleri gelişti, '
+        'esniyor ve bükülebiliyor.',
+    sizeText: 'Bir erik kadar.',
+    fruit: FruitShape.smallRound,
+    stage: EmbryoStage.plumpFetus,
   ),
   PregnancyWeekInfo(
     week: 13,
-    summary: 'İkinci trimester başladı, minik parmak izleri oluştu.',
+    summary: 'İkinci trimester başladı! Minik parmak izleri oluştu, '
+        'kemikler sertleşmeye başladı.',
     sizeText: 'Bir şeftali kadar.',
     fruit: FruitShape.citrus,
-    stage: EmbryoStage.earlyFetus,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 14,
-    summary: 'Yüz ifadeleri yapabiliyor, kaş bile çatabiliyor.',
+    summary: 'Yüz ifadeleri yapabiliyor: kaş çatıyor, gülümsüyor. '
+        'Troid bezi çalışmaya başladı.',
     sizeText: 'Bir limon kadar.',
     fruit: FruitShape.citrus,
-    stage: EmbryoStage.fetus,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 15,
-    summary: 'Sesini duyabiliyor, ışığı algılamaya başladı.',
-    sizeText: 'Bir elma kadar.',
-    fruit: FruitShape.apple,
-    stage: EmbryoStage.fetus,
+    summary: 'Sesini duyabiliyor, ışığı algılamaya başladı. '
+        'Kemik iliği kan hücreleri üretiyor.',
+    sizeText: 'Bir portakal kadar.',
+    fruit: FruitShape.citrus,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 16,
-    summary: 'Minik kasları güçleniyor, ilk tekmeler yakın.',
+    summary: 'Kasları güçleniyor, ilk tekmeler yakın! '
+        'Gözleri yavaş yavaş açılmaya başladı.',
     sizeText: 'Bir avokado kadar.',
     fruit: FruitShape.avocado,
-    stage: EmbryoStage.fetus,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 17,
-    summary: 'Yağ depolamaya başladı, derisi pürüzsüzleşiyor.',
-    sizeText: 'Bir armut kadar.',
-    fruit: FruitShape.pear,
-    stage: EmbryoStage.fetus,
+    summary: 'Yağ depolamaya başladı, derisi pürüzsüzleşiyor. '
+        'İşitme duyusu gelişiyor.',
+    sizeText: 'Bir soğan kadar.',
+    fruit: FruitShape.apple,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 18,
-    summary: 'Esniyor, hıçkırıyor — yakında sen de hissedeceksin.',
-    sizeText: 'Bir dolmalık biber kadar.',
-    fruit: FruitShape.pepper,
-    stage: EmbryoStage.fetus,
+    summary: 'Esniyor, hıçkırıyor — yakında sen de hissedeceksin! '
+        'Sinir sistemi hızla gelişiyor.',
+    sizeText: 'Bir tatlı patates kadar.',
+    fruit: FruitShape.pear,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 19,
-    summary: 'Vücudunu koruyan vernix tabakası oluştu.',
-    sizeText: 'Bir domates kadar.',
-    fruit: FruitShape.apple,
-    stage: EmbryoStage.fetus,
+    summary: 'Deriyi koruyan vernix tabakası oluştu. '
+        'Duyu organları olgunlaşıyor.',
+    sizeText: 'Bir mango kadar.',
+    fruit: FruitShape.pear,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 20,
-    summary: 'Yarı yoldasın! Bebek artık seni net duyuyor.',
+    summary: 'Yarı yoldasın! Bebek artık seni net duyuyor, '
+        'sesine alışıyor.',
     sizeText: 'Bir muz kadar.',
     fruit: FruitShape.banana,
-    stage: EmbryoStage.fetus,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 21,
-    summary: 'Yutkunma hareketleri yapıyor, sindirimi çalışıyor.',
-    sizeText: 'Bir havuç kadar.',
-    fruit: FruitShape.carrot,
-    stage: EmbryoStage.fetus,
+    summary: 'Yutkunma hareketleri yapıyor, sindirim sistemi çalışıyor. '
+        'Kaşlar ve kirpikler belirginleşti.',
+    sizeText: 'Bir nar kadar.',
+    fruit: FruitShape.apple,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 22,
-    summary: 'Kaş ve kirpikleri belirginleşti.',
-    sizeText: 'Bir kabak kadar.',
-    fruit: FruitShape.longGreen,
-    stage: EmbryoStage.fetus,
+    summary: 'Kaş ve kirpikleri belirginleşti, dudak hareketleri yapıyor. '
+        'Görme siniri gelişiyor.',
+    sizeText: 'Bir papaya kadar.',
+    fruit: FruitShape.pear,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 23,
-    summary: 'Derisi hâlâ buruşuk ama hızla kilo alıyor.',
+    summary: 'Derisi hâlâ buruşuk ama hızla kilo alıyor. '
+        'Akciğer gelişimi hızlanıyor.',
     sizeText: 'Bir greyfurt kadar.',
     fruit: FruitShape.citrus,
-    stage: EmbryoStage.plumpFetus,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 24,
-    summary: 'Akciğerleri nefes almaya hazırlanıyor.',
-    sizeText: 'Bir mısır kadar.',
-    fruit: FruitShape.corn,
-    stage: EmbryoStage.plumpFetus,
+    summary: 'Akciğerleri nefes almaya hazırlanıyor, surfaktan üretiyor. '
+        'Denge duyusu çalışıyor.',
+    sizeText: 'Bir kavun kadar.',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 25,
-    summary: 'Saçları belirginleşti, denge duyusu gelişiyor.',
-    sizeText: 'Bir karnabahar kadar.',
+    summary: 'Saçları belirginleşti, deri altı yağ dokusu birikmeye başladı. '
+        'Elleri kavrayabiliyor.',
+    sizeText: 'Bir karnıbahar kadar.',
     fruit: FruitShape.leafy,
-    stage: EmbryoStage.plumpFetus,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 26,
-    summary: 'Gözlerini açıp kapatabiliyor.',
-    sizeText: 'Bir marul kadar.',
+    summary: 'Gözlerini açıp kapatabiliyor, ışık ve karanlık farkını '
+        'hissediyor.',
+    sizeText: 'Bir lahana kadar.',
     fruit: FruitShape.leafy,
-    stage: EmbryoStage.plumpFetus,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 27,
-    summary: 'Üçüncü trimester başladı! Beyni hızla gelişiyor.',
-    sizeText: 'Bir salatalık kadar.',
-    fruit: FruitShape.longGreen,
-    stage: EmbryoStage.plumpFetus,
+    summary: 'Üçüncü trimester başladı! Beyni hızla kıvrımlanıyor, '
+        'rüya görebiliyor.',
+    sizeText: 'Bir şalgam kadar.',
+    fruit: FruitShape.smallRound,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 28,
-    summary: 'Rüya görebiliyor, gözleri ışığa tepki veriyor.',
+    summary: 'Gözler ışığa tepki veriyor. Artık "tekme sayarı" '
+        'kullanabilirsin — günde 10 tekme hedef.',
     sizeText: 'Bir patlıcan kadar.',
     fruit: FruitShape.eggplant,
-    stage: EmbryoStage.plumpFetus,
+    stage: EmbryoStage.matureFetus,
   ),
   PregnancyWeekInfo(
     week: 29,
-    summary: 'Kasları ve akciğerleri olgunlaşmaya devam ediyor.',
+    summary: 'Kasları ve akciğerleri olgunlaşmaya devam ediyor. '
+        'Kalsiyum ihtiyacı arttı.',
     sizeText: 'Bir bal kabağı kadar.',
     fruit: FruitShape.melon,
-    stage: EmbryoStage.plumpFetus,
+    stage: EmbryoStage.fullTerm,
   ),
   PregnancyWeekInfo(
     week: 30,
-    summary: 'Beynindeki kıvrımlar artıyor — daha da akıllı :)',
-    sizeText: 'Bir lahana kadar.',
-    fruit: FruitShape.leafy,
-    stage: EmbryoStage.plumpFetus,
-  ),
-  PregnancyWeekInfo(
-    week: 31,
-    summary: 'Tüm duyuları çalışıyor, hızla kilo alıyor.',
-    sizeText: 'Bir hindistan cevizi kadar.',
-    fruit: FruitShape.melon,
-    stage: EmbryoStage.plumpFetus,
-  ),
-  PregnancyWeekInfo(
-    week: 32,
-    summary: 'Tırnakları parmak uçlarına ulaştı.',
-    sizeText: 'Bir kereviz kadar.',
+    summary: 'Beyin kıvrımları artıyor, daha da akıllı oluyor! '
+        'Kilo alımı hızlandı.',
+    sizeText: 'Bir salatalık kadar.',
     fruit: FruitShape.longGreen,
     stage: EmbryoStage.fullTerm,
   ),
   PregnancyWeekInfo(
+    week: 31,
+    summary: 'Tüm duyuları çalışıyor. Vücudu ısısını düzenlemeye '
+        'başlıyor.',
+    sizeText: 'Bir hindistan cevizi kadar.',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.fullTerm,
+  ),
+  PregnancyWeekInfo(
+    week: 32,
+    summary: 'Tırnakları parmak uçlarına ulaştı. '
+        'Büyük olasılıkla baş aşağı döndü.',
+    sizeText: 'Bir kabak kadar.',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.fullTerm,
+  ),
+  PregnancyWeekInfo(
     week: 33,
-    summary: 'Kemikleri sertleşiyor, kafatası hâlâ yumuşacık.',
-    sizeText: 'Bir ananas kadar.',
+    summary: 'Kemikleri sertleşiyor, kafatası hâlâ esneme kabiliyetinde — '
+        'doğum kanalından geçmek için.',
+    sizeText: 'Bir durian meyvesi kadar.',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
   PregnancyWeekInfo(
     week: 34,
-    summary: 'Bağışıklık sistemi gelişiyor, doğuma hazırlanıyor.',
-    sizeText: 'Bir kavun kadar.',
+    summary: 'Bağışıklık sistemi güçleniyor, anneden antikorlar geçiyor. '
+        'Doğuma hazırlanıyor.',
+    sizeText: 'Bir tatlı kabak kadar.',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
   PregnancyWeekInfo(
     week: 35,
-    summary: 'Böbrekleri tam gelişti, hızla yağlanıyor.',
-    sizeText: 'Bir bal kabağı kadar.',
+    summary: 'Böbrekleri tam gelişti, hızla yağlanıyor. '
+        'Kasılmalar (Braxton Hicks) hissedebilirsin.',
+    sizeText: 'Bir hindistan cevizi kadar.',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
   PregnancyWeekInfo(
     week: 36,
-    summary: 'Doğum pozisyonuna geçiyor, başı aşağıda.',
-    sizeText: 'Bir marul kadar.',
-    fruit: FruitShape.leafy,
+    summary: 'Doğum pozisyonuna geçiyor — başı aşağıda. '
+        'Haftalık NST kontrolleri başlıyor.',
+    sizeText: 'Bir tatlı kavun kadar.',
+    fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
   PregnancyWeekInfo(
     week: 37,
-    summary: 'Erken term sayılır — artık her an hazır.',
-    sizeText: 'Bir pazı demeti kadar.',
-    fruit: FruitShape.leafy,
-    stage: EmbryoStage.fullTerm,
-  ),
-  PregnancyWeekInfo(
-    week: 38,
-    summary: 'Organları tamamen olgun, kavrama refleksi güçlü.',
-    sizeText: 'Bir pırasa kadar.',
+    summary: 'Erken term — artık her an hazır! '
+        'Akciğerleri tamamen olgun.',
+    sizeText: 'Bir kış kavunu kadar.',
     fruit: FruitShape.longGreen,
     stage: EmbryoStage.fullTerm,
   ),
   PregnancyWeekInfo(
+    week: 38,
+    summary: 'Organları tamamen olgun. Kavrama refleksi çok güçlü — '
+        'doğar doğmaz seni tutacak.',
+    sizeText: 'Bir kestane kabağı kadar.',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.fullTerm,
+  ),
+  PregnancyWeekInfo(
     week: 39,
-    summary: 'Doğuma çok az kaldı, son rötuşlar yapılıyor.',
+    summary: 'Doğum çok yakın! Son rötuşlar tamamlanıyor, '
+        'çantanı hazırla.',
     sizeText: 'Küçük bir karpuz kadar.',
     fruit: FruitShape.watermelon,
     stage: EmbryoStage.fullTerm,
   ),
   PregnancyWeekInfo(
     week: 40,
-    summary: 'Hoş geldin günü çok yakın! Bebek tamamen hazır.',
+    summary: 'Hoş geldin günü çok yakın! Bebek tamamen hazır. '
+        'Doğum çantanı yanında tut.',
     sizeText: 'Bir karpuz kadar.',
     fruit: FruitShape.watermelon,
     stage: EmbryoStage.fullTerm,
   ),
 ];
 
-/// Verilen hafta için gelişim bilgisini döndürür (1..40 arası kırpılır).
 PregnancyWeekInfo pregnancyWeekInfo(int week) {
   final w = week.clamp(1, 40).toInt();
   return kPregnancyWeeks[w - 1];
 }
 
 // ─────────────────────────────────────────────
-// Kilometre taşları (Önemli Günler)
+// Kilometre taşları
 // ─────────────────────────────────────────────
-
-/// Kilometre taşı kategorisi — takvim noktası ve kart rengini belirler.
-enum MilestoneCategory { folicAcid, fertilization, implantation, test, organ, heartbeat }
+enum MilestoneCategory {
+  folicAcid,
+  fertilization,
+  implantation,
+  test,
+  organ,
+  heartbeat,
+}
 
 extension MilestoneCategoryX on MilestoneCategory {
   Color get color {
     switch (this) {
       case MilestoneCategory.folicAcid:
-        return const Color(0xFFEC4899); // pembe
+        return const Color(0xFFEC4899);
       case MilestoneCategory.fertilization:
-        return const Color(0xFF3B82F6); // mavi
+        return const Color(0xFF3B82F6);
       case MilestoneCategory.implantation:
-        return const Color(0xFFE11D48); // kırmızı
+        return const Color(0xFFE11D48);
       case MilestoneCategory.test:
-        return const Color(0xFF9333EA); // mor
+        return const Color(0xFF9333EA);
       case MilestoneCategory.organ:
-        return const Color(0xFF14B8A6); // turkuaz
+        return const Color(0xFF14B8A6);
       case MilestoneCategory.heartbeat:
-        return const Color(0xFFF97316); // turuncu
+        return const Color(0xFFF97316);
     }
   }
 }
@@ -390,7 +432,6 @@ class PregnancyMilestone {
   final String title;
   final String description;
   final MilestoneCategory category;
-  // LMP'den itibaren gün aralığı (her iki uç dahil).
   final int startDayOffset;
   final int endDayOffset;
 
@@ -405,38 +446,33 @@ class PregnancyMilestone {
   Color get color => category.color;
 }
 
-/// LMP'ye göre sabit kilometre taşı tanımları.
-/// Tarihler tıbbi olarak yaklaşıktır; takip amaçlıdır.
 const List<PregnancyMilestone> kMilestones = [
   PregnancyMilestone(
     title: 'Folik asit kullanımı',
     description:
-        'Bebeğin nöral tüpünün sağlıklı gelişimi için bu dönemde folik asit '
-        'almak çok önemli. Doktorunun önerdiği dozu aksatma.',
+        'Bebeğin nöral tüpünün sağlıklı gelişimi için folik asit almak '
+        'bu dönemde çok kritik. Doktorunun önerdiği dozu aksatma.',
     category: MilestoneCategory.folicAcid,
     startDayOffset: 0,
-    endDayOffset: 90, // ~12. hafta sonuna kadar
+    endDayOffset: 90,
   ),
   PregnancyMilestone(
     title: 'Döllenme',
-    description:
-        'Sperm ve yumurta buluştu — minicik bir hücre yolculuğuna başladı. :)',
+    description: 'Sperm ve yumurta buluştu — yolculuk başladı!',
     category: MilestoneCategory.fertilization,
     startDayOffset: 13,
     endDayOffset: 15,
   ),
   PregnancyMilestone(
     title: 'Rahme tutunma',
-    description:
-        'Döllenmiş yumurta rahim duvarına tutundu. Gebelik resmen başladı!',
+    description: 'Döllenmiş yumurta rahim duvarına tutundu. Gebelik resmen başladı!',
     category: MilestoneCategory.implantation,
     startDayOffset: 20,
     endDayOffset: 24,
   ),
   PregnancyMilestone(
-    title: 'Gebelik testinde çıkması',
-    description:
-        'hCG hormonu artık testte görülecek kadar yükseldi. Müjdeli haber zamanı!',
+    title: 'Gebelik testi pozitif',
+    description: 'hCG hormonu testte görünecek kadar yükseldi.',
     category: MilestoneCategory.test,
     startDayOffset: 27,
     endDayOffset: 31,
@@ -445,23 +481,20 @@ const List<PregnancyMilestone> kMilestones = [
     title: 'Organ gelişim dönemi',
     description:
         'Bebeğin hayati organlarının temeli bu haftalarda atılıyor. '
-        'İlaç ve beslenmene özen göstermenin en kritik dönemi.',
+        'İlaç ve beslenmene en çok dikkat etmen gereken dönem.',
     category: MilestoneCategory.organ,
     startDayOffset: 28,
-    endDayOffset: 70, // ~5-10. haftalar
+    endDayOffset: 70,
   ),
   PregnancyMilestone(
     title: 'İlk kalp atışı',
-    description:
-        'Minik kalp atmaya başladı! Ultrasonda bu haftalarda duyulabilir.',
+    description: 'Minik kalp atmaya başladı! Ultrasonda duyulabilir.',
     category: MilestoneCategory.heartbeat,
     startDayOffset: 38,
     endDayOffset: 44,
   ),
 ];
 
-/// Verilen takvim gününe denk gelen kilometre taşlarını döndürür.
-/// [lmp] null ise boş liste döner.
 List<PregnancyMilestone> milestonesForDate(DateTime date, DateTime? lmp) {
   if (lmp == null) return const [];
   final d0 = DateTime(lmp.year, lmp.month, lmp.day);
@@ -472,7 +505,6 @@ List<PregnancyMilestone> milestonesForDate(DateTime date, DateTime? lmp) {
       .toList();
 }
 
-/// Verilen takvim gününün gebelik haftası (1..40). LMP yoksa null.
 int? pregnancyWeekForDate(DateTime date, DateTime? lmp) {
   if (lmp == null) return null;
   final d0 = DateTime(lmp.year, lmp.month, lmp.day);
@@ -480,7 +512,5 @@ int? pregnancyWeekForDate(DateTime date, DateTime? lmp) {
   final days = d1.difference(d0).inDays;
   if (days < 0) return null;
   final week = (days ~/ 7) + 1;
-  if (week < 1) return 1;
-  if (week > 40) return 40;
-  return week;
+  return week.clamp(1, 40);
 }
