@@ -145,6 +145,65 @@ class _LegendRow extends StatelessWidget {
   }
 }
 
+class _ActionChipRow extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        _ChipButton(
+          icon: Icons.emoji_emotions_outlined,
+          label: 'Ruh Halim',
+          onTap: () => showMoodDialog(context),
+        ),
+        const SizedBox(width: 8),
+        _ChipButton(
+          icon: Icons.info_outline,
+          label: 'Takvim Renkleri',
+          onTap: () => showLegendDialog(context),
+        ),
+      ],
+    );
+  }
+}
+
+class _ChipButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  const _ChipButton({required this.icon, required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3EFFB),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 16, color: const Color(0xFF7C3AED)),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Color(0xFF7C3AED),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -207,7 +266,9 @@ class HomeScreen extends StatelessWidget {
                 const MonthHeader(),
                 const SizedBox(height: 8),
                 const CalendarGrid(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 8),
+                _ActionChipRow(),
+                const SizedBox(height: 12),
 
                 // ── Hamile takip modu ──
                 if (isPregnancy) ...[
