@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 // 6 büyüme aşaması — Lottie kare haritasından (ip:38 op:216 → 178 kare)
-const List<List<int>> _stages = [
+const List<List<int>> _stageFrames = [
   [38, 56],
   [56, 91],
   [91, 127],
@@ -11,10 +11,27 @@ const List<List<int>> _stages = [
   [189, 216],
 ];
 
+const List<String> _stageWeeks = [
+  '1–4. hafta',
+  '5–12. hafta',
+  '13–20. hafta',
+  '21–27. hafta',
+  '28–34. hafta',
+  '35–40. hafta',
+];
+
+const List<String> _stageTrimester = [
+  '1. Trimester',
+  '1. Trimester',
+  '2. Trimester',
+  '2. Trimester',
+  '3. Trimester',
+  '3. Trimester',
+];
+
 double _stageValue(int stage) {
-  final s = _stages[stage.clamp(0, _stages.length - 1)];
-  final frame = s[1].toDouble();
-  return ((frame - 38) / 178).clamp(0.0, 1.0);
+  final s = _stageFrames[stage.clamp(0, _stageFrames.length - 1)];
+  return ((s[1].toDouble() - 38) / 178).clamp(0.0, 1.0);
 }
 
 class GardenScreen extends StatefulWidget {
@@ -44,7 +61,7 @@ class _GardenScreenState extends State<GardenScreen>
 
   void _grow() {
     if (!_ready) return;
-    final next = (_stage + 1).clamp(0, _stages.length - 1);
+    final next = (_stage + 1).clamp(0, _stageFrames.length - 1);
     if (next == _stage) return;
     setState(() => _stage = next);
     _tree.animateTo(
@@ -60,49 +77,75 @@ class _GardenScreenState extends State<GardenScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenH = MediaQuery.of(context).size.height;
 
+    const green = Color(0xFF558B2F);
+    final bgColor = isDark ? const Color(0xFF2D2040) : const Color(0xFFF3EFFB);
+
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Başlık
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Text(
+              'Büyüme Bahçem',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: cs.onSurface,
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Hafta + trimester bilgisi (yeşil, üstte)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
               children: [
+                const Icon(Icons.eco, size: 14, color: green),
+                const SizedBox(width: 6),
                 Text(
-                  'Büyüme Bahçem',
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    color: cs.onSurface,
+                  _stageWeeks[_stage],
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: green,
                   ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(width: 10),
+                Container(
+                  width: 1,
+                  height: 12,
+                  color: green.withValues(alpha: 0.35),
+                ),
+                const SizedBox(width: 10),
                 Text(
-                  'Ağaca dokun, büyüsün.',
+                  _stageTrimester[_stage],
                   style: TextStyle(
                     fontSize: 13,
-                    color: cs.onSurface.withValues(alpha: 0.55),
+                    fontWeight: FontWeight.w600,
+                    color: green.withValues(alpha: 0.8),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
 
-          // Ağaç — ekranın yarısı kadar yükseklik, tıklanabilir
+          const SizedBox(height: 12),
+
+          // Ağaç — ekranın yarısı kadar, tıklanabilir
           GestureDetector(
             onTap: _grow,
             child: Container(
               width: double.infinity,
               height: screenH * 0.5,
-              decoration: BoxDecoration(
-                color: isDark
-                    ? const Color(0xFF1E2A1E)
-                    : const Color(0xFFEDF5EC),
-                borderRadius: const BorderRadius.all(Radius.circular(24)),
-              ),
               margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: bgColor,
+                borderRadius: BorderRadius.circular(24),
+              ),
               child: RepaintBoundary(
                 child: Lottie.asset(
                   'assets/animations/tree_transparent.json',
@@ -114,35 +157,10 @@ class _GardenScreenState extends State<GardenScreen>
                     setState(() => _ready = true);
                   },
                   errorBuilder: (ctx, err, st) => const Center(
-                    child: Icon(Icons.park_outlined,
-                        size: 80, color: Color(0xFF558B2F)),
+                    child: Icon(Icons.park_outlined, size: 80, color: green),
                   ),
                 ),
               ),
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // Aşama göstergesi
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: List.generate(_stages.length, (i) {
-                final active = i <= _stage;
-                return Expanded(
-                  child: Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    height: 4,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(2),
-                      color: active
-                          ? const Color(0xFF558B2F)
-                          : const Color(0xFF558B2F).withValues(alpha: 0.2),
-                    ),
-                  ),
-                );
-              }),
             ),
           ),
         ],
