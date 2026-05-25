@@ -346,7 +346,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 35,
     summary: 'Böbrekleri tam gelişti, hızla yağlanıyor. '
         'Kasılmalar (Braxton Hicks) hissedebilirsin.',
-    sizeText: 'Bir hindistan cevizi kadar.',
+    sizeText: 'Bir kokonat kadar.',
     fruit: FruitShape.melon,
     stage: EmbryoStage.fullTerm,
   ),
@@ -378,7 +378,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 39,
     summary: 'Doğum çok yakın! Son rötuşlar tamamlanıyor, '
         'çantanı hazırla.',
-    sizeText: 'Küçük bir karpuz kadar.',
+    sizeText: 'Bir karpuz kadar.',
     fruit: FruitShape.watermelon,
     stage: EmbryoStage.fullTerm,
   ),
@@ -386,7 +386,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
     week: 40,
     summary: 'Hoş geldin günü çok yakın! Bebek tamamen hazır. '
         'Doğum çantanı yanında tut.',
-    sizeText: 'Bir karpuz kadar.',
+    sizeText: 'Bir jack meyvesi kadar.',
     fruit: FruitShape.watermelon,
     stage: EmbryoStage.fullTerm,
   ),
