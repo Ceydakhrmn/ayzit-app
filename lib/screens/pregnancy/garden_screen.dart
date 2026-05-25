@@ -1,37 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
-// 6 büyüme aşaması — Lottie kare haritasından (ip:38 op:216 → 178 kare)
-const List<List<int>> _stageFrames = [
-  [38, 56],
-  [56, 91],
-  [91, 127],
-  [127, 158],
-  [158, 189],
-  [189, 216],
+// Hafta → Lottie kare aralığı  [haftaStart, haftaEnd, frameStart, frameEnd]
+const List<List<int>> _weekStages = [
+  [1,  4,  38,  56],
+  [5,  12, 56,  91],
+  [13, 20, 91,  127],
+  [21, 27, 127, 158],
+  [28, 34, 158, 189],
+  [35, 40, 189, 216],
 ];
 
-const List<String> _stageWeeks = [
-  '1–4. hafta',
-  '5–12. hafta',
-  '13–20. hafta',
-  '21–27. hafta',
-  '28–34. hafta',
-  '35–40. hafta',
-];
+String _trimester(int week) {
+  if (week <= 12) return '1. Trimester';
+  if (week <= 27) return '2. Trimester';
+  return '3. Trimester';
+}
 
-const List<String> _stageTrimester = [
-  '1. Trimester',
-  '1. Trimester',
-  '2. Trimester',
-  '2. Trimester',
-  '3. Trimester',
-  '3. Trimester',
-];
-
-double _stageValue(int stage) {
-  final s = _stageFrames[stage.clamp(0, _stageFrames.length - 1)];
-  return ((s[1].toDouble() - 38) / 178).clamp(0.0, 1.0);
+double _valueForWeek(int week) {
+  final w = week.clamp(1, 40);
+  for (final s in _weekStages) {
+    if (w >= s[0] && w <= s[1]) {
+      final frac = s[1] == s[0] ? 0.0 : (w - s[0]) / (s[1] - s[0]);
+      final frame = s[2] + frac * (s[3] - s[2]);
+      return ((frame - 38) / 178).clamp(0.0, 1.0);
+    }
+  }
+  return 1.0;
 }
 
 class GardenScreen extends StatefulWidget {
@@ -45,7 +40,7 @@ class _GardenScreenState extends State<GardenScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _tree;
   bool _ready = false;
-  int _stage = 0;
+  int _week = 1;
 
   @override
   void initState() {
@@ -61,11 +56,11 @@ class _GardenScreenState extends State<GardenScreen>
 
   void _grow() {
     if (!_ready) return;
-    final next = (_stage + 1).clamp(0, _stageFrames.length - 1);
-    if (next == _stage) return;
-    setState(() => _stage = next);
+    final next = (_week + 1).clamp(1, 40);
+    if (next == _week) return;
+    setState(() => _week = next);
     _tree.animateTo(
-      _stageValue(next),
+      _valueForWeek(next),
       duration: const Duration(milliseconds: 900),
       curve: Curves.easeInOut,
     );
@@ -107,7 +102,7 @@ class _GardenScreenState extends State<GardenScreen>
                 const Icon(Icons.eco, size: 14, color: green),
                 const SizedBox(width: 6),
                 Text(
-                  _stageWeeks[_stage],
+                  '$_week. hafta',
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -122,7 +117,7 @@ class _GardenScreenState extends State<GardenScreen>
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  _stageTrimester[_stage],
+                  _trimester(_week),
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -153,7 +148,7 @@ class _GardenScreenState extends State<GardenScreen>
                   fit: BoxFit.contain,
                   onLoaded: (comp) {
                     _tree.duration = comp.duration;
-                    _tree.value = _stageValue(0);
+                    _tree.value = _valueForWeek(1);
                     setState(() => _ready = true);
                   },
                   errorBuilder: (ctx, err, st) => const Center(
