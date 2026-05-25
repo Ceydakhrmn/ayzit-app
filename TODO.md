@@ -23,9 +23,11 @@
 - [x] Publish Firestore rules to production
 - [x] LMP date picker in settings + editable LMP row
 
-## Ready
-- [ ] Find a new home for Mood and calendar-legend buttons (removed from top bar) — P2
-- [ ] Remove unused files (`tree_growing.json`) — P3
+## Done (recent)
+- [x] Mood + legend chip buttons below calendar
+- [x] Remove unused `tree_growing.json`
+
+## Backlog
 
 ## Backlog
 - [ ] Fix iOS bundle id (`com.example.yeniUygulama` -> real, consistent id) — P2
