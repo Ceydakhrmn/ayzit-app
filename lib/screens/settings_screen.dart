@@ -73,8 +73,27 @@ class _GeneralSettingsSection extends StatelessWidget {
           subtitle: 'Hamilelik sürecinizi takip edin',
           icon: Icons.pregnant_woman_outlined,
           selected: provider.appMode == AppMode.hamileTakip,
-          onTap: () => provider.updateAppMode(AppMode.hamileTakip),
+          onTap: () async {
+            provider.updateAppMode(AppMode.hamileTakip);
+            final picked = await showDatePicker(
+              context: context,
+              initialDate: provider.pregnancyStartDate ??
+                  DateTime.now().subtract(const Duration(days: 70)),
+              firstDate: DateTime.now().subtract(const Duration(days: 280)),
+              lastDate: DateTime.now(),
+              helpText: 'Son Adet Tarihinizi Seçin (LMP)',
+              cancelText: 'İPTAL',
+              confirmText: 'TAMAM',
+            );
+            if (picked != null) {
+              provider.updatePregnancyStartDate(picked);
+            }
+          },
         ),
+        if (provider.appMode == AppMode.hamileTakip) ...[
+          const SizedBox(height: 8),
+          _LmpRow(),
+        ],
         const SizedBox(height: 8),
         _ModeCard(
           title: 'Hamile Kalma',
@@ -341,6 +360,59 @@ class _Section extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LmpRow extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final provider = context.watch<CycleProvider>();
+    final lmp = provider.pregnancyStartDate;
+    final label = lmp != null
+        ? 'Son adet tarihi: ${lmp.day}/${lmp.month}/${lmp.year}  •  ${provider.pregnancyWeek}. hafta'
+        : 'Son adet tarihi girilmedi';
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () async {
+        final picked = await showDatePicker(
+          context: context,
+          initialDate: lmp ?? DateTime.now().subtract(const Duration(days: 70)),
+          firstDate: DateTime.now().subtract(const Duration(days: 280)),
+          lastDate: DateTime.now(),
+          helpText: 'Son Adet Tarihinizi Seçin (LMP)',
+          cancelText: 'İPTAL',
+          confirmText: 'TAMAM',
+        );
+        if (picked != null) provider.updatePregnancyStartDate(picked);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF3EFFB),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.3)),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.calendar_today_outlined,
+                size: 18, color: Color(0xFF7C3AED)),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF7C3AED),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const Icon(Icons.edit_outlined, size: 16, color: Color(0xFF7C3AED)),
+          ],
+        ),
       ),
     );
   }
