@@ -266,9 +266,7 @@ class HomeScreen extends StatelessWidget {
                 const MonthHeader(),
                 const SizedBox(height: 8),
                 const CalendarGrid(),
-                const SizedBox(height: 8),
-                _ActionChipRow(),
-                const SizedBox(height: 12),
+                const SizedBox(height: 16),
 
                 // ── Hamile takip modu ──
                 if (isPregnancy) ...[
@@ -286,6 +284,8 @@ class HomeScreen extends StatelessWidget {
                 ]
                 // ── Regl / hamile kalma modu ──
                 else ...[
+                  _ActionChipRow(),
+                  const SizedBox(height: 12),
                   const InfoCard(),
                   const SizedBox(height: 12),
                   Row(
