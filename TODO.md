@@ -13,23 +13,18 @@
 - [x] Baby Development card — first version
 - [x] Appointment system (model, Firestore sync, add UI, local notifications)
 - [x] Firestore rules: appointments collection added
-
-## In Review — coded, awaiting test + commit
-- [ ] Build fix: `uiLocalNotificationDateInterpretation` parameter — P1
-- [ ] Reminder fix: instant confirmation + appointment-time notification — P1
-- [ ] Biological development drawing — 8-stage medical timeline — P2
-- [ ] Smooth stage transitions (AnimatedSwitcher) — P2
-- [ ] Baby Development card new layout (left visual / right text) — P2
-- [ ] "My Growth Garden" tree card — P2
-- [ ] Top bar simplification (removed extra icons) — P3
-
-## In Progress
-- [ ] Test the app on device/emulator and commit the latest changes — P1
+- [x] Build fix: `uiLocalNotificationDateInterpretation` parameter
+- [x] Reminder fix: instant confirmation + appointment-time notification
+- [x] Biological development drawing — 8-stage medical timeline
+- [x] Smooth stage transitions (AnimatedSwitcher)
+- [x] Baby Development card new layout (left visual / right text)
+- [x] "My Growth Garden" tree card
+- [x] Top bar simplification (removed extra icons)
+- [x] Publish Firestore rules to production
+- [x] LMP date picker in settings + editable LMP row
 
 ## Ready
-- [ ] Publish Firestore rules to production (Console -> Publish) — P1
 - [ ] Find a new home for Mood and calendar-legend buttons (removed from top bar) — P2
-- [ ] Review the LMP (last menstrual period) input flow — P2
 - [ ] Remove unused files (`tree_growing.json`) — P3
 
 ## Backlog
