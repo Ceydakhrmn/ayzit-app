@@ -11,7 +11,6 @@ import '../widgets/mood_card.dart';
 import '../widgets/cycle_summary_card.dart';
 import '../widgets/pregnancy/appointments_card.dart';
 import '../widgets/pregnancy/baby_development_card.dart';
-import '../widgets/pregnancy/growth_garden_card.dart';
 import '../widgets/pregnancy/important_days_card.dart';
 
 void showLegendDialog(BuildContext context) {
@@ -278,8 +277,6 @@ class HomeScreen extends StatelessWidget {
                   _symptomButton(context),
                   const SizedBox(height: 16),
                   const NoteCard(),
-                  const SizedBox(height: 12),
-                  const GrowthGardenCard(),
                   const SizedBox(height: 20),
                 ]
                 // ── Regl / hamile kalma modu ──

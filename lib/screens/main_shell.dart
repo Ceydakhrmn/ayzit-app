@@ -1,17 +1,18 @@
 // =============================================
 // screens/main_shell.dart
-// 4-tab bottom navigation shell (shown when user is authenticated):
-//   0 — Calendar (HomeScreen) — same calendar in every app mode
-//   1 — Exercise (ExerciseScreen)
-//   2 — Social
-//   3 — Profile
+// Bottom navigation shell:
+//   Normal mode  (4 tabs): Takvim | Egzersiz | Sosyal | Profil
+//   Hamile mode  (5 tabs): Takvim | Büyüme Bahçem | Egzersiz | Sosyal | Profil
 // =============================================
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../core/theme/app_background.dart';
+import '../providers/cycle_provider.dart';
 import 'exercise_screen.dart';
 import 'home_screen.dart';
+import 'pregnancy/garden_screen.dart';
 import 'profile/profile_screen.dart';
 import 'social/social_screen.dart';
 
@@ -24,12 +25,13 @@ class MainShell extends StatefulWidget {
 
 class _MainShellState extends State<MainShell> {
   int _index = 0;
-  late final PageController _pageController;
+  bool? _prevIsPregnancy;
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: _index);
+    _pageController = PageController();
   }
 
   @override
@@ -47,52 +49,90 @@ class _MainShellState extends State<MainShell> {
     );
   }
 
+  List<Widget> _pages(bool isPregnancy) => isPregnancy
+      ? [
+          const HomeScreen(),
+          const GardenScreen(),
+          const ExerciseScreen(),
+          const SocialScreen(),
+          const ProfileScreen(),
+        ]
+      : [
+          const HomeScreen(),
+          const ExerciseScreen(),
+          const SocialScreen(),
+          const ProfileScreen(),
+        ];
+
+  List<BottomNavigationBarItem> _navItems(bool isPregnancy) => [
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.calendar_month_outlined),
+          activeIcon: Icon(Icons.calendar_month),
+          label: '',
+        ),
+        if (isPregnancy)
+          const BottomNavigationBarItem(
+            icon: Icon(Icons.yard_outlined),
+            activeIcon: Icon(Icons.yard),
+            label: '',
+          ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.self_improvement_outlined),
+          activeIcon: Icon(Icons.self_improvement),
+          label: '',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.forum_outlined),
+          activeIcon: Icon(Icons.forum),
+          label: '',
+        ),
+        const BottomNavigationBarItem(
+          icon: Icon(Icons.person_outline),
+          activeIcon: Icon(Icons.person),
+          label: '',
+        ),
+      ];
+
   @override
   Widget build(BuildContext context) {
+    final isPregnancy =
+        context.watch<CycleProvider>().appMode == AppMode.hamileTakip;
+
+    // Mod değişince index'i sıfırla ve PageController'ı yenile.
+    if (_prevIsPregnancy != null && _prevIsPregnancy != isPregnancy) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final old = _pageController;
+        setState(() {
+          _index = 0;
+          _pageController = PageController();
+        });
+        old.dispose();
+      });
+    }
+    _prevIsPregnancy = isPregnancy;
+
+    final maxIndex = isPregnancy ? 4 : 3;
+    final safeIndex = _index.clamp(0, maxIndex);
+
     return AppBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         extendBody: false,
         body: PageView(
-        controller: _pageController,
-        physics: const ClampingScrollPhysics(),
-        onPageChanged: (i) => setState(() => _index = i),
-        children: [
-          const HomeScreen(),
-          const ExerciseScreen(),
-          const SocialScreen(),
-          const ProfileScreen(),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _index,
-        type: BottomNavigationBarType.fixed,
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        onTap: _onTap,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month_outlined),
-            activeIcon: Icon(Icons.calendar_month),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.self_improvement_outlined),
-            activeIcon: Icon(Icons.self_improvement),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.forum_outlined),
-            activeIcon: Icon(Icons.forum),
-            label: '',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: '',
-          ),
-        ],
-      ),
+          controller: _pageController,
+          physics: const ClampingScrollPhysics(),
+          onPageChanged: (i) => setState(() => _index = i),
+          children: _pages(isPregnancy),
+        ),
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: safeIndex,
+          type: BottomNavigationBarType.fixed,
+          showSelectedLabels: false,
+          showUnselectedLabels: false,
+          onTap: _onTap,
+          items: _navItems(isPregnancy),
+        ),
       ),
     );
   }

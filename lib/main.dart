@@ -26,6 +26,7 @@ import 'l10n/app_localizations.dart';
 import 'providers/appointment_provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/cycle_provider.dart';
+import 'services/appointment_notification_service.dart';
 
 Future<void> main() async {
   runZonedGuarded<Future<void>>(() async {
@@ -36,6 +37,7 @@ Future<void> main() async {
       statusBarColor: Colors.transparent,
     ));
     await initializeDateFormatting('tr');
+    await AppointmentNotificationService.instance.init();
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );

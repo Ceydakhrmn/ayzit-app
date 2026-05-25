@@ -32,7 +32,7 @@ class AppointmentNotificationService {
       tz.setLocalLocation(tz.getLocation('UTC'));
     }
 
-    const android = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const android = AndroidInitializationSettings('@drawable/ic_launcher_foreground');
     const ios = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
