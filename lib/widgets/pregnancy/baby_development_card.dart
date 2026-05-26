@@ -3,10 +3,8 @@
 // Hamile takip modunda "BEBEĞİN GELİŞİMİ" kartı.
 //
 // Düzen: yatay Row —
-//   SOL %40  : bebeğin biyolojik gelişim çizimi (döllenme → hücre
-//              bölünmesi → embriyo → fetüs → bebek), haftaya göre evre
-//              değiştiren, yumuşakça hareket eden animasyon.
-//   SAĞ %60  : seçilen haftanın "X Hafta Y Gün" bilgisi + meyve boyutu.
+//   SOL %42  : büyük emoji (meyve/sebze) trimester renkli arka planda
+//   SAĞ %58  : hafta navigasyonu, trimester etiketi, boyut metni
 //
 // Takvimde bir güne tıklamak, ‹ › okları ve hafta seçici kartı o
 // haftaya taşır.
@@ -17,7 +15,7 @@ import 'package:provider/provider.dart';
 
 import '../../data/pregnancy_data.dart';
 import '../../providers/cycle_provider.dart';
-import 'embryo_painter.dart';
+import '../../utils/phase_colors.dart';
 import 'fruit_painter.dart';
 
 class BabyDevelopmentCard extends StatefulWidget {
@@ -55,12 +53,11 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
 
     final week = (_viewWeek ?? currentWeek).clamp(1, 40).toInt();
     final info = pregnancyWeekInfo(week);
-    final stage = embryoStageForWeek(week);
     final trimester = provider.trimesterForWeek(week);
     final progress = (week / 40.0).clamp(0.0, 1.0).toDouble();
     final browsing = _viewWeek != null && _viewWeek != currentWeek;
 
-    // Hafta + gün başlığı ("13 Hafta 3 Gün"). Gün yalnızca bugünkü haftada.
+    // Hafta + gün başlığı. Gün yalnızca bugünkü haftada gösterilir.
     final String weekLabel;
     if (week == currentWeek && lmp != null) {
       final dayInWeek = DateTime.now().difference(lmp).inDays % 7;
@@ -82,7 +79,7 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Başlık satırı
+          // ── Başlık satırı ────────────────────────────────────────────
           Row(
             children: [
               const _DotLabel(
@@ -99,34 +96,32 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
 
-          // ── Kahraman satır: SOL biyolojik gelişim · SAĞ metin ──
+          // ── Kahraman satır: SOL emoji · SAĞ hafta bilgisi ──────────
           Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // SOL %40 — biyolojik gelişim çizimi
+              // SOL %42 — trimester renkli büyük emoji
               Expanded(
-                flex: 40,
-                child: SizedBox(
-                  height: 140,
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 450),
-                    switchInCurve: Curves.easeOut,
-                    switchOutCurve: Curves.easeIn,
-                    child: FittedBox(
-                      key: ValueKey(stage),
-                      fit: BoxFit.contain,
-                      child: EmbryoIcon(stage: stage, size: 130),
-                    ),
+                flex: 42,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 350),
+                  switchInCurve: Curves.easeOut,
+                  switchOutCurve: Curves.easeIn,
+                  child: _EmojiStage(
+                    key: ValueKey(week),
+                    week: week,
+                    trimester: trimester,
+                    isDark: isDark,
                   ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 12),
 
-              // SAĞ %60 — hafta/gün + meyve boyutu
+              // SAĞ %58 — hafta navigasyonu + trimester etiketi + boyut
               Expanded(
-                flex: 60,
+                flex: 58,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -151,7 +146,7 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
                                 weekLabel,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  fontSize: 17,
                                   fontWeight: FontWeight.w800,
                                   color: cs.onSurface,
                                 ),
@@ -167,33 +162,50 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    // Meyve / boyut satırı
-                    if (info.fruit != FruitShape.none &&
-                        info.sizeText.isNotEmpty)
+
+                    // Trimester renk etiketi
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _trimColor(trimester, isDark),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '$trimester. Trimester',
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: (trimester == 3 && !isDark)
+                                ? Colors.white
+                                : (isDark
+                                    ? const Color(0xFFFFC8D6)
+                                    : const Color(0xFF8B1A3A)),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Boyut metni (meyve yoksa gizlenir)
+                    if (info.sizeText.isNotEmpty)
                       Container(
+                        width: double.infinity,
                         padding: const EdgeInsets.symmetric(
                             horizontal: 10, vertical: 8),
                         decoration: BoxDecoration(
                           color: cs.surface.withValues(alpha: 0.55),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Row(
-                          children: [
-                            FruitIcon(shape: info.fruit, size: 46),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: Text(
-                                'Bebeğiniz ${info.sizeText.toLowerCase()}',
-                                style: TextStyle(
-                                  fontSize: 12.5,
-                                  fontWeight: FontWeight.w600,
-                                  height: 1.3,
-                                  color:
-                                      cs.onSurface.withValues(alpha: 0.8),
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: Text(
+                          'Bebeğin ${info.sizeText}',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            height: 1.35,
+                            color: cs.onSurface.withValues(alpha: 0.85),
+                          ),
                         ),
                       ),
                   ],
@@ -203,7 +215,8 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
           ),
 
           const SizedBox(height: 14),
-          // Gelişim açıklaması
+
+          // ── Gelişim açıklaması ────────────────────────────────────
           Text(
             info.summary,
             maxLines: 4,
@@ -216,14 +229,15 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
           ),
           const SizedBox(height: 12),
 
-          // 40 haftalık ilerleme
+          // ── 40 haftalık ilerleme çubuğu ───────────────────────────
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 6,
               backgroundColor: cs.onSurface.withValues(alpha: 0.08),
-              valueColor: const AlwaysStoppedAnimation(Color(0xFF9333EA)),
+              valueColor:
+                  const AlwaysStoppedAnimation(Color(0xFF9333EA)),
             ),
           ),
           const SizedBox(height: 4),
@@ -242,7 +256,8 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
                   onTap: () => setState(() => _viewWeek = null),
                   child: const Row(
                     children: [
-                      Icon(Icons.today, size: 13, color: Color(0xFF9333EA)),
+                      Icon(Icons.today,
+                          size: 13, color: Color(0xFF9333EA)),
                       SizedBox(width: 3),
                       Text(
                         'Bugüne dön',
@@ -282,7 +297,8 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
             children: [
               const Text(
                 'Hafta seç',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                style:
+                    TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 12),
               GridView.builder(
@@ -332,7 +348,55 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
   }
 }
 
+// ── Yardımcı: trimester rengini döndürür ──────────────────────────────
+Color _trimColor(int trimester, bool isDark) {
+  if (isDark) {
+    if (trimester == 1) return kTrimester1Dark;
+    if (trimester == 2) return kTrimester2Dark;
+    return kTrimester3Dark;
+  }
+  if (trimester == 1) return kTrimester1;
+  if (trimester == 2) return kTrimester2;
+  return kTrimester3;
+}
 
+// ── Büyük emoji kartı (sol panel) ────────────────────────────────────
+class _EmojiStage extends StatelessWidget {
+  final int week;
+  final int trimester;
+  final bool isDark;
+
+  const _EmojiStage({
+    super.key,
+    required this.week,
+    required this.trimester,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = _trimColor(trimester, isDark);
+    final emoji = fruitEmojiForWeek(week);
+
+    return Container(
+      width: double.infinity,
+      height: 148,
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: Center(
+        child: Text(
+          emoji,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontSize: 64, height: 1),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Navigasyon ok butonu ─────────────────────────────────────────────
 class _NavButton extends StatelessWidget {
   final IconData icon;
   final bool enabled;
@@ -359,6 +423,7 @@ class _NavButton extends StatelessWidget {
   }
 }
 
+// ── Nokta + başlık etiketi ──────────────────────────────────────────
 class _DotLabel extends StatelessWidget {
   final Color color;
   final String text;
