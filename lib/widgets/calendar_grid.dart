@@ -109,9 +109,12 @@ class CalendarGrid extends StatelessWidget {
     final isSelected = provider.selectedDay != null &&
         _isSameDay(provider.selectedDay!, date);
 
-    // Hamile takip modunda faz renkleri yerine kilometre taşı noktaları
-    // ve randevu işareti gösterilir.
+    // Hamile takip modunda trimester arka plan rengi + kilometre taşı noktaları.
     if (isPregnancy) {
+      final week = pregnancyWeekForDate(date, lmp);
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final tStyle = trimesterStyle(week, isDark: isDark);
+
       final dots = milestonesForDate(date, lmp).map((m) => m.color).toList();
       if (appts.hasAppointmentOn(date)) {
         dots.add(_appointmentDot);
@@ -120,6 +123,8 @@ class CalendarGrid extends StatelessWidget {
         label: '${date.day}',
         isToday: isToday,
         isSelected: isSelected,
+        backgroundColor: tStyle?.background,
+        textColor: tStyle?.textColor,
         dots: dots,
         onTap: () => provider.selectDay(date),
       );
