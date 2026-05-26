@@ -11,46 +11,53 @@ import '../../data/pregnancy_data.dart';
 /// Her gebelik haftası için doğru meyve/sebze emojisi.
 /// 1–3. hafta: sembolik emoji (henüz meyve bilgisi yok).
 const Map<int, String> _kWeekEmoji = {
-  1:  '🌟',  // Hazırlık aşaması
-  2:  '✨',   // Ovulasyon
-  3:  '💫',  // Döllenme / implantasyon
-  4:  '🌱',  // Haşhaş tohumu
-  5:  '🌱',  // Elma çekirdeği
-  6:  '🫛',  // Bezelye
+  // ── 1–3. Hafta: sembolik (henüz boyut yok) ──────────────────────
+  1:  '🌟',
+  2:  '✨',
+  3:  '💫',
+
+  // ── 1. Trimester: Tohumlar ve Küçük Orman Meyveleri ─────────────
+  4:  '🌱',  // Haşhaş / susam tanesi kadar küçük filiz
+  5:  '🌾',  // Pirinç / susam tanesi boyutu
+  6:  '🫛',  // Bezelye tanesi
   7:  '🫐',  // Yaban mersini
-  8:  '🍓',  // Ahududu
+  8:  '🍒',  // Kiraz (ahududu boyutu)
   9:  '🫒',  // Yeşil zeytin
-  10: '🍑',  // Erik kurusu
-  11: '🍋',  // Misket limonu
-  12: '🍑',  // Erik
-  13: '🍑',  // Şeftali
-  14: '🍋',  // Limon
-  15: '🍊',  // Portakal
+  10: '🍓',  // Çilek
+  11: '🫚',  // Zencefil kökü (şekilsiz, büyüyen kök sebze)
+  12: '🍋',  // Limon
+  13: '🍏',  // Yeşil elma
+
+  // ── 2. Trimester: Belirgin Meyveler ve Boy Uzaması ──────────────
+  14: '🍑',  // Şeftali — tombullaşmaya başlıyor
+  15: '🍎',  // Kırmızı elma — biraz daha hacimli
   16: '🥑',  // Avokado
-  17: '🧅',  // Soğan
-  18: '🍠',  // Tatlı patates
-  19: '🥭',  // Mango
-  20: '🍌',  // Muz
-  21: '🍎',  // Nar
-  22: '🥭',  // Papaya
-  23: '🍊',  // Greyfurt
-  24: '🍈',  // Kavun
-  25: '🥦',  // Karnıbahar
-  26: '🥬',  // Lahana
-  27: '🥬',  // Şalgam
-  28: '🍆',  // Patlıcan
-  29: '🎃',  // Bal kabağı
-  30: '🥒',  // Salatalık
-  31: '🥥',  // Hindistan cevizi
-  32: '🥒',  // Kabak
-  33: '🍈',  // Durian
-  34: '🎃',  // Tatlı kabak
-  35: '🥥',  // Kokonat (hindistan cevizi)
-  36: '🍈',  // Tatlı kavun
-  37: '🍈',  // Kış kavunu
-  38: '🎃',  // Kestane kabağı
-  39: '🍉',  // Karpuz
-  40: '🍉',  // Jack meyvesi
+  17: '🍐',  // Armut — aşağıya genişleyen şekil
+  18: '🧅',  // Soğan — yuvarlak ve katmanlı
+  19: '🥭',  // Mango — egzotik, daha büyük
+  20: '🍌',  // Muz — boy uzuyor
+  21: '🥕',  // Havuç — boy uzunluğu devam ediyor
+  22: '🥔',  // Patates — hacimli ve tombul
+  23: '🍅',  // Domates — büyük ve sulu
+  24: '🌽',  // Mısır — boy iyice uzadı
+  25: '🥦',  // Brokoli
+  26: '🥬',  // Marul / yeşillik — katlanan hacim
+
+  // ── 3. Trimester: İyice Ağırlaşan Büyük Meyve ve Sebzeler ───────
+  27: '🫑',  // Dolmalık biber — geniş ve içi dolu
+  28: '🍆',  // Patlıcan — uzun ve iri
+  29: '🥥',  // Hindistan cevizi — sert ve büyük
+  30: '🥒',  // Salatalık — uzunluk belirginleşiyor
+  31: '🍍',  // Ananas — büyük ve heybetli
+  32: '🍊',  // Mandalina / portakal — büyük narenciye
+  33: '🍈',  // Kavun — iri ve yuvarlak
+  34: '🍇',  // Üzüm salkımı — büyük hacim
+  35: '🥔',  // Büyük patates
+  36: '🥬',  // Büyük lahana demeti
+  37: '🌽',  // Uzun mısır koçanı
+  38: '🎃',  // Bal kabağı — büyük ve ağır
+  39: '🍉',  // Karpuz dilimi
+  40: '🍉',  // Karpuz — doğuma hazır, en büyük
 };
 
 /// Verilen gebelik haftasının meyve/sebze emojisini döndürür.

@@ -13,6 +13,7 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/cycle_provider.dart';
+import '../../widgets/pregnancy/baby_development_card.dart';
 
 // Lottie kare haritası: [haftaStart, haftaEnd, frameStart, frameEnd]
 const List<List<int>> _weekStages = [
@@ -178,143 +179,153 @@ class _GardenScreenState extends State<GardenScreen>
     final locked = !provider.canTapGarden;
 
     return SafeArea(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Başlık ────────────────────────────────────────────────────
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
-            child: Text(
-              'Büyüme Bahçem',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
-                color: cs.onSurface,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.only(bottom: 24),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Başlık ──────────────────────────────────────────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+              child: Text(
+                'Büyüme Bahçem',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  color: cs.onSurface,
+                ),
               ),
             ),
-          ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          // ── Hafta + trimester (yeşil) ──────────────────────────────
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                const Icon(Icons.eco, size: 14, color: green),
-                const SizedBox(width: 6),
-                Text(
-                  '$week. hafta',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: green,
+            // ── Hafta + trimester (yeşil) ────────────────────────────
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  const Icon(Icons.eco, size: 14, color: green),
+                  const SizedBox(width: 6),
+                  Text(
+                    '$week. hafta',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: green,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                Container(
-                    width: 1,
-                    height: 12,
-                    color: green.withValues(alpha: 0.35)),
-                const SizedBox(width: 10),
-                Text(
-                  _trimesterLabel(week),
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: green.withValues(alpha: 0.8),
+                  const SizedBox(width: 10),
+                  Container(
+                      width: 1,
+                      height: 12,
+                      color: green.withValues(alpha: 0.35)),
+                  const SizedBox(width: 10),
+                  Text(
+                    _trimesterLabel(week),
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: green.withValues(alpha: 0.8),
+                    ),
                   ),
-                ),
-                const Spacer(),
-                // Kilit durumu
-                if (locked)
-                  Row(
-                    children: [
-                      const Icon(Icons.lock_outline,
-                          size: 13, color: Color(0xFF7C3AED)),
-                      const SizedBox(width: 4),
-                      Text(
-                        '${provider.gardenCooldownDays}g kaldı',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF7C3AED),
-                          fontWeight: FontWeight.w600,
+                  const Spacer(),
+                  if (locked)
+                    Row(
+                      children: [
+                        const Icon(Icons.lock_outline,
+                            size: 13, color: Color(0xFF7C3AED)),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${provider.gardenCooldownDays}g kaldı',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF7C3AED),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // ── Ağaç — dokunulabilir ────────────────────────────────
+            GestureDetector(
+              onTap: () => _onTap(context, provider),
+              child: Stack(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: screenH * 0.45,
+                    margin: const EdgeInsets.symmetric(horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: bgColor,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: RepaintBoundary(
+                      child: Lottie.asset(
+                        'assets/animations/tree_transparent.json',
+                        controller: _tree,
+                        fit: BoxFit.contain,
+                        onLoaded: (comp) {
+                          _tree.duration = comp.duration;
+                          _tree.value = _valueForWeek(week);
+                          _displayedWeek = week;
+                          setState(() => _ready = true);
+                        },
+                        errorBuilder: (ctx, err, st) => const Center(
+                          child: Icon(Icons.park_outlined,
+                              size: 80, color: green),
                         ),
                       ),
-                    ],
-                  ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // ── Ağaç — ekranın yarısı, dokunulabilir ──────────────────
-          GestureDetector(
-            onTap: () => _onTap(context, provider),
-            child: Stack(
-              children: [
-                Container(
-                  width: double.infinity,
-                  height: screenH * 0.5,
-                  margin: const EdgeInsets.symmetric(horizontal: 16),
-                  decoration: BoxDecoration(
-                    color: bgColor,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: RepaintBoundary(
-                    child: Lottie.asset(
-                      'assets/animations/tree_transparent.json',
-                      controller: _tree,
-                      fit: BoxFit.contain,
-                      onLoaded: (comp) {
-                        _tree.duration = comp.duration;
-                        _tree.value = _valueForWeek(week);
-                        _displayedWeek = week;
-                        setState(() => _ready = true);
-                      },
-                      errorBuilder: (ctx, err, st) => const Center(
-                        child: Icon(Icons.park_outlined,
-                            size: 80, color: green),
-                      ),
                     ),
                   ),
-                ),
-                // Kilit ikonu overlay
-                if (locked)
-                  Positioned(
-                    right: 28,
-                    top: 12,
-                    child: Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF7C3AED).withValues(alpha: 0.12),
-                        shape: BoxShape.circle,
+                  if (locked)
+                    Positioned(
+                      right: 28,
+                      top: 12,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color:
+                              const Color(0xFF7C3AED).withValues(alpha: 0.12),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.lock_outline,
+                            size: 16, color: Color(0xFF7C3AED)),
                       ),
-                      child: const Icon(Icons.lock_outline,
-                          size: 16, color: Color(0xFF7C3AED)),
                     ),
-                  ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 14),
-
-          // ── Dokunma ipucu ──────────────────────────────────────────
-          Center(
-            child: Text(
-              locked
-                  ? '${provider.gardenCooldownDays} gün sonra tekrar büyütebilirsin'
-                  : 'Ağaca dokun, büyüsün 🌱',
-              style: TextStyle(
-                fontSize: 12,
-                color: cs.onSurface.withValues(alpha: 0.45),
-                fontStyle: FontStyle.italic,
+                ],
               ),
             ),
-          ),
-        ],
+
+            const SizedBox(height: 10),
+
+            // ── Dokunma ipucu ────────────────────────────────────────
+            Center(
+              child: Text(
+                locked
+                    ? '${provider.gardenCooldownDays} gün sonra tekrar büyütebilirsin'
+                    : 'Ağaca dokun, büyüsün 🌱',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: cs.onSurface.withValues(alpha: 0.45),
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // ── Bebeğin Gelişimi kartı ───────────────────────────────
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: BabyDevelopmentCard(),
+            ),
+          ],
+        ),
       ),
     );
   }
