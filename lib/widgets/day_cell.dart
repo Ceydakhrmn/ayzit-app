@@ -18,6 +18,9 @@ class DayCell extends StatelessWidget {
   /// Hamile modunda gün altında gösterilen kilometre taşı noktaları (en fazla 3).
   final List<Color> dots;
 
+  /// Sağ üst köşede küçük emoji rozeti (SAT, TDT, milestone için).
+  final String? badge;
+
   const DayCell({
     super.key,
     required this.label,
@@ -28,6 +31,7 @@ class DayCell extends StatelessWidget {
     this.isSelected = false,
     this.onTap,
     this.dots = const [],
+    this.badge,
   });
 
   @override
@@ -83,6 +87,22 @@ class DayCell extends StatelessWidget {
                         decoration: BoxDecoration(shape: BoxShape.circle, color: c),
                       ),
                   ],
+                ),
+              ),
+            // Sağ üst rozet (SAT / TDT / milestone emoji) — kontrast kabarcık
+            if (badge != null && !isOtherMonth)
+              Positioned(
+                top: 1,
+                right: 1,
+                child: Container(
+                  padding: const EdgeInsets.all(1),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.black.withValues(alpha: 0.45)
+                        : Colors.white.withValues(alpha: 0.80),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(badge!, style: const TextStyle(fontSize: 11)),
                 ),
               ),
           ],

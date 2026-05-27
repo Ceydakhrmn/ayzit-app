@@ -11,6 +11,7 @@ import '../widgets/mood_card.dart';
 import '../widgets/cycle_summary_card.dart';
 import '../widgets/pregnancy/appointments_card.dart';
 import '../widgets/pregnancy/important_days_card.dart';
+import '../widgets/pregnancy/pregnancy_calculator_card.dart';
 
 void showLegendDialog(BuildContext context) {
   showDialog(
@@ -274,7 +275,7 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 12),
                   _symptomButton(context),
                   const SizedBox(height: 16),
-                  const NoteCard(),
+                  const PregnancyCalculatorCard(),
                   const SizedBox(height: 20),
                 ]
                 // ── Regl / hamile kalma modu ──

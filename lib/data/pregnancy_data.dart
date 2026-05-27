@@ -677,23 +677,31 @@ enum MilestoneCategory {
   test,
   organ,
   heartbeat,
+  prenatalTest, // İkili, üçlü, OGTT vb. tarama testleri
 }
 
 extension MilestoneCategoryX on MilestoneCategory {
   Color get color {
     switch (this) {
-      case MilestoneCategory.folicAcid:
-        return const Color(0xFFEC4899);
-      case MilestoneCategory.fertilization:
-        return const Color(0xFF3B82F6);
-      case MilestoneCategory.implantation:
-        return const Color(0xFFE11D48);
-      case MilestoneCategory.test:
-        return const Color(0xFF9333EA);
-      case MilestoneCategory.organ:
-        return const Color(0xFF14B8A6);
-      case MilestoneCategory.heartbeat:
-        return const Color(0xFFF97316);
+      case MilestoneCategory.folicAcid:    return const Color(0xFFEC4899);
+      case MilestoneCategory.fertilization:return const Color(0xFF3B82F6);
+      case MilestoneCategory.implantation: return const Color(0xFFE11D48);
+      case MilestoneCategory.test:         return const Color(0xFF9333EA);
+      case MilestoneCategory.organ:        return const Color(0xFF14B8A6);
+      case MilestoneCategory.heartbeat:    return const Color(0xFFF97316);
+      case MilestoneCategory.prenatalTest: return const Color(0xFF0369A1);
+    }
+  }
+
+  String get emoji {
+    switch (this) {
+      case MilestoneCategory.folicAcid:    return '💊';
+      case MilestoneCategory.fertilization:return '🥚';
+      case MilestoneCategory.implantation: return '🌱';
+      case MilestoneCategory.test:         return '🔬';
+      case MilestoneCategory.organ:        return '🫀';
+      case MilestoneCategory.heartbeat:    return '💓';
+      case MilestoneCategory.prenatalTest: return '🧪';
     }
   }
 }
@@ -763,6 +771,99 @@ const List<PregnancyMilestone> kMilestones = [
     startDayOffset: 38,
     endDayOffset: 44,
   ),
+
+  // ── Prenatal tarama testleri ─────────────────────────────────────────
+  PregnancyMilestone(
+    title: 'İlk trimester ultrason',
+    description:
+        'Bebeğin canlılığı, kalp atışı ve gebelik haftası doğrulanır. '
+        'Baş-popo mesafesi (CRL) ölçülür. 6–10. hafta.',
+    category: MilestoneCategory.prenatalTest,
+    startDayOffset: 35,   // 6. hafta
+    endDayOffset: 69,     // 10. hafta sonu
+  ),
+  PregnancyMilestone(
+    title: 'Kan testleri (1. grup)',
+    description:
+        'Tam kan sayımı (CBC), kan grubu & Rh, indirekt Coombs, '
+        'rubella IgG, toksoplazmoz, CMV, HIV, HBsAg, HCV, VDRL, '
+        'idrar kültürü, TSH. 6–12. hafta.',
+    category: MilestoneCategory.prenatalTest,
+    startDayOffset: 35,   // 6. hafta
+    endDayOffset: 84,     // 12. hafta sonu
+  ),
+  PregnancyMilestone(
+    title: 'İkili tarama testi',
+    description:
+        'PAPP-A, serbest β-hCG ve ense saydamlığı (NT) ölçümü. '
+        'Down sendromu ve diğer kromozom anomalileri taranır. 11–14. hafta.',
+    category: MilestoneCategory.prenatalTest,
+    startDayOffset: 70,   // 11. hafta
+    endDayOffset: 97,     // 14. hafta sonu
+  ),
+  PregnancyMilestone(
+    title: 'NIPT (Hücre dışı DNA)',
+    description:
+        'Anneden alınan kandan Down sendromu ve diğer trizomiler taranır. '
+        'En ideal dönem 10–13. hafta.',
+    category: MilestoneCategory.prenatalTest,
+    startDayOffset: 63,   // 10. hafta
+    endDayOffset: 90,     // 13. hafta sonu
+  ),
+  PregnancyMilestone(
+    title: 'Üçlü / Dörtlü tarama',
+    description:
+        'AFP, hCG, estriol (ve inhibin A) ölçülür. '
+        'Nöral tüp defektleri ve kromozom anomalileri taranır. 15–18. hafta.',
+    category: MilestoneCategory.prenatalTest,
+    startDayOffset: 98,   // 15. hafta
+    endDayOffset: 125,    // 18. hafta sonu
+  ),
+  PregnancyMilestone(
+    title: 'Detaylı ultrason (Anomali taraması)',
+    description:
+        'Bebeğin tüm organları, yapısal anomaliler ve cinsiyet incelenir. '
+        '18–22. hafta.',
+    category: MilestoneCategory.prenatalTest,
+    startDayOffset: 119,  // 18. hafta
+    endDayOffset: 153,    // 22. hafta sonu
+  ),
+  PregnancyMilestone(
+    title: 'Şeker yükleme testi (OGTT)',
+    description:
+        '75 g oral glikoz tolerans testi. Gestasyonel diyabet taranır. '
+        '24–28. hafta.',
+    category: MilestoneCategory.prenatalTest,
+    startDayOffset: 161,  // 24. hafta
+    endDayOffset: 196,    // 28. hafta sonu
+  ),
+  PregnancyMilestone(
+    title: 'Anti-D & 2. Rh taraması',
+    description:
+        'Rh(-) annelere Anti-D immünoglobulin uygulanır. '
+        'İkinci Rh antikor taraması yapılır. 28. hafta.',
+    category: MilestoneCategory.prenatalTest,
+    startDayOffset: 189,  // 28. hafta
+    endDayOffset: 196,
+  ),
+  PregnancyMilestone(
+    title: '3. Trimester ultrason',
+    description:
+        'Fetal biyometri, amniyon sıvı miktarı ve bebeğin büyümesi '
+        'değerlendirilir. 32–38. hafta.',
+    category: MilestoneCategory.prenatalTest,
+    startDayOffset: 217,  // 32. hafta
+    endDayOffset: 265,    // 38. hafta sonu
+  ),
+  PregnancyMilestone(
+    title: 'NST (Non-stres test)',
+    description:
+        'Bebeğin kalp atış hızı ve hareketleri izlenir. '
+        '36. haftadan itibaren rutin uygulanır.',
+    category: MilestoneCategory.prenatalTest,
+    startDayOffset: 245,  // 36. hafta
+    endDayOffset: 280,
+  ),
 ];
 
 List<PregnancyMilestone> milestonesForDate(DateTime date, DateTime? lmp) {
@@ -775,12 +876,136 @@ List<PregnancyMilestone> milestonesForDate(DateTime date, DateTime? lmp) {
       .toList();
 }
 
+/// Verilen 7 günlük satır aralığında BAŞLAYAN milestone'ları döndürür.
+/// Takvim hafta-etiket bandı için kullanılır.
+List<PregnancyMilestone> milestonesStartingInRow(
+    DateTime rowStart, DateTime? lmp) {
+  if (lmp == null) return const [];
+  final d0 = DateTime(lmp.year, lmp.month, lmp.day);
+  final rowStartOffset = rowStart.difference(d0).inDays;
+  final rowEndOffset = rowStartOffset + 6;
+  return kMilestones
+      .where((m) =>
+          m.startDayOffset >= rowStartOffset &&
+          m.startDayOffset <= rowEndOffset)
+      .toList();
+}
+
 int? pregnancyWeekForDate(DateTime date, DateTime? lmp) {
   if (lmp == null) return null;
   final d0 = DateTime(lmp.year, lmp.month, lmp.day);
   final d1 = DateTime(date.year, date.month, date.day);
   final days = d1.difference(d0).inDays;
-  if (days < 0) return null;
+  if (days < 0 || days > 280) return null; // SAT öncesi veya 40. hafta sonrası → işaretsiz
   final week = (days ~/ 7) + 1;
   return week.clamp(1, 40);
+}
+
+// ─────────────────────────────────────────────
+// Hafta olayları (takvim milestone etiketleri)
+// ─────────────────────────────────────────────
+
+class WeekEvent {
+  final int week;
+  final String emoji;
+  final String title;
+  final String detail;
+  final Color color;
+
+  const WeekEvent({
+    required this.week,
+    required this.emoji,
+    required this.title,
+    required this.detail,
+    required this.color,
+  });
+}
+
+const List<WeekEvent> kWeekEvents = [
+  // ── Erken gebelik ─────────────────────────────────────────────────────
+  WeekEvent(week: 2,  emoji: '🌸', title: 'Yumurtlama dönemi',      detail: 'Yumurtalık yumurtayı serbest bırakmaya hazırlanıyor. Döllenme için en uygun dönem yaklaşıyor.',           color: Color(0xFFDB2777)),
+  WeekEvent(week: 3,  emoji: '🥚', title: 'Yumurtlama & Döllenme', detail: 'Yumurtlama gerçekleşiyor (SAT\'tan ~14 gün sonra). Sperm ile buluşursa döllenme başlar — yeni bir hayat!', color: Color(0xFFEA580C)),
+  WeekEvent(week: 4,  emoji: '🌱', title: 'Rahme tutunma',          detail: 'Döllenmiş yumurta rahim duvarına tutunuyor. hCG hormonu salgılanmaya başladı.',                            color: Color(0xFFE11D48)),
+  WeekEvent(week: 5,  emoji: '🔬', title: 'Test pozitif!',          detail: 'İlk adet gecikmesi bu hafta. Ev gebelik testi artık pozitif sonuç verebilir!',                             color: Color(0xFF7C3AED)),
+  WeekEvent(week: 6,  emoji: '💓', title: 'İlk kalp atışı',         detail: 'Bebeğin minik kalbi atmaya başlıyor — ultrasonda duyulabilir!',                                            color: Color(0xFFF97316)),
+  WeekEvent(week: 8,  emoji: '🫀', title: 'Tüm organlar başladı',   detail: 'Tüm hayati organların temeli bu haftada atılıyor.',                                                         color: Color(0xFF14B8A6)),
+  WeekEvent(week: 10, emoji: '👶', title: 'Fetüs dönemi',           detail: 'Artık embriyo değil, fetüs! Yüz hatları belirginleşiyor.',                                                  color: Color(0xFF9333EA)),
+  WeekEvent(week: 12, emoji: '🎉', title: '1. Trimester sonu',      detail: 'Düşük riski önemli ölçüde azaldı. İkili tarama testi zamanı.',                                             color: Color(0xFF7C3AED)),
+  WeekEvent(week: 14, emoji: '🌟', title: '2. Trimester başladı',   detail: 'En rahat dönem başlıyor. Mide bulantısı genellikle geçer.',                                                 color: Color(0xFF0891B2)),
+  WeekEvent(week: 16, emoji: '👂', title: 'Bebek duyuyor',          detail: 'Bebek sesleri duyabilir — ona şarkı söyle!',                                                                color: Color(0xFF059669)),
+  WeekEvent(week: 18, emoji: '🤸', title: 'İlk hareketler',         detail: 'İlk kez hamile annelerde bebek hareketleri bu hafta hissedilebilir.',                                       color: Color(0xFFD97706)),
+  WeekEvent(week: 20, emoji: '🩺', title: 'Detaylı ultrason',       detail: 'Cinsiyet öğrenilebilir! Anomali taraması ve detaylı ultrason zamanı.',                                      color: Color(0xFF3B82F6)),
+  WeekEvent(week: 24, emoji: '🏥', title: 'Yaşayabilirlik eşiği',  detail: 'Bu haftadan itibaren bebek yoğun bakım desteğiyle hayatta kalabilir.',                                      color: Color(0xFF6366F1)),
+  WeekEvent(week: 28, emoji: '📅', title: '3. Trimester başladı',   detail: 'Son dönem! Doğum hazırlıklarına başlama zamanı.',                                                           color: Color(0xFFEC4899)),
+  WeekEvent(week: 32, emoji: '😴', title: 'Uyku-uyanıklık döngüsü',detail: 'Bebek düzenli uyku ve uyanıklık döngüleri oluşturdu.',                   color: Color(0xFF8B5CF6)),
+  WeekEvent(week: 36, emoji: '🔜', title: 'Erken term',             detail: 'Bebek "erken term" kabul edilir. Doğum çantası hazır olmalı!',           color: Color(0xFF0D9488)),
+  WeekEvent(week: 37, emoji: '✅', title: 'Tam term',               detail: 'Bebek "tam term" — doğum her an başlayabilir!',                          color: Color(0xFF16A34A)),
+  WeekEvent(week: 40, emoji: '🎊', title: 'Tahmini doğum günü',     detail: 'Tahmini doğum tarihi! Bebeklerin %4–5\'i bu tarihte doğar.',             color: Color(0xFFDC2626)),
+];
+
+/// Verilen tarih bir hafta olayının ilk günüyse o WeekEvent'i döndürür.
+WeekEvent? weekEventForDate(DateTime date, DateTime? lmp) {
+  if (lmp == null) return null;
+  final d0 = DateTime(lmp.year, lmp.month, lmp.day);
+  final d1 = DateTime(date.year, date.month, date.day);
+  final days = d1.difference(d0).inDays;
+  if (days < 0 || days % 7 != 0) return null; // sadece haftanın ilk günü
+  final week = (days ~/ 7) + 1;
+  try {
+    return kWeekEvents.firstWhere((e) => e.week == week);
+  } catch (_) {
+    return null;
+  }
+}
+
+// ─────────────────────────────────────────────
+// Burç hesaplama
+// ─────────────────────────────────────────────
+
+class ZodiacInfo {
+  final String name;
+  final String emoji;
+  final String dateRange;
+
+  const ZodiacInfo(this.name, this.emoji, this.dateRange);
+}
+
+ZodiacInfo zodiacForDate(DateTime date) {
+  final m = date.month;
+  final d = date.day;
+
+  if ((m == 3 && d >= 21) || (m == 4 && d <= 19)) {
+    return const ZodiacInfo('Koç',      '♈', '21 Mar – 19 Nis');
+  }
+  if ((m == 4 && d >= 20) || (m == 5 && d <= 20)) {
+    return const ZodiacInfo('Boğa',     '♉', '20 Nis – 20 May');
+  }
+  if ((m == 5 && d >= 21) || (m == 6 && d <= 20)) {
+    return const ZodiacInfo('İkizler',  '♊', '21 May – 20 Haz');
+  }
+  if ((m == 6 && d >= 21) || (m == 7 && d <= 22)) {
+    return const ZodiacInfo('Yengeç',   '♋', '21 Haz – 22 Tem');
+  }
+  if ((m == 7 && d >= 23) || (m == 8 && d <= 22)) {
+    return const ZodiacInfo('Aslan',    '♌', '23 Tem – 22 Ağu');
+  }
+  if ((m == 8 && d >= 23) || (m == 9 && d <= 22)) {
+    return const ZodiacInfo('Başak',    '♍', '23 Ağu – 22 Eyl');
+  }
+  if ((m == 9 && d >= 23) || (m == 10 && d <= 22)) {
+    return const ZodiacInfo('Terazi',   '♎', '23 Eyl – 22 Eki');
+  }
+  if ((m == 10 && d >= 23) || (m == 11 && d <= 21)) {
+    return const ZodiacInfo('Akrep',    '♏', '23 Eki – 21 Kas');
+  }
+  if ((m == 11 && d >= 22) || (m == 12 && d <= 21)) {
+    return const ZodiacInfo('Yay',      '♐', '22 Kas – 21 Ara');
+  }
+  if ((m == 12 && d >= 22) || (m == 1 && d <= 19)) {
+    return const ZodiacInfo('Oğlak',   '♑', '22 Ara – 19 Oca');
+  }
+  if ((m == 1 && d >= 20) || (m == 2 && d <= 18)) {
+    return const ZodiacInfo('Kova',     '♒', '20 Oca – 18 Şub');
+  }
+  return const ZodiacInfo('Balık',     '♓', '19 Şub – 20 Mar');
 }

@@ -1,8 +1,12 @@
 // =============================================
 // widgets/calendar_grid.dart
 // Takvim ızgarasını çizen ana widget.
-// Hamile takip modunda: faz renkleri yerine kilometre taşı noktaları
-// gösterir ve her takvim satırının altına "N. Hafta" etiketi koyar.
+//
+// Normal mod  : faz renkleri (regl/ovulasyon/doğurganlık).
+// Hamile mod  :
+//   • SAT yoksa → güne dokununca SAT seç dialogu
+//   • SAT varsa  → trimester arka planları, SAT 🌸 rozeti, TDT ⭐ rozeti,
+//                  hafta olayı emoji rozeti, gün bilgi sheet'i
 // =============================================
 
 import 'package:flutter/material.dart';
@@ -12,6 +16,7 @@ import '../providers/appointment_provider.dart';
 import '../providers/cycle_provider.dart';
 import '../utils/phase_colors.dart';
 import 'day_cell.dart';
+import 'pregnancy/pregnancy_day_sheet.dart';
 
 /// Takvimde randevu içeren günlerin nokta rengi.
 const Color _appointmentDot = Color(0xFF3F51B5);
@@ -34,8 +39,12 @@ class CalendarGrid extends StatelessWidget {
     final trailing = _trailingDays(startOffset, daysInMonth);
     final rowCount = (startOffset + daysInMonth + trailing) ~/ 7;
 
+    // Hamile mod + SAT yok → yönlendirme banner'ı
+    final showSatBanner = isPregnancy && lmp == null;
+
     return Column(
       children: [
+        if (showSatBanner) _buildSatBanner(context),
         _buildWeekdayHeader(context),
         const SizedBox(height: 8),
         for (int r = 0; r < rowCount; r++) ...[
@@ -46,6 +55,38 @@ class CalendarGrid extends StatelessWidget {
           const SizedBox(height: 6),
         ],
       ],
+    );
+  }
+
+  // ── SAT seçim yönlendirme banner'ı ─────────────────────────────────────
+  Widget _buildSatBanner(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF7C3AED).withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF7C3AED).withValues(alpha: 0.22),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Text('🌸', style: TextStyle(fontSize: 18)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Son adet tarihinizi seçmek için takvimde bir güne dokunun.',
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -109,27 +150,69 @@ class CalendarGrid extends StatelessWidget {
     final isSelected = provider.selectedDay != null &&
         _isSameDay(provider.selectedDay!, date);
 
-    // Hamile takip modunda trimester arka plan rengi + kilometre taşı noktaları.
+    // ── Hamile mod ───────────────────────────────────────────────────
     if (isPregnancy) {
-      final week = pregnancyWeekForDate(date, lmp);
       final isDark = Theme.of(context).brightness == Brightness.dark;
+
+      // SAT seçilmemişse: herhangi geçmiş/bugün güne dokununca SAT dialog
+      if (lmp == null) {
+        final isFuture = date.isAfter(DateTime.now());
+        return DayCell(
+          label: '${date.day}',
+          isToday: isToday,
+          isSelected: isSelected,
+          onTap: isFuture
+              ? null
+              : () => _showSetSatDialog(context, date, provider),
+        );
+      }
+
+      // SAT var — tam hamilelik görünümü
+      final isSat = _isSameDay(date, lmp);
+      final dueDate = lmp.add(const Duration(days: 280));
+      final isDue = _isSameDay(date, dueDate);
+      final week = pregnancyWeekForDate(date, lmp);
       final tStyle = trimesterStyle(week, isDark: isDark);
 
-      final dots = milestonesForDate(date, lmp).map((m) => m.color).toList();
-      if (appts.hasAppointmentOn(date)) {
-        dots.add(_appointmentDot);
+      // Renkler
+      Color? bg = tStyle?.background;
+      Color? fg = tStyle?.textColor;
+      if (isSat) {
+        bg = const Color(0xFFE11D48).withValues(alpha: isDark ? 0.55 : 0.75);
+        fg = Colors.white;
+      } else if (isDue) {
+        bg = const Color(0xFFDC2626).withValues(alpha: isDark ? 0.6 : 0.8);
+        fg = Colors.white;
       }
+
+      // Rozet
+      String? badge;
+      if (isSat) {
+        badge = '🌸';
+      } else if (isDue) {
+        badge = '⭐';
+      } else {
+        final ev = weekEventForDate(date, lmp);
+        if (ev != null) badge = ev.emoji;
+      }
+
+      // Noktalar
+      final dots = milestonesForDate(date, lmp).map((m) => m.color).toList();
+      if (appts.hasAppointmentOn(date)) dots.add(_appointmentDot);
+
       return DayCell(
         label: '${date.day}',
         isToday: isToday,
         isSelected: isSelected,
-        backgroundColor: tStyle?.background,
-        textColor: tStyle?.textColor,
+        backgroundColor: bg,
+        textColor: fg,
         dots: dots,
-        onTap: () => provider.selectDay(date),
+        badge: badge,
+        onTap: () => _handlePregnancyTap(context, date, lmp, dueDate, provider),
       );
     }
 
+    // ── Normal mod ───────────────────────────────────────────────────
     final style = phaseStyle(provider.phaseOf(date));
     return DayCell(
       label: '${date.day}',
@@ -141,7 +224,93 @@ class CalendarGrid extends StatelessWidget {
     );
   }
 
-  /// Satırın gebelik haftası etiketi ("N. Hafta"). LMP yoksa boş.
+  // ── SAT seç onay dialogu ────────────────────────────────────────────────
+  void _showSetSatDialog(
+      BuildContext context, DateTime date, CycleProvider provider) {
+    const months = [
+      'Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
+      'Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık',
+    ];
+    final label = '${date.day} ${months[date.month - 1]} ${date.year}';
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Text('🌸', style: TextStyle(fontSize: 20)),
+            SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                'Son Adet Tarihi',
+                style: TextStyle(
+                    fontSize: 16, fontWeight: FontWeight.w700),
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          '$label tarihini gebelik başlangıcı (SAT) olarak ayarlamak istiyor musunuz?\n\n'
+          'Tahmini doğum tarihi otomatik hesaplanacak.',
+          style: const TextStyle(fontSize: 14, height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('İptal'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              provider.updatePregnancyStartDate(date);
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF7C3AED),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+            ),
+            child: const Text('Ayarla'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Gün detay sheet (SAT seçiliyse) ────────────────────────────────────
+  void _handlePregnancyTap(
+    BuildContext context,
+    DateTime date,
+    DateTime lmp,
+    DateTime dueDate,
+    CycleProvider provider,
+  ) {
+    provider.selectDay(date);
+    // Tarih SAT öncesiyse sheet açma
+    final d0 = DateTime(lmp.year, lmp.month, lmp.day);
+    final d1 = DateTime(date.year, date.month, date.day);
+    if (d1.isBefore(d0)) return;
+    // 40. haftadan fazla da gösterme
+    final days = d1.difference(d0).inDays;
+    if (days > 280) return;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => FractionallySizedBox(
+        heightFactor: 0.65,
+        child: PregnancyDaySheet(
+          date: date,
+          lmp: lmp,
+          dueDate: dueDate,
+        ),
+      ),
+    );
+  }
+
+  /// Satırın hafta etiketi + varsa önemli olay bantları.
   Widget _buildWeekLabel(
     BuildContext context,
     DateTime firstDay,
@@ -149,26 +318,100 @@ class CalendarGrid extends StatelessWidget {
     int row,
     DateTime? lmp,
   ) {
-    // Satırın ortasındaki günü (Perşembe) temsilci olarak al.
-    final midDate =
-        firstDay.add(Duration(days: row * 7 - startOffset + 3));
+    final firstDateOfRow =
+        firstDay.add(Duration(days: row * 7 - startOffset));
+    final midDate = firstDateOfRow.add(const Duration(days: 3));
     final week = pregnancyWeekForDate(midDate, lmp);
     if (week == null) return const SizedBox.shrink();
+
+    // WeekEvent'ler (hafta-bazlı)
+    WeekEvent? rowWeekEvent;
+    for (int d = 0; d < 7; d++) {
+      final ev = weekEventForDate(
+          firstDateOfRow.add(Duration(days: d)), lmp);
+      if (ev != null) { rowWeekEvent = ev; break; }
+    }
+
+    // Bu satırda başlayan kMilestones
+    final startingMilestones =
+        milestonesStartingInRow(firstDateOfRow, lmp);
+
+    // İkisi de yoksa satır boş
+    if (rowWeekEvent == null && startingMilestones.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    // Tüm bantları listele
+    final bands = <Widget>[];
+
+    if (rowWeekEvent != null) {
+      bands.add(_eventBand(
+        rowWeekEvent.emoji,
+        '$week. Hafta · ${rowWeekEvent.title}',
+        rowWeekEvent.color,
+        isDark,
+      ));
+    }
+
+    for (final m in startingMilestones) {
+      // WeekEvent ile başlığı aynıysa tekrar gösterme
+      if (rowWeekEvent != null &&
+          m.title.toLowerCase() ==
+              rowWeekEvent.title.toLowerCase()) { continue; }
+      bands.add(_eventBand(
+        m.category.emoji,
+        m.title,
+        m.color,
+        isDark,
+      ));
+    }
+
+    if (bands.isEmpty) return const SizedBox.shrink();
+
     return Padding(
-      padding: const EdgeInsets.only(left: 6, top: 4),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          '$week. Hafta',
-          style: TextStyle(
-            fontSize: 10.5,
-            fontWeight: FontWeight.w600,
-            color: Theme.of(context)
-                .colorScheme
-                .onSurface
-                .withValues(alpha: 0.4),
-          ),
+      padding: const EdgeInsets.only(top: 3, bottom: 1),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: bands
+            .map((b) => Padding(
+                  padding: const EdgeInsets.only(bottom: 3),
+                  child: b,
+                ))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _eventBand(
+      String emoji, String label, Color color, bool isDark) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: isDark ? 0.2 : 0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: color.withValues(alpha: isDark ? 0.4 : 0.28),
         ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(emoji, style: const TextStyle(fontSize: 12)),
+          const SizedBox(width: 5),
+          Flexible(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+                color: color,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -100,15 +100,8 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
               // SOL %42 — bebek gelişim görseli
               Expanded(
                 flex: 42,
-                child: Container(
+                child: SizedBox(
                   height: 148,
-                  decoration: BoxDecoration(
-                    // Resimlerin doğal sıcak arka plan rengiyle uyum
-                    color: isDark
-                        ? const Color(0xFF3A2828)
-                        : const Color(0xFFF5DDD9),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(14),
                     child: AnimatedSwitcher(
@@ -269,45 +262,27 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
 
           const SizedBox(height: 14),
 
-          // ── Gelişim açıklaması ─────────────────────────────────────
-          Text(
-            info.summary,
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 12.5,
-              height: 1.4,
-              color: cs.onSurface.withValues(alpha: 0.78),
-            ),
+          // ── Bebek gelişimi ─────────────────────────────────────────
+          _DetailSection(
+            emoji: '👶',
+            title: 'Bebek Gelişimi',
+            text: info.summary,
+            color: const Color(0xFF9333EA),
+            isDark: isDark,
           ),
+
+          // ── Annedeki değişimler ────────────────────────────────────
           if (info.motherInfo.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            GestureDetector(
-              onTap: () => _openDetailSheet(context, week, info),
-              child: Row(
-                children: [
-                  const Text('💜', style: TextStyle(fontSize: 13)),
-                  const SizedBox(width: 5),
-                  Text(
-                    'Annedeki değişimler',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF9333EA).withValues(
-                          alpha: isDark ? 0.9 : 1.0),
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 16,
-                    color: const Color(0xFF9333EA).withValues(
-                        alpha: isDark ? 0.9 : 1.0),
-                  ),
-                ],
-              ),
+            const SizedBox(height: 10),
+            _DetailSection(
+              emoji: '💜',
+              title: 'Annedeki Değişimler',
+              text: info.motherInfo,
+              color: const Color(0xFFEC4899),
+              isDark: isDark,
             ),
           ],
+
           const SizedBox(height: 12),
 
           // ── 40 haftalık ilerleme çubuğu ───────────────────────────
@@ -359,54 +334,6 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
     );
   }
 
-  void _openDetailSheet(
-      BuildContext context, int week, PregnancyWeekInfo info) {
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      isScrollControlled: true,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.6,
-          maxChildSize: 0.92,
-          builder: (_, scrollController) => SingleChildScrollView(
-            controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '$week. Hafta',
-                  style: const TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.w800),
-                ),
-                const SizedBox(height: 16),
-                // ── Bebek gelişimi ─────────────────────────
-                _DetailSection(
-                  emoji: '👶',
-                  title: 'Bebek Gelişimi',
-                  text: info.summary,
-                  color: const Color(0xFF9333EA),
-                  isDark: isDark,
-                ),
-                const SizedBox(height: 14),
-                // ── Annedeki değişimler ────────────────────
-                _DetailSection(
-                  emoji: '💜',
-                  title: 'Annedeki Değişimler',
-                  text: info.motherInfo,
-                  color: const Color(0xFFEC4899),
-                  isDark: isDark,
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
 
   void _openWeekPicker(BuildContext context, int currentWeek) {
     showModalBottomSheet(
@@ -543,15 +470,19 @@ class _StatChip extends StatelessWidget {
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(icon, style: const TextStyle(fontSize: 13)),
           const SizedBox(width: 5),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w700,
-              color: cs.onSurface.withValues(alpha: 0.85),
+          Flexible(
+            child: Text(
+              label,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 11.5,
+                fontWeight: FontWeight.w700,
+                color: cs.onSurface.withValues(alpha: 0.85),
+              ),
             ),
           ),
         ],

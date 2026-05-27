@@ -197,7 +197,15 @@ class _GardenScreenState extends State<GardenScreen>
               ),
             ),
 
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
+
+            // ── Bebeğin Gelişimi kartı (üstte) ──────────────────────
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: BabyDevelopmentCard(),
+            ),
+
+            const SizedBox(height: 20),
 
             // ── Hafta + trimester (yeşil) ────────────────────────────
             Padding(
@@ -251,7 +259,7 @@ class _GardenScreenState extends State<GardenScreen>
 
             const SizedBox(height: 12),
 
-            // ── Ağaç — dokunulabilir ────────────────────────────────
+            // ── Ağaç — dokunulabilir (altta) ────────────────────────
             GestureDetector(
               onTap: () => _onTap(context, provider),
               child: Stack(
@@ -315,14 +323,6 @@ class _GardenScreenState extends State<GardenScreen>
                   fontStyle: FontStyle.italic,
                 ),
               ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // ── Bebeğin Gelişimi kartı ───────────────────────────────
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: BabyDevelopmentCard(),
             ),
           ],
         ),
