@@ -12,6 +12,7 @@ import '../widgets/cycle_summary_card.dart';
 import '../widgets/pregnancy/appointments_card.dart';
 import '../widgets/pregnancy/important_days_card.dart';
 import '../widgets/pregnancy/pregnancy_calculator_card.dart';
+import '../widgets/fertility/fertility_info_cards.dart';
 
 void showLegendDialog(BuildContext context) {
   showDialog(
@@ -341,6 +342,13 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   const CycleSummaryCard(),
                   const SizedBox(height: 20),
+                  // ── Hamile kalma modu ek bilgi kartları ──
+                  if (provider.appMode == AppMode.hamilleKalma) ...[
+                    const FertilityPrepCard(),
+                    const SizedBox(height: 12),
+                    const PregnancySymptomsCard(),
+                    const SizedBox(height: 20),
+                  ],
                 ],
               ],
             ),
