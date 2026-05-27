@@ -347,6 +347,39 @@ class HomeScreen extends StatelessWidget {
                     const FertilityPrepCard(),
                     const SizedBox(height: 12),
                     const PregnancySymptomsCard(),
+                    const SizedBox(height: 24),
+                    // Alternatif tedavi seçenekleri başlığı
+                    Row(children: [
+                      Expanded(
+                        child: Divider(
+                          color: const Color(0xFF7C3AED).withValues(alpha: 0.2),
+                          thickness: 1,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                        child: Text(
+                          'Doğal Yolla Olmazsa',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF7C3AED)
+                                .withValues(alpha: 0.6),
+                            letterSpacing: 0.4,
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Divider(
+                          color: const Color(0xFF7C3AED).withValues(alpha: 0.2),
+                          thickness: 1,
+                        ),
+                      ),
+                    ]),
+                    const SizedBox(height: 14),
+                    const IUIInfoCard(),
+                    const SizedBox(height: 12),
+                    const IVFInfoCard(),
                     const SizedBox(height: 20),
                   ],
                 ],
