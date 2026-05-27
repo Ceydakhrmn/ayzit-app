@@ -204,10 +204,122 @@ class _ChipButton extends StatelessWidget {
   }
 }
 
+// ── Hamile kalma alt-mod seçimi ─────────────────────────────────────────────
+
+enum _ConceptionMode { dogal, asilama, tupBebek }
+
+class _HamilleKalmaContent extends StatefulWidget {
+  const _HamilleKalmaContent();
+
+  @override
+  State<_HamilleKalmaContent> createState() => _HamilleKalmaContentState();
+}
+
+class _HamilleKalmaContentState extends State<_HamilleKalmaContent> {
+  _ConceptionMode _mode = _ConceptionMode.dogal;
+
+  static const _accent = Color(0xFF7C3AED);
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ── Soru başlığı ─────────────────────────────────────────────────
+        Text(
+          'Nasıl hamile kalmayı planlıyorsunuz?',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: cs.onSurface.withValues(alpha: 0.8),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // ── Üç seçenek ───────────────────────────────────────────────────
+        Row(
+          children: [
+            _chip(context, '🌸', 'Doğal', _ConceptionMode.dogal, isDark),
+            const SizedBox(width: 8),
+            _chip(context, '🔬', 'Aşılama', _ConceptionMode.asilama, isDark),
+            const SizedBox(width: 8),
+            _chip(context, '🧬', 'Tüp Bebek', _ConceptionMode.tupBebek, isDark),
+          ],
+        ),
+        const SizedBox(height: 20),
+        // ── Seçime göre içerik ────────────────────────────────────────────
+        if (_mode == _ConceptionMode.dogal) ...[
+          const FertilityPrepCard(),
+          const SizedBox(height: 12),
+          const PregnancySymptomsCard(),
+        ] else if (_mode == _ConceptionMode.asilama) ...[
+          const IUIInfoCard(),
+        ] else ...[
+          const IVFInfoCard(),
+        ],
+      ],
+    );
+  }
+
+  Widget _chip(
+    BuildContext context,
+    String emoji,
+    String label,
+    _ConceptionMode mode,
+    bool isDark,
+  ) {
+    final cs = Theme.of(context).colorScheme;
+    final isSelected = _mode == mode;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => setState(() => _mode = mode),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? _accent.withValues(alpha: isDark ? 0.28 : 0.1)
+                : cs.onSurface.withValues(alpha: isDark ? 0.06 : 0.04),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(
+              color: isSelected
+                  ? _accent.withValues(alpha: isDark ? 0.55 : 0.45)
+                  : cs.onSurface.withValues(alpha: 0.12),
+              width: isSelected ? 1.5 : 1,
+            ),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(emoji, style: const TextStyle(fontSize: 22)),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: isSelected
+                      ? _accent
+                      : cs.onSurface.withValues(alpha: 0.55),
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  /// Tam genişlikte "BELİRTİ GİR" butonu (her iki modda kullanılır).
+  /// Tam genişlikte "BELİRTİ GİR" butonu.
   Widget _symptomButton(BuildContext context) {
     return SizedBox(
       width: double.infinity,
@@ -227,6 +339,52 @@ class HomeScreen extends StatelessWidget {
             fontSize: 13,
             letterSpacing: 0.5,
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Regl başlat / bitir butonu.
+  Widget _periodButton(BuildContext context, CycleProvider provider) {
+    return ElevatedButton.icon(
+      onPressed: () {
+        if (provider.isPeriodActive) {
+          provider.endPeriod();
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Regl bitirildi!'),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        } else {
+          final selected = provider.selectedDay;
+          final startDate = selected ?? DateTime.now();
+          provider.startPeriod(startDate);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                selected != null
+                    ? '${startDate.day}/${startDate.month} tarihinden regl başlatıldı!'
+                    : 'Regl başlatıldı!',
+              ),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+      icon: const Icon(Icons.water_drop, size: 16),
+      label: Text(provider.isPeriodActive ? 'REGL BİTİR' : 'REGL BAŞLAT'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: const Color(0xFF7C3AED),
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        textStyle: const TextStyle(
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+          letterSpacing: 0.5,
         ),
       ),
     );
@@ -279,7 +437,24 @@ class HomeScreen extends StatelessWidget {
                   const PregnancyCalculatorCard(),
                   const SizedBox(height: 20),
                 ]
-                // ── Regl / hamile kalma modu ──
+                // ── Hamile kalma modu ──
+                else if (provider.appMode == AppMode.hamilleKalma) ...[
+                  const _HamilleKalmaContent(),
+                  const SizedBox(height: 20),
+                  _ActionChipRow(),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: _symptomButton(context)),
+                      const SizedBox(width: 10),
+                      Expanded(child: _periodButton(context, provider)),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  const CycleSummaryCard(),
+                  const SizedBox(height: 20),
+                ]
+                // ── Regl takip modu ──
                 else ...[
                   _ActionChipRow(),
                   const SizedBox(height: 12),
@@ -289,52 +464,7 @@ class HomeScreen extends StatelessWidget {
                     children: [
                       Expanded(child: _symptomButton(context)),
                       const SizedBox(width: 10),
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: () {
-                            if (provider.isPeriodActive) {
-                              provider.endPeriod();
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Regl bitirildi!'),
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
-                            } else {
-                              final selected = provider.selectedDay;
-                              final startDate = selected ?? DateTime.now();
-                              provider.startPeriod(startDate);
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    selected != null
-                                        ? '${startDate.day}/${startDate.month} tarihinden regl başlatıldı!'
-                                        : 'Regl başlatıldı!',
-                                  ),
-                                  duration: const Duration(seconds: 2),
-                                ),
-                              );
-                            }
-                          },
-                          icon: const Icon(Icons.water_drop, size: 16),
-                          label: Text(provider.isPeriodActive
-                              ? 'REGL BİTİR'
-                              : 'REGL BAŞLAT'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF7C3AED),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(24),
-                            ),
-                            textStyle: const TextStyle(
-                              fontWeight: FontWeight.w700,
-                              fontSize: 13,
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ),
-                      ),
+                      Expanded(child: _periodButton(context, provider)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -342,46 +472,6 @@ class HomeScreen extends StatelessWidget {
                   const SizedBox(height: 16),
                   const CycleSummaryCard(),
                   const SizedBox(height: 20),
-                  // ── Hamile kalma modu ek bilgi kartları ──
-                  if (provider.appMode == AppMode.hamilleKalma) ...[
-                    const FertilityPrepCard(),
-                    const SizedBox(height: 12),
-                    const PregnancySymptomsCard(),
-                    const SizedBox(height: 24),
-                    // Alternatif tedavi seçenekleri başlığı
-                    Row(children: [
-                      Expanded(
-                        child: Divider(
-                          color: const Color(0xFF7C3AED).withValues(alpha: 0.2),
-                          thickness: 1,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 10),
-                        child: Text(
-                          'Doğal Yolla Olmazsa',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF7C3AED)
-                                .withValues(alpha: 0.6),
-                            letterSpacing: 0.4,
-                          ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: const Color(0xFF7C3AED).withValues(alpha: 0.2),
-                          thickness: 1,
-                        ),
-                      ),
-                    ]),
-                    const SizedBox(height: 14),
-                    const IUIInfoCard(),
-                    const SizedBox(height: 12),
-                    const IVFInfoCard(),
-                    const SizedBox(height: 20),
-                  ],
                 ],
               ],
             ),
