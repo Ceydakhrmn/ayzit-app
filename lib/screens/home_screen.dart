@@ -7,7 +7,6 @@ import 'settings_screen.dart';
 import '../widgets/month_header.dart';
 import '../widgets/info_card.dart';
 import '../widgets/note_card.dart';
-import '../widgets/mood_card.dart';
 import '../widgets/cycle_summary_card.dart';
 import '../widgets/pregnancy/appointments_card.dart';
 import '../widgets/pregnancy/important_days_card.dart';
@@ -69,38 +68,6 @@ void showLegendDialog(BuildContext context) {
   );
 }
 
-void showMoodDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (ctx) => Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'Ruh Hali',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-            const MoodCard(),
-            const SizedBox(height: 8),
-            OutlinedButton(
-              onPressed: () => Navigator.pop(ctx),
-              style: OutlinedButton.styleFrom(
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24)),
-              ),
-              child: const Text('KAPAT'),
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
 class _LegendRow extends StatelessWidget {
   final Color? color;
   final String label;
@@ -140,65 +107,6 @@ class _LegendRow extends StatelessWidget {
           const SizedBox(width: 14),
           Expanded(child: Text(label, style: const TextStyle(fontSize: 14))),
         ],
-      ),
-    );
-  }
-}
-
-class _ActionChipRow extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        _ChipButton(
-          icon: Icons.emoji_emotions_outlined,
-          label: 'Ruh Halim',
-          onTap: () => showMoodDialog(context),
-        ),
-        const SizedBox(width: 8),
-        _ChipButton(
-          icon: Icons.info_outline,
-          label: 'Takvim Renkleri',
-          onTap: () => showLegendDialog(context),
-        ),
-      ],
-    );
-  }
-}
-
-class _ChipButton extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  const _ChipButton({required this.icon, required this.label, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(20),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3EFFB),
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: const Color(0xFF7C3AED).withValues(alpha: 0.25)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 16, color: const Color(0xFF7C3AED)),
-            const SizedBox(width: 5),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF7C3AED),
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -400,9 +308,15 @@ class HomeScreen extends StatelessWidget {
       children: [
         Container(
           color: Theme.of(context).colorScheme.surface,
-          padding: const EdgeInsets.fromLTRB(16, 6, 4, 6),
+          padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
           child: Row(
             children: [
+              IconButton(
+                icon: const Icon(Icons.palette_outlined,
+                    color: Color(0xFF7C3AED)),
+                tooltip: 'Takvim Renkleri',
+                onPressed: () => showLegendDialog(context),
+              ),
               const Spacer(),
               IconButton(
                 icon: const Icon(Icons.settings_outlined,
@@ -441,8 +355,6 @@ class HomeScreen extends StatelessWidget {
                 else if (provider.appMode == AppMode.hamilleKalma) ...[
                   const _HamilleKalmaContent(),
                   const SizedBox(height: 20),
-                  _ActionChipRow(),
-                  const SizedBox(height: 12),
                   Row(
                     children: [
                       Expanded(child: _symptomButton(context)),
@@ -456,8 +368,6 @@ class HomeScreen extends StatelessWidget {
                 ]
                 // ── Regl takip modu ──
                 else ...[
-                  _ActionChipRow(),
-                  const SizedBox(height: 12),
                   const InfoCard(),
                   const SizedBox(height: 12),
                   Row(
