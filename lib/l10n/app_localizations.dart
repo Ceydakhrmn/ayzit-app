@@ -925,6 +925,17 @@ abstract class AppLocalizations {
   String get emotionalLabel;
   String get saveBtn;
   String get symptomsSavedSnack;
+
+  // ── Common action buttons ─────────────────────────────────────────────────
+  String get deleteBtn;
+  String get editBtn;
+  String get reportBtn;
+  String get logoutBtn;
+  String get profileLabel;
+  String get settingsLabel;
+  String get editProfileLabel;
+  String get myPostsLabel;
+  String get dismissBtn;
 }
 
 extension AppLocalizationsX on AppLocalizations {

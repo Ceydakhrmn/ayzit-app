@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers/cycle_provider.dart';
 import '../../widgets/pregnancy/baby_development_card.dart';
 
@@ -98,20 +99,23 @@ class _GardenScreenState extends State<GardenScreen>
   }
 
   void _showLockedDialog(BuildContext context, int daysLeft) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Icon(Icons.lock_clock_outlined, color: Color(0xFF7C3AED)),
-            SizedBox(width: 8),
-            Text('Bu haftayı tamamladın!',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const Icon(Icons.lock_clock_outlined, color: Color(0xFF7C3AED)),
+            const SizedBox(width: 8),
+            Text(isEn ? 'Week complete!' : 'Bu haftayı tamamladın!',
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
           ],
         ),
         content: Text(
-          'Bahçen bu hafta büyüdü 🌱\n\nYeni hafta için $daysLeft gün kaldı.',
+          isEn
+              ? 'Your garden grew this week 🌱\n\n$daysLeft days until the next week.'
+              : 'Bahçen bu hafta büyüdü 🌱\n\nYeni hafta için $daysLeft gün kaldı.',
           style: const TextStyle(fontSize: 14, height: 1.5),
         ),
         actions: [
@@ -124,7 +128,7 @@ class _GardenScreenState extends State<GardenScreen>
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Tamam'),
+              child: Text(AppLocalizations.of(context)!.okBtn),
             ),
           ),
         ],
@@ -133,16 +137,20 @@ class _GardenScreenState extends State<GardenScreen>
   }
 
   void _showPostTermDialog(BuildContext context) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
+    final okLabel = AppLocalizations.of(context)!.okBtn;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Text('Doğum gerçekleşti mi?',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
-        content: const Text(
-          '42. haftayı geçtin. Bebeğini kucağına aldıysan tebrikler! 🎉\n\n'
-          'Ayarlar\'dan modu güncelleyebilirsin.',
-          style: TextStyle(fontSize: 14, height: 1.5),
+        title: Text(
+            isEn ? 'Has baby arrived?' : 'Doğum gerçekleşti mi?',
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+        content: Text(
+          isEn
+              ? 'You\'ve passed week 42. If your baby is in your arms, congratulations! 🎉\n\nYou can update the mode in Settings.'
+              : '42. haftayı geçtin. Bebeğini kucağına aldıysan tebrikler! 🎉\n\nAyarlar\'dan modu güncelleyebilirsin.',
+          style: const TextStyle(fontSize: 14, height: 1.5),
         ),
         actions: [
           SizedBox(
@@ -154,7 +162,7 @@ class _GardenScreenState extends State<GardenScreen>
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Tamam'),
+              child: Text(okLabel),
             ),
           ),
         ],
@@ -169,6 +177,7 @@ class _GardenScreenState extends State<GardenScreen>
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final screenH = MediaQuery.of(context).size.height;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
 
     // Provider değişince animasyonu güncelle.
     WidgetsBinding.instance.addPostFrameCallback((_) => _syncWeek(week));
@@ -188,7 +197,7 @@ class _GardenScreenState extends State<GardenScreen>
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 0),
               child: Text(
-                'Büyüme Bahçem',
+                isEn ? 'My Garden' : 'Büyüme Bahçem',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w800,
@@ -215,7 +224,7 @@ class _GardenScreenState extends State<GardenScreen>
                   const Icon(Icons.eco, size: 14, color: green),
                   const SizedBox(width: 6),
                   Text(
-                    '$week. hafta',
+                    isEn ? 'Week $week' : '$week. hafta',
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w700,
@@ -244,7 +253,9 @@ class _GardenScreenState extends State<GardenScreen>
                             size: 13, color: Color(0xFF7C3AED)),
                         const SizedBox(width: 4),
                         Text(
-                          '${provider.gardenCooldownDays}g kaldı',
+                          isEn
+                              ? '${provider.gardenCooldownDays}d left'
+                              : '${provider.gardenCooldownDays}g kaldı',
                           style: const TextStyle(
                             fontSize: 12,
                             color: Color(0xFF7C3AED),
@@ -315,8 +326,10 @@ class _GardenScreenState extends State<GardenScreen>
             Center(
               child: Text(
                 locked
-                    ? '${provider.gardenCooldownDays} gün sonra tekrar büyütebilirsin'
-                    : 'Ağaca dokun, büyüsün 🌱',
+                    ? (isEn
+                        ? 'Come back in ${provider.gardenCooldownDays} days 🌱'
+                        : '${provider.gardenCooldownDays} gün sonra tekrar büyütebilirsin')
+                    : (isEn ? 'Tap the tree to grow it 🌱' : 'Ağaca dokun, büyüsün 🌱'),
                 style: TextStyle(
                   fontSize: 12,
                   color: cs.onSurface.withValues(alpha: 0.45),

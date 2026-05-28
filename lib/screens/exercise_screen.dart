@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/cycle_provider.dart';
 import '../widgets/exercise_card.dart';
 
@@ -20,6 +21,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     final mode = provider.appMode;
     final exercises = _exercisesForMode(mode, _trimester);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
 
     return SafeArea(
       child: Column(
@@ -32,7 +34,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Text(
-                  _titleForMode(mode),
+                  _titleForMode(mode, isEn: isEn),
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -86,7 +88,7 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
               child: Text(
-                _subtitleForMode(mode),
+                _subtitleForMode(mode, isEn: isEn),
                 style: TextStyle(
                   fontSize: 13,
                   color: isDark ? Colors.white.withValues(alpha: 0.55) : Colors.black45,
@@ -117,19 +119,19 @@ class _ExerciseScreenState extends State<ExerciseScreen> {
     );
   }
 
-  String _titleForMode(AppMode mode) {
+  String _titleForMode(AppMode mode, {bool isEn = false}) {
     switch (mode) {
-      case AppMode.reglTakip:    return 'Regl Dönemi Egzersizleri';
-      case AppMode.hamileTakip:  return 'Hamilelik Egzersizleri';
-      case AppMode.hamilleKalma: return 'Doğurganlık Egzersizleri';
+      case AppMode.reglTakip:    return isEn ? 'Period Exercises' : 'Regl Dönemi Egzersizleri';
+      case AppMode.hamileTakip:  return isEn ? 'Pregnancy Exercises' : 'Hamilelik Egzersizleri';
+      case AppMode.hamilleKalma: return isEn ? 'Fertility Exercises' : 'Doğurganlık Egzersizleri';
     }
   }
 
-  String _subtitleForMode(AppMode mode) {
+  String _subtitleForMode(AppMode mode, {bool isEn = false}) {
     switch (mode) {
-      case AppMode.reglTakip:    return 'Sancıları azaltmaya yardımcı hafif hareketler';
+      case AppMode.reglTakip:    return isEn ? 'Gentle movements to ease cramps' : 'Sancıları azaltmaya yardımcı hafif hareketler';
       case AppMode.hamileTakip:  return '';
-      case AppMode.hamilleKalma: return 'Pelvik taban ve kan dolaşımını destekleyen hareketler';
+      case AppMode.hamilleKalma: return isEn ? 'Pelvic floor and circulation support' : 'Pelvik taban ve kan dolaşımını destekleyen hareketler';
     }
   }
 
@@ -622,6 +624,7 @@ class _TrimesterPicker extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -636,7 +639,9 @@ class _TrimesterPicker extends StatelessWidget {
       child: Row(
         children: [1, 2, 3].map((t) {
           final isSelected = selected == t;
-          final weeks = t == 1 ? '0–12. hafta' : t == 2 ? '13–27. hafta' : '28–40. hafta';
+          final weeks = isEn
+              ? (t == 1 ? 'Wk 0–12' : t == 2 ? 'Wk 13–27' : 'Wk 28–40')
+              : (t == 1 ? '0–12. hafta' : t == 2 ? '13–27. hafta' : '28–40. hafta');
           return Expanded(
             child: GestureDetector(
               onTap: () => onChanged(t),
@@ -651,7 +656,7 @@ class _TrimesterPicker extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      '$t. Trimester',
+                      isEn ? 'Trimester $t' : '$t. Trimester',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
@@ -690,6 +695,9 @@ class _PregnancyWarningCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
+    final riskyItems = isEn ? _riskyItemsEn : _riskyItemsTr;
+    final emergencyItems = isEn ? _emergencyItemsEn : _emergencyItemsTr;
 
     return Container(
       decoration: BoxDecoration(
@@ -711,7 +719,7 @@ class _PregnancyWarningCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Hamilelikte Riskli Pozlar',
+                  isEn ? 'Risky Poses in Pregnancy' : 'Hamilelikte Riskli Pozlar',
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -723,7 +731,9 @@ class _PregnancyWarningCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Hamileliğin hangi aşamasında olursan ol, aşağıdaki pozlar riskli kabul edilir:',
+            isEn
+                ? 'Regardless of your stage of pregnancy, the following poses are considered risky:'
+                : 'Hamileliğin hangi aşamasında olursan ol, aşağıdaki pozlar riskli kabul edilir:',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -731,7 +741,7 @@ class _PregnancyWarningCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          ..._riskyItems.map((item) => _RiskyItem(text: item, isDark: isDark)),
+          ...riskyItems.map((item) => _RiskyItem(text: item, isDark: isDark)),
           const SizedBox(height: 12),
           Divider(color: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFBBF24), height: 1),
           const SizedBox(height: 12),
@@ -742,7 +752,9 @@ class _PregnancyWarningCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Egzersizi anında bırakıp doktorunu araman gereken durumlar:',
+                  isEn
+                      ? 'Stop exercise immediately and call your doctor if:'
+                      : 'Egzersizi anında bırakıp doktorunu araman gereken durumlar:',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -753,7 +765,7 @@ class _PregnancyWarningCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          ..._emergencyItems.map((item) => _BulletItem(text: item, isDark: isDark)),
+          ...emergencyItems.map((item) => _BulletItem(text: item, isDark: isDark)),
           const SizedBox(height: 12),
           // Alt uyarı kutusu
           Container(
@@ -767,7 +779,9 @@ class _PregnancyWarningCard extends StatelessWidget {
               ),
             ),
             child: Text(
-              '⚠️  En iyi rehber kendi vücudundur. Eğer bir hareket "doğru" hissettirmiyorsa, o hareketi yapma. Eğitmenine mutlaka kaç haftalık hamile olduğunu belirtmeyi unutma!',
+              isEn
+                  ? '⚠️  Your body is the best guide. If a movement doesn\'t feel right, skip it. Always tell your instructor how many weeks pregnant you are!'
+                  : '⚠️  En iyi rehber kendi vücudundur. Eğer bir hareket "doğru" hissettirmiyorsa, o hareketi yapma. Eğitmenine mutlaka kaç haftalık hamile olduğunu belirtmeyi unutma!',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -781,18 +795,32 @@ class _PregnancyWarningCard extends StatelessWidget {
     );
   }
 
-  static const _riskyItems = [
+  static const _riskyItemsTr = [
     'a) Amuda Kalkma / Baş Üstü Duruş — Düşme riski ve yüksek tansiyon sebebiyle.',
     'b) Derin Geriye Eğilmeler (Deve Pozu vb.) — Karın kaslarını aşırı gerer.',
     'c) Karın Üstü Yatış — Bebeğe doğrudan baskı yapar.',
     'd) Derin Twistler (Bükülmeler) — Rahmi sıkıştırabilir.',
   ];
 
-  static const _emergencyItems = [
+  static const _riskyItemsEn = [
+    'a) Headstands / Inversions — Risk of falling and high blood pressure.',
+    'b) Deep Backbends (Camel Pose etc.) — Overstretches the abdominal muscles.',
+    'c) Lying on the Stomach — Puts direct pressure on the baby.',
+    'd) Deep Twists — Can compress the uterus.',
+  ];
+
+  static const _emergencyItemsTr = [
     'Vajinal kanama veya sıvı gelişi.',
     'Şiddetli baş ağrısı veya baş dönmesi.',
     'Saatte 4\'ten fazla kasılma hissetmek.',
     'Baldırlarda aşırı ağrı veya ani şişlik.',
+  ];
+
+  static const _emergencyItemsEn = [
+    'Vaginal bleeding or fluid leakage.',
+    'Severe headache or dizziness.',
+    'More than 4 contractions per hour.',
+    'Severe calf pain or sudden swelling.',
   ];
 }
 

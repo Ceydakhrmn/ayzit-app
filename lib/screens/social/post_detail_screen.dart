@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_background.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/comment.dart';
 import '../../models/post.dart';
 import '../../models/post_report.dart';
@@ -68,28 +69,33 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       FocusScope.of(context).unfocus();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Gönderilemedi: $e')));
+      final isEn = !AppLocalizations.of(context)!.isTurkish;
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(isEn ? 'Could not send: $e' : 'Gönderilemedi: $e')));
     } finally {
       if (mounted) setState(() => _sending = false);
     }
   }
 
   Future<void> _handleDeleteComment(Comment c) async {
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = !l10n.isTurkish;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Yorumu Sil'),
-        content: const Text('Bu yorumu silmek istediğine emin misin?'),
+        title: Text(isEn ? 'Delete Comment' : 'Yorumu Sil'),
+        content: Text(isEn
+            ? 'Are you sure you want to delete this comment?'
+            : 'Bu yorumu silmek istediğine emin misin?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Vazgeç'),
+            child: Text(l10n.dismissBtn),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Sil',
-                style: TextStyle(color: AppColors.danger)),
+            child: Text(l10n.deleteBtn,
+                style: const TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -102,26 +108,30 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Silinemedi: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(isEn ? 'Could not delete: $e' : 'Silinemedi: $e')));
     }
   }
 
   Future<void> _handleDeletePost(Post post) async {
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = !l10n.isTurkish;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Postu Sil'),
-        content: const Text('Bu paylaşımı silmek istediğine emin misin?'),
+        title: Text(isEn ? 'Delete Post' : 'Postu Sil'),
+        content: Text(isEn
+            ? 'Are you sure you want to delete this post?'
+            : 'Bu paylaşımı silmek istediğine emin misin?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Vazgeç'),
+            child: Text(l10n.dismissBtn),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Sil',
-                style: TextStyle(color: AppColors.danger)),
+            child: Text(l10n.deleteBtn,
+                style: const TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -133,8 +143,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       Navigator.of(context).pop();
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Silinemedi: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(isEn ? 'Could not delete: $e' : 'Silinemedi: $e')));
     }
   }
 
@@ -154,11 +164,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     return AppBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Paylaşım'),
+          title: Text(isEn ? 'Post' : 'Paylaşım'),
         ),
       body: Column(
         children: [
@@ -171,8 +182,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 }
                 final post = postSnap.data;
                 if (post == null) {
-                  return const Center(
-                    child: Text('Paylaşım bulunamadı (silinmiş olabilir)'),
+                  return Center(
+                    child: Text(isEn
+                        ? 'Post not found (may have been deleted)'
+                        : 'Paylaşım bulunamadı (silinmiş olabilir)'),
                   );
                 }
                 return StreamBuilder<List<Comment>>(
@@ -214,7 +227,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           padding:
                               const EdgeInsets.fromLTRB(16, 12, 16, 6),
                           child: Text(
-                            'Yorumlar (${post.commentCount})',
+                            isEn
+                                ? 'Comments (${post.commentCount})'
+                                : 'Yorumlar (${post.commentCount})',
                             style: const TextStyle(
                                 fontSize: 14,
                                 fontWeight: FontWeight.w700),
@@ -225,7 +240,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             padding: const EdgeInsets.all(24),
                             child: Center(
                               child: Text(
-                                'Henüz yorum yok. İlk sen yaz!',
+                                isEn
+                                    ? 'No comments yet. Be the first!'
+                                    : 'Henüz yorum yok. İlk sen yaz!',
                                 style: TextStyle(
                                     color: Theme.of(context)
                                         .colorScheme
@@ -271,14 +288,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               },
             ),
           ),
-          _buildComposer(context),
+          _buildComposer(context, isEn: isEn),
         ],
       ),
       ),
     );
   }
 
-  Widget _buildComposer(BuildContext context) {
+  Widget _buildComposer(BuildContext context, {bool isEn = false}) {
     return SafeArea(
       top: false,
       child: Container(
@@ -309,7 +326,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      'Yanıt: $_replyToUsername',
+                      isEn ? 'Reply: $_replyToUsername' : 'Yanıt: $_replyToUsername',
                       style: const TextStyle(fontSize: 12),
                     ),
                   ),
@@ -331,10 +348,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     minLines: 1,
                     maxLines: 4,
                     textInputAction: TextInputAction.newline,
-                    decoration: const InputDecoration(
-                      hintText: 'Yorum yaz...',
+                    decoration: InputDecoration(
+                      hintText: isEn ? 'Write a comment...' : 'Yorum yaz...',
                       isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
+                      contentPadding: const EdgeInsets.symmetric(
                           horizontal: 14, vertical: 10),
                     ),
                   ),

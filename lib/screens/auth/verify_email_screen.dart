@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import 'auth_scaffold.dart';
 
@@ -52,6 +53,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
   }
 
   Future<void> _resend() async {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     setState(() {
       _error = null;
       _info = null;
@@ -60,7 +62,7 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
       await context.read<AuthProvider>().authService.sendEmailVerification();
       if (!mounted) return;
       setState(() {
-        _info = 'Doğrulama e-postası gönderildi';
+        _info = isEn ? 'Verification email sent' : 'Doğrulama e-postası gönderildi';
         _canResend = false;
         _cooldownSec = 30;
       });
@@ -79,9 +81,9 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
         });
       });
     } on FirebaseAuthException catch (e) {
-      setState(() => _error = 'Gönderim hatası: ${e.code}');
+      setState(() => _error = isEn ? 'Send error: ${e.code}' : 'Gönderim hatası: ${e.code}');
     } catch (e) {
-      setState(() => _error = 'Gönderim başarısız');
+      setState(() => _error = isEn ? 'Failed to send' : 'Gönderim başarısız');
     }
   }
 
@@ -98,24 +100,29 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     final email = context.watch<AuthProvider>().firebaseUser?.email ?? '';
 
     return AuthScaffold(
-      title: 'Email doğrulama',
-      subtitle: 'Kayıt tamamlandı, sadece bir adım kaldı',
+      title: isEn ? 'Email verification' : 'Email doğrulama',
+      subtitle: isEn ? 'Registration complete — one more step' : 'Kayıt tamamlandı, sadece bir adım kaldı',
       child: Column(
         children: [
           const Icon(Icons.mark_email_unread_outlined,
               size: 72, color: AppColors.primary),
           const SizedBox(height: 12),
           Text(
-            'Sana $email adresine bir doğrulama linki gönderdik. Lütfen email kutunu kontrol et ve linke tıkla.',
+            isEn
+                ? 'We sent a verification link to $email. Please check your inbox and click the link.'
+                : 'Sana $email adresine bir doğrulama linki gönderdik. Lütfen email kutunu kontrol et ve linke tıkla.',
             textAlign: TextAlign.center,
             style: const TextStyle(fontSize: 14),
           ),
           const SizedBox(height: 8),
           Text(
-            'Doğrulama tamamlandığında otomatik olarak devam edilecek.',
+            isEn
+                ? 'You will be forwarded automatically once verified.'
+                : 'Doğrulama tamamlandığında otomatik olarak devam edilecek.',
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12,
@@ -145,22 +152,22 @@ class _VerifyEmailScreenState extends State<VerifyEmailScreen> {
           ElevatedButton.icon(
             onPressed: _checkVerified,
             icon: const Icon(Icons.refresh),
-            label: const Text('DOĞRULADIM'),
+            label: Text(isEn ? 'I VERIFIED' : 'DOĞRULADIM'),
           ),
           const SizedBox(height: 12),
           OutlinedButton.icon(
             onPressed: _canResend ? _resend : null,
             icon: const Icon(Icons.send_outlined),
             label: Text(_canResend
-                ? 'Maili tekrar gönder'
+                ? (isEn ? 'Resend email' : 'Maili tekrar gönder')
                 : _cooldownSec > 0
-                    ? 'Tekrar gönder ($_cooldownSec sn)'
-                    : 'Maili tekrar gönder'),
+                    ? (isEn ? 'Resend ($_cooldownSec s)' : 'Tekrar gönder ($_cooldownSec sn)')
+                    : (isEn ? 'Resend email' : 'Maili tekrar gönder')),
           ),
           const SizedBox(height: 20),
           TextButton(
             onPressed: _logout,
-            child: const Text('Çıkış yap'),
+            child: Text(isEn ? 'Sign out' : 'Çıkış yap'),
           ),
         ],
       ),

@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import 'auth_scaffold.dart';
 import 'forgot_password_screen.dart';
@@ -38,6 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _signInEmail() async {
     if (!_formKey.currentState!.validate()) return;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     setState(() {
       _loading = true;
       _error = null;
@@ -50,15 +52,16 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       // AuthGate will route automatically
     } on FirebaseAuthException catch (e) {
-      setState(() => _error = _mapError(e));
+      setState(() => _error = _mapError(e, isEn: isEn));
     } catch (e) {
-      setState(() => _error = 'Beklenmeyen bir hata oluştu');
+      setState(() => _error = isEn ? 'An unexpected error occurred' : 'Beklenmeyen bir hata oluştu');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
   Future<void> _signInGoogle() async {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     setState(() {
       _loading = true;
       _error = null;
@@ -67,36 +70,37 @@ class _LoginScreenState extends State<LoginScreen> {
       final auth = context.read<AuthProvider>().authService;
       await auth.signInWithGoogle();
     } on FirebaseAuthException catch (e) {
-      setState(() => _error = _mapError(e));
+      setState(() => _error = _mapError(e, isEn: isEn));
     } catch (e) {
-      setState(() => _error = 'Google girişi başarısız');
+      setState(() => _error = isEn ? 'Google sign-in failed' : 'Google girişi başarısız');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  String _mapError(FirebaseAuthException e) {
+  String _mapError(FirebaseAuthException e, {bool isEn = false}) {
     switch (e.code) {
       case 'invalid-email':
-        return 'Geçersiz email adresi';
+        return isEn ? 'Invalid email address' : 'Geçersiz email adresi';
       case 'user-not-found':
       case 'wrong-password':
       case 'invalid-credential':
-        return 'Email veya şifre hatalı';
+        return isEn ? 'Incorrect email or password' : 'Email veya şifre hatalı';
       case 'user-disabled':
-        return 'Bu hesap devre dışı bırakılmış';
+        return isEn ? 'This account has been disabled' : 'Bu hesap devre dışı bırakılmış';
       case 'too-many-requests':
-        return 'Çok fazla deneme. Lütfen daha sonra tekrar deneyin';
+        return isEn ? 'Too many attempts. Please try again later' : 'Çok fazla deneme. Lütfen daha sonra tekrar deneyin';
       default:
-        return 'Giriş başarısız: ${e.code}';
+        return isEn ? 'Sign-in failed: ${e.code}' : 'Giriş başarısız: ${e.code}';
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     return AuthScaffold(
-      title: 'Hoş geldin',
-      subtitle: 'Devam etmek için giriş yap',
+      title: isEn ? 'Welcome' : 'Hoş geldin',
+      subtitle: isEn ? 'Sign in to continue' : 'Devam etmek için giriş yap',
       child: Form(
         key: _formKey,
         child: Column(
@@ -113,9 +117,9 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               validator: (v) {
                 final s = (v ?? '').trim();
-                if (s.isEmpty) return 'Email gerekli';
+                if (s.isEmpty) return isEn ? 'Email is required' : 'Email gerekli';
                 if (!s.contains('@') || !s.contains('.')) {
-                  return 'Geçerli bir email girin';
+                  return isEn ? 'Enter a valid email' : 'Geçerli bir email girin';
                 }
                 return null;
               },
@@ -126,7 +130,7 @@ class _LoginScreenState extends State<LoginScreen> {
               obscureText: _obscure,
               autofillHints: const [AutofillHints.password],
               decoration: InputDecoration(
-                labelText: 'Şifre',
+                labelText: isEn ? 'Password' : 'Şifre',
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(_obscure
@@ -136,7 +140,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               validator: (v) {
-                if ((v ?? '').isEmpty) return 'Şifre gerekli';
+                if ((v ?? '').isEmpty) return isEn ? 'Password is required' : 'Şifre gerekli';
                 return null;
               },
             ),
@@ -151,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             builder: (_) => const ForgotPasswordScreen(),
                           ),
                         ),
-                child: const Text('Şifremi unuttum'),
+                child: Text(isEn ? 'Forgot password' : 'Şifremi unuttum'),
               ),
             ),
             if (_error != null) ...[
@@ -172,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text('GİRİŞ YAP'),
+                  : Text(isEn ? 'SIGN IN' : 'GİRİŞ YAP'),
             ),
             const SizedBox(height: 12),
             Row(
@@ -181,7 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
-                    'veya',
+                    isEn ? 'or' : 'veya',
                     style: TextStyle(
                       color: Theme.of(context)
                           .colorScheme
@@ -197,13 +201,13 @@ class _LoginScreenState extends State<LoginScreen> {
             OutlinedButton.icon(
               onPressed: _loading ? null : _signInGoogle,
               icon: const Icon(Icons.g_mobiledata, size: 28),
-              label: const Text('Google ile devam et'),
+              label: Text(isEn ? 'Continue with Google' : 'Google ile devam et'),
             ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Hesabın yok mu? '),
+                Text(isEn ? 'No account? ' : 'Hesabın yok mu? '),
                 TextButton(
                   onPressed: _loading
                       ? null
@@ -212,7 +216,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               builder: (_) => const RegisterScreen(),
                             ),
                           ),
-                  child: const Text('Kayıt ol'),
+                  child: Text(isEn ? 'Sign up' : 'Kayıt ol'),
                 ),
               ],
             ),

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import 'auth_scaffold.dart';
 
@@ -33,6 +34,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<void> _send() async {
     if (!_formKey.currentState!.validate()) return;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     setState(() {
       _loading = true;
       _error = null;
@@ -45,33 +47,34 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       if (!mounted) return;
       setState(() => _sent = true);
     } on FirebaseAuthException catch (e) {
-      setState(() => _error = _mapError(e));
+      setState(() => _error = _mapError(e, isEn: isEn));
     } catch (e) {
-      setState(() => _error = 'Beklenmeyen hata');
+      setState(() => _error = isEn ? 'Unexpected error' : 'Beklenmeyen hata');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  String _mapError(FirebaseAuthException e) {
+  String _mapError(FirebaseAuthException e, {bool isEn = false}) {
     switch (e.code) {
       case 'invalid-email':
-        return 'Geçersiz email adresi';
+        return isEn ? 'Invalid email address' : 'Geçersiz email adresi';
       case 'user-not-found':
-        return 'Bu email ile kayıtlı hesap bulunamadı';
+        return isEn ? 'No account found with this email' : 'Bu email ile kayıtlı hesap bulunamadı';
       default:
-        return 'Gönderim başarısız: ${e.code}';
+        return isEn ? 'Failed to send: ${e.code}' : 'Gönderim başarısız: ${e.code}';
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     return AuthScaffold(
       showBack: true,
-      title: 'Şifremi unuttum',
+      title: isEn ? 'Forgot password' : 'Şifremi unuttum',
       subtitle: _sent
-          ? 'Email kutunu kontrol et'
-          : 'Sana sıfırlama linki gönderelim',
+          ? (isEn ? 'Check your inbox' : 'Email kutunu kontrol et')
+          : (isEn ? 'We\'ll send you a reset link' : 'Sana sıfırlama linki gönderelim'),
       child: _sent
           ? Column(
               children: [
@@ -79,14 +82,16 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     size: 64, color: AppColors.primary),
                 const SizedBox(height: 12),
                 Text(
-                  '${_emailCtrl.text.trim()} adresine sıfırlama linki gönderildi.',
+                  isEn
+                      ? 'A reset link has been sent to ${_emailCtrl.text.trim()}.'
+                      : '${_emailCtrl.text.trim()} adresine sıfırlama linki gönderildi.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 14),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('GİRİŞE DÖN'),
+                  child: Text(isEn ? 'BACK TO SIGN IN' : 'GİRİŞE DÖN'),
                 ),
               ],
             )
@@ -107,8 +112,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                     validator: (v) {
                       final s = (v ?? '').trim();
-                      if (s.isEmpty) return 'Email gerekli';
-                      if (!s.contains('@')) return 'Geçerli bir email girin';
+                      if (s.isEmpty) return isEn ? 'Email is required' : 'Email gerekli';
+                      if (!s.contains('@')) return isEn ? 'Enter a valid email' : 'Geçerli bir email girin';
                       return null;
                     },
                   ),
@@ -131,7 +136,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             child: CircularProgressIndicator(
                                 strokeWidth: 2, color: Colors.white),
                           )
-                        : const Text('SIFIRLAMA LİNKİ GÖNDER'),
+                        : Text(isEn ? 'SEND RESET LINK' : 'SIFIRLAMA LİNKİ GÖNDER'),
                   ),
                 ],
               ),

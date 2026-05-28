@@ -25,72 +25,26 @@ class PregnancyWeekEventsCard extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final isEn = !l10n.isTurkish;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final month = provider.focusedMonth;
 
-    final firstDay = DateTime(month.year, month.month, 1);
-    final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
+    // ── Seçili gün yoksa bugünü kullan ───────────────────────────────────
+    final refDate = provider.selectedDay ?? DateTime.now();
+    final currentWeek = pregnancyWeekForDate(refDate, lmp);
 
-    // ── Hafta olaylarını topla (ayda bir kez göster) ──────────────────────
-    final seenWeeks = <int>{};
-    final weekItems = <({int week, WeekEvent event})>[];
+    // Gebelik aralığı dışındaysa (SAT öncesi veya 40+ hafta) gösterme
+    if (currentWeek == null) return const SizedBox.shrink();
 
-    for (int d = 0; d < daysInMonth; d++) {
-      final date = firstDay.add(Duration(days: d));
-      final week = pregnancyWeekForDate(date, lmp);
-      if (week == null) continue;
-      if (seenWeeks.contains(week)) continue;
-      seenWeeks.add(week);
-      final ev = weekEventForDate(date, lmp);
-      if (ev != null) weekItems.add((week: week, event: ev));
-    }
+    // ── Sadece bu haftanın WeekEvent'ini al ──────────────────────────────
+    final ev = weekEventForDate(refDate, lmp);
+    if (ev == null) return const SizedBox.shrink();
 
-    // ── Kilometre taşlarını topla (bu ayda başlayanlar) ───────────────────
-    final milestoneItems = <({DateTime date, PregnancyMilestone milestone})>[];
-    final seenMilestones = <String>{};
-
-    for (int d = 0; d < daysInMonth; d++) {
-      final date = firstDay.add(Duration(days: d));
-      for (final m in milestonesForDate(date, lmp)) {
-        final key = m.getTitle(false); // Türkçe key olarak kullan
-        if (seenMilestones.contains(key)) continue;
-        // Hafta olayıyla aynı başlıksa atla
-        final alreadyInWeekItems = weekItems.any(
-          (w) => w.event.getTitle(isEn).toLowerCase() == m.getTitle(isEn).toLowerCase(),
-        );
-        if (alreadyInWeekItems) continue;
-        seenMilestones.add(key);
-        milestoneItems.add((date: date, milestone: m));
-      }
-    }
-
-    if (weekItems.isEmpty && milestoneItems.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Column(
-      children: [
-        // Hafta gelişim olayları
-        for (final item in weekItems)
-          _EventRow(
-            emoji: item.event.emoji,
-            label: isEn
-                ? 'Week ${item.week} · ${item.event.getTitle(isEn)}'
-                : '${item.week}. Hafta · ${item.event.getTitle(isEn)}',
-            color: item.event.color,
-            isDark: isDark,
-            onTap: () => _showWeekDetail(context, item.week, item.event, isEn),
-          ),
-
-        // Kilometre taşları
-        for (final item in milestoneItems)
-          _EventRow(
-            emoji: item.milestone.category.emoji,
-            label: item.milestone.getTitle(isEn),
-            color: item.milestone.color,
-            isDark: isDark,
-            onTap: () => _showMilestoneDetail(context, item.milestone, isEn),
-          ),
-      ],
+    return _EventRow(
+      emoji: ev.emoji,
+      label: isEn
+          ? 'Week $currentWeek · ${ev.getTitle(isEn)}'
+          : '$currentWeek. Hafta · ${ev.getTitle(isEn)}',
+      color: ev.color,
+      isDark: isDark,
+      onTap: () => _showWeekDetail(context, currentWeek, ev, isEn),
     );
   }
 
@@ -131,48 +85,6 @@ class PregnancyWeekEventsCard extends StatelessWidget {
     );
   }
 
-  // ── Kilometre taşı detayı ─────────────────────────────────────────────
-  void _showMilestoneDetail(
-      BuildContext context, PregnancyMilestone milestone, bool isEn) {
-    final l10n = AppLocalizations.of(context)!;
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Row(
-          children: [
-            Container(
-              width: 14,
-              height: 14,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: milestone.color,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                milestone.getTitle(isEn),
-                style:
-                    const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-              ),
-            ),
-          ],
-        ),
-        content: Text(
-          milestone.description,
-          style: const TextStyle(fontSize: 13.5, height: 1.5),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text(l10n.okBtn,
-                style: const TextStyle(color: Color(0xFF7C3AED))),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // ── Tek satır widget'ı ────────────────────────────────────────────────────

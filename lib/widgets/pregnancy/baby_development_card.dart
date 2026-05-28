@@ -216,7 +216,7 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Bebeğin ${info.sizeText}',
+                                isEnglish ? 'Your baby is ${info.sizeText}' : 'Bebeğin ${info.sizeText}',
                                 style: TextStyle(
                                   fontSize: 11.5,
                                   fontWeight: FontWeight.w600,
@@ -343,6 +343,7 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
 
 
   void _openWeekPicker(BuildContext context, int currentWeek) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -360,8 +361,8 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Hafta seç',
-                  style: TextStyle(
+              Text(isEn ? 'Select week' : 'Hafta seç',
+                  style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.w700)),
               const SizedBox(height: 12),
               GridView.builder(

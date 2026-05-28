@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/user_service.dart';
 import 'auth_scaffold.dart';
@@ -45,6 +46,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     setState(() {
       _loading = true;
       _error = null;
@@ -57,7 +59,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final available = await auth.userService
           .isUsernameAvailable(_usernameCtrl.text);
       if (!available) {
-        setState(() => _error = 'Bu kullanıcı adı alınmış');
+        setState(() => _error = isEn ? 'This username is taken' : 'Bu kullanıcı adı alınmış');
         return;
       }
 
@@ -84,7 +86,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         try {
           await cred.user?.delete();
         } catch (_) {}
-        setState(() => _error = 'Bu kullanıcı adı alınmış');
+        setState(() => _error = isEn ? 'This username is taken' : 'Bu kullanıcı adı alınmış');
         return;
       } on FirebaseException catch (e) {
         // Firestore (or other Firebase) failed AFTER the auth user was
@@ -92,7 +94,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         try {
           await cred.user?.delete();
         } catch (_) {}
-        setState(() => _error = _mapFirestoreError(e));
+        setState(() => _error = _mapFirestoreError(e, isEn: isEn));
         return;
       }
 
@@ -101,34 +103,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // AuthGate routes to VerifyEmailScreen automatically.
     } on FirebaseAuthException catch (e) {
       debugPrint('FirebaseAuthException: code=${e.code} msg=${e.message} plugin=${e.plugin}');
-      setState(() => _error = '[Auth:${e.code}] ${e.message ?? _mapError(e)}');
+      setState(() => _error = '[Auth:${e.code}] ${e.message ?? _mapError(e, isEn: isEn)}');
     } on FirebaseException catch (e) {
       debugPrint('FirebaseException: code=${e.code} msg=${e.message} plugin=${e.plugin}');
-      setState(() => _error = '[FS:${e.code}] ${e.message ?? _mapFirestoreError(e)}');
+      setState(() => _error = '[FS:${e.code}] ${e.message ?? _mapFirestoreError(e, isEn: isEn)}');
     } catch (e, st) {
       debugPrint('Register error: $e\n$st');
-      setState(() => _error = 'Hata: $e');
+      setState(() => _error = isEn ? 'Error: $e' : 'Hata: $e');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  String _mapFirestoreError(FirebaseException e) {
+  String _mapFirestoreError(FirebaseException e, {bool isEn = false}) {
     switch (e.code) {
       case 'unavailable':
-        return 'Sunucuya ulaşılamıyor. İnternet bağlantınızı kontrol edip tekrar deneyin.';
+        return isEn
+            ? 'Cannot reach server. Check your internet connection and try again.'
+            : 'Sunucuya ulaşılamıyor. İnternet bağlantınızı kontrol edip tekrar deneyin.';
       case 'permission-denied':
-        return 'Yetki hatası. Lütfen daha sonra tekrar deneyin.';
+        return isEn ? 'Permission error. Please try again later.' : 'Yetki hatası. Lütfen daha sonra tekrar deneyin.';
       case 'deadline-exceeded':
-        return 'İstek zaman aşımına uğradı. Tekrar deneyin.';
+        return isEn ? 'Request timed out. Try again.' : 'İstek zaman aşımına uğradı. Tekrar deneyin.';
       case 'unknown':
-        return 'Sunucu bağlantı hatası. İnternet bağlantınızı kontrol edip tekrar deneyin.';
+        return isEn
+            ? 'Server connection error. Check your internet connection and try again.'
+            : 'Sunucu bağlantı hatası. İnternet bağlantınızı kontrol edip tekrar deneyin.';
       default:
-        return 'Kayıt tamamlanamadı: ${e.code}';
+        return isEn ? 'Registration failed: ${e.code}' : 'Kayıt tamamlanamadı: ${e.code}';
     }
   }
 
   Future<void> _signUpGoogle() async {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     setState(() {
       _loading = true;
       _error = null;
@@ -136,35 +143,36 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       await context.read<AuthProvider>().authService.signInWithGoogle();
     } on FirebaseAuthException catch (e) {
-      setState(() => _error = _mapError(e));
+      setState(() => _error = _mapError(e, isEn: isEn));
     } catch (e) {
-      setState(() => _error = 'Google kaydı başarısız');
+      setState(() => _error = isEn ? 'Google sign-up failed' : 'Google kaydı başarısız');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  String _mapError(FirebaseAuthException e) {
+  String _mapError(FirebaseAuthException e, {bool isEn = false}) {
     switch (e.code) {
       case 'email-already-in-use':
-        return 'Bu email zaten kayıtlı';
+        return isEn ? 'This email is already registered' : 'Bu email zaten kayıtlı';
       case 'invalid-email':
-        return 'Geçersiz email adresi';
+        return isEn ? 'Invalid email address' : 'Geçersiz email adresi';
       case 'weak-password':
-        return 'Şifre çok zayıf (en az 6 karakter)';
+        return isEn ? 'Password is too weak (min 6 characters)' : 'Şifre çok zayıf (en az 6 karakter)';
       case 'operation-not-allowed':
-        return 'Email/şifre girişi etkin değil';
+        return isEn ? 'Email/password sign-in is not enabled' : 'Email/şifre girişi etkin değil';
       default:
-        return 'Kayıt başarısız: ${e.code}';
+        return isEn ? 'Registration failed: ${e.code}' : 'Kayıt başarısız: ${e.code}';
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     return AuthScaffold(
       showBack: true,
-      title: 'Hesap oluştur',
-      subtitle: 'Topluluğa katılmak için kayıt ol',
+      title: isEn ? 'Create account' : 'Hesap oluştur',
+      subtitle: isEn ? 'Sign up to join the community' : 'Topluluğa katılmak için kayıt ol',
       child: Form(
         key: _formKey,
         child: Column(
@@ -173,29 +181,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
             TextFormField(
               controller: _displayNameCtrl,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(
-                labelText: 'İsim (görünen ad)',
-                prefixIcon: Icon(Icons.badge_outlined),
+              decoration: InputDecoration(
+                labelText: isEn ? 'Display name' : 'İsim (görünen ad)',
+                prefixIcon: const Icon(Icons.badge_outlined),
               ),
               validator: (v) {
                 final s = (v ?? '').trim();
-                if (s.length < 2) return 'En az 2 karakter';
+                if (s.length < 2) return isEn ? 'At least 2 characters' : 'En az 2 karakter';
                 return null;
               },
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _usernameCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Kullanıcı adı',
-                prefixIcon: Icon(Icons.alternate_email),
-                helperText: '3-20 karakter, küçük harf/rakam/._',
+              decoration: InputDecoration(
+                labelText: isEn ? 'Username' : 'Kullanıcı adı',
+                prefixIcon: const Icon(Icons.alternate_email),
+                helperText: isEn ? '3-20 chars, lowercase/digits/._' : '3-20 karakter, küçük harf/rakam/._',
               ),
               validator: (v) {
                 final s = (v ?? '').trim();
-                if (s.isEmpty) return 'Kullanıcı adı gerekli';
+                if (s.isEmpty) return isEn ? 'Username is required' : 'Kullanıcı adı gerekli';
                 if (!UserService.isValidUsername(s)) {
-                  return 'Geçersiz kullanıcı adı';
+                  return isEn ? 'Invalid username' : 'Geçersiz kullanıcı adı';
                 }
                 return null;
               },
@@ -213,9 +221,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               validator: (v) {
                 final s = (v ?? '').trim();
-                if (s.isEmpty) return 'Email gerekli';
+                if (s.isEmpty) return isEn ? 'Email is required' : 'Email gerekli';
                 if (!s.contains('@') || !s.contains('.')) {
-                  return 'Geçerli bir email girin';
+                  return isEn ? 'Enter a valid email' : 'Geçerli bir email girin';
                 }
                 return null;
               },
@@ -225,7 +233,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               controller: _passwordCtrl,
               obscureText: _obscure,
               decoration: InputDecoration(
-                labelText: 'Şifre',
+                labelText: isEn ? 'Password' : 'Şifre',
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(_obscure
@@ -236,7 +244,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
               ),
               validator: (v) {
                 final s = v ?? '';
-                if (s.length < 6) return 'En az 6 karakter';
+                if (s.length < 6) return isEn ? 'At least 6 characters' : 'En az 6 karakter';
                 return null;
               },
             ),
@@ -244,12 +252,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             TextFormField(
               controller: _confirmCtrl,
               obscureText: _obscure,
-              decoration: const InputDecoration(
-                labelText: 'Şifre (tekrar)',
-                prefixIcon: Icon(Icons.lock_outline),
+              decoration: InputDecoration(
+                labelText: isEn ? 'Confirm password' : 'Şifre (tekrar)',
+                prefixIcon: const Icon(Icons.lock_outline),
               ),
               validator: (v) {
-                if (v != _passwordCtrl.text) return 'Şifreler eşleşmiyor';
+                if (v != _passwordCtrl.text) return isEn ? 'Passwords do not match' : 'Şifreler eşleşmiyor';
                 return null;
               },
             ),
@@ -271,7 +279,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       child: CircularProgressIndicator(
                           strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text('KAYIT OL'),
+                  : Text(isEn ? 'SIGN UP' : 'KAYIT OL'),
             ),
             const SizedBox(height: 12),
             Row(
@@ -280,7 +288,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12),
                   child: Text(
-                    'veya',
+                    isEn ? 'or' : 'veya',
                     style: TextStyle(
                       color: Theme.of(context)
                           .colorScheme
@@ -296,17 +304,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
             OutlinedButton.icon(
               onPressed: _loading ? null : _signUpGoogle,
               icon: const Icon(Icons.g_mobiledata, size: 28),
-              label: const Text('Google ile devam et'),
+              label: Text(isEn ? 'Continue with Google' : 'Google ile devam et'),
             ),
             const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Text('Zaten hesabın var mı? '),
+                Text(isEn ? 'Already have an account? ' : 'Zaten hesabın var mı? '),
                 TextButton(
                   onPressed:
                       _loading ? null : () => Navigator.of(context).pop(),
-                  child: const Text('Giriş yap'),
+                  child: Text(isEn ? 'Sign in' : 'Giriş yap'),
                 ),
               ],
             ),

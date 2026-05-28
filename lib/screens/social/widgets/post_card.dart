@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/relative_time.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/post.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/post_service.dart';
@@ -40,9 +41,11 @@ class PostCard extends StatelessWidget {
     final uid = auth.firebaseUser?.uid;
     final isMine = uid != null && uid == post.authorId;
     final effectiveService = postService ?? PostService();
+    final l10n = AppLocalizations.of(context)!;
+    final locale = l10n.localeName;
 
     final displayName = post.isAnonymous
-        ? 'Anonim'
+        ? (l10n.isTurkish ? 'Anonim' : 'Anonymous')
         : (post.authorUsername.isEmpty ? '—' : post.authorUsername);
 
     return Card(
@@ -77,7 +80,7 @@ class PostCard extends StatelessWidget {
                         ),
                         const SizedBox(height: 2),
                         Text(
-                          '${RelativeTime.format(post.createdAt)}${post.edited ? ' • düzenlendi' : ''}',
+                          '${RelativeTime.format(post.createdAt, locale: locale)}${post.edited ? (l10n.isTurkish ? ' • düzenlendi' : ' • edited') : ''}',
                           style: TextStyle(
                             fontSize: 12,
                             color: Theme.of(context)
@@ -104,36 +107,39 @@ class PostCard extends StatelessWidget {
                           break;
                       }
                     },
-                    itemBuilder: (ctx) => [
-                      if (isMine) ...[
-                        const PopupMenuItem(
-                          value: 'edit',
-                          child: ListTile(
-                            dense: true,
-                            leading: Icon(Icons.edit_outlined),
-                            title: Text('Düzenle'),
+                    itemBuilder: (ctx) {
+                      final l10n = AppLocalizations.of(ctx)!;
+                      return [
+                        if (isMine) ...[
+                          PopupMenuItem(
+                            value: 'edit',
+                            child: ListTile(
+                              dense: true,
+                              leading: const Icon(Icons.edit_outlined),
+                              title: Text(l10n.editBtn),
+                            ),
                           ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: ListTile(
-                            dense: true,
-                            leading: Icon(Icons.delete_outline,
-                                color: AppColors.danger),
-                            title: Text('Sil',
-                                style: TextStyle(color: AppColors.danger)),
+                          PopupMenuItem(
+                            value: 'delete',
+                            child: ListTile(
+                              dense: true,
+                              leading: const Icon(Icons.delete_outline,
+                                  color: AppColors.danger),
+                              title: Text(l10n.deleteBtn,
+                                  style: const TextStyle(color: AppColors.danger)),
+                            ),
                           ),
-                        ),
-                      ] else
-                        const PopupMenuItem(
-                          value: 'report',
-                          child: ListTile(
-                            dense: true,
-                            leading: Icon(Icons.flag_outlined),
-                            title: Text('Şikayet Et'),
+                        ] else
+                          PopupMenuItem(
+                            value: 'report',
+                            child: ListTile(
+                              dense: true,
+                              leading: const Icon(Icons.flag_outlined),
+                              title: Text(l10n.reportBtn),
+                            ),
                           ),
-                        ),
-                    ],
+                      ];
+                    },
                   ),
                 ],
               ),

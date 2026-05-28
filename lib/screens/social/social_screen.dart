@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/post.dart';
 import '../../models/post_report.dart';
 import '../../services/post_service.dart';
@@ -36,7 +37,7 @@ class SocialScreen extends StatelessWidget {
                   child: Row(
                     children: [
                       Text(
-                        'Sosyal',
+                        !AppLocalizations.of(context)!.isTurkish ? 'Social' : 'Sosyal',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -48,10 +49,10 @@ class SocialScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const TabBar(
+                TabBar(
                   tabs: [
-                    Tab(text: 'En Yeni'),
-                    Tab(text: 'Popüler'),
+                    Tab(text: !AppLocalizations.of(context)!.isTurkish ? 'Latest' : 'En Yeni'),
+                    Tab(text: !AppLocalizations.of(context)!.isTurkish ? 'Popular' : 'Popüler'),
                   ],
                 ),
                 const Expanded(
@@ -141,6 +142,7 @@ class _FeedListState extends State<_FeedList>
   }
 
   Future<void> _loadFirstPage() async {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     setState(() {
       _initialLoading = true;
       _error = null;
@@ -159,13 +161,14 @@ class _FeedListState extends State<_FeedList>
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _error = 'Yüklenemedi: $e';
+        _error = isEn ? 'Could not load: $e' : 'Yüklenemedi: $e';
         _initialLoading = false;
       });
     }
   }
 
   Future<void> _refresh() async {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     try {
       final result = await _fetch();
       if (!mounted) return;
@@ -179,7 +182,7 @@ class _FeedListState extends State<_FeedList>
       });
     } catch (e) {
       if (!mounted) return;
-      setState(() => _error = 'Yenileme başarısız: $e');
+      setState(() => _error = isEn ? 'Refresh failed: $e' : 'Yenileme başarısız: $e');
     }
   }
 
@@ -202,21 +205,25 @@ class _FeedListState extends State<_FeedList>
   }
 
   Future<void> _handleDelete(Post post) async {
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = !l10n.isTurkish;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Postu Sil'),
-        content: const Text('Bu paylaşımı silmek istediğine emin misin?'),
+        title: Text(isEn ? 'Delete Post' : 'Postu Sil'),
+        content: Text(isEn
+            ? 'Are you sure you want to delete this post?'
+            : 'Bu paylaşımı silmek istediğine emin misin?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Vazgeç'),
+            child: Text(l10n.dismissBtn),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text(
-              'Sil',
-              style: TextStyle(color: AppColors.danger),
+            child: Text(
+              l10n.deleteBtn,
+              style: const TextStyle(color: AppColors.danger),
             ),
           ),
         ],
@@ -229,8 +236,8 @@ class _FeedListState extends State<_FeedList>
       setState(() => _posts.removeWhere((p) => p.id == post.id));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Silinemedi: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(isEn ? 'Could not delete: $e' : 'Silinemedi: $e')));
     }
   }
 
@@ -252,7 +259,7 @@ class _FeedListState extends State<_FeedList>
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: _loadFirstPage,
-                child: const Text('Tekrar dene'),
+                child: Text(!AppLocalizations.of(context)!.isTurkish ? 'Retry' : 'Tekrar dene'),
               ),
             ],
           ),
@@ -267,7 +274,7 @@ class _FeedListState extends State<_FeedList>
           children: [
             SizedBox(
               height: MediaQuery.of(context).size.height * 0.5,
-              child: const Center(child: Text('Henüz paylaşım yok')),
+              child: Center(child: Text(!AppLocalizations.of(context)!.isTurkish ? 'No posts yet' : 'Henüz paylaşım yok')),
             ),
           ],
         ),

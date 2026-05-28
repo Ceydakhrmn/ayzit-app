@@ -4,6 +4,7 @@
 // =============================================
 
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../utils/phase_colors.dart';
 
 class LegendRow extends StatelessWidget {
@@ -11,13 +12,14 @@ class LegendRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     final items = [
-      _LegendItem(color: kPeriodPeak,  label: 'Regl (yoğun)'),
-      _LegendItem(color: kPeriodLight, label: 'Regl (hafif)'),
-      _LegendItem(color: kFertilePeak, label: 'Doğurganlık — en yüksek'),
-      _LegendItem(color: kFertileMid,  label: 'Doğurganlık — orta'),
-      _LegendItem(color: kFertileLow,  label: 'Doğurganlık — düşük'),
-      _LegendItem(color: kOvulation,   label: 'Ovulasyon'),
+      _LegendItem(color: kPeriodPeak,  label: isEn ? 'Period (heavy)' : 'Regl (yoğun)'),
+      _LegendItem(color: kPeriodLight, label: isEn ? 'Period (light)' : 'Regl (hafif)'),
+      _LegendItem(color: kFertilePeak, label: isEn ? 'Fertility — peak' : 'Doğurganlık — en yüksek'),
+      _LegendItem(color: kFertileMid,  label: isEn ? 'Fertility — mid' : 'Doğurganlık — orta'),
+      _LegendItem(color: kFertileLow,  label: isEn ? 'Fertility — low' : 'Doğurganlık — düşük'),
+      _LegendItem(color: kOvulation,   label: isEn ? 'Ovulation' : 'Ovulasyon'),
     ];
 
     return Wrap(

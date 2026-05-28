@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/relative_time.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/comment.dart';
 import '../../../providers/auth_provider.dart';
 import 'avatar_circle.dart';
@@ -33,6 +34,7 @@ class CommentTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final uid = context.watch<AuthProvider>().firebaseUser?.uid;
     final isMine = uid != null && uid == comment.authorId;
+    final l10n = AppLocalizations.of(context)!;
 
     return Padding(
       padding: EdgeInsets.fromLTRB(16 + indent, 10, 16, 10),
@@ -63,7 +65,7 @@ class CommentTile extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      RelativeTime.format(comment.createdAt),
+                      RelativeTime.format(comment.createdAt, locale: l10n.localeName),
                       style: TextStyle(
                         fontSize: 11,
                         color: Theme.of(context)
@@ -81,28 +83,31 @@ class CommentTile extends StatelessWidget {
                         if (v == 'delete') onDelete();
                         if (v == 'report') onReport();
                       },
-                      itemBuilder: (_) => [
-                        if (isMine)
-                          const PopupMenuItem(
-                            value: 'delete',
-                            child: ListTile(
-                              dense: true,
-                              leading: Icon(Icons.delete_outline,
-                                  color: AppColors.danger),
-                              title: Text('Sil',
-                                  style: TextStyle(color: AppColors.danger)),
+                      itemBuilder: (ctx) {
+                        final l10n = AppLocalizations.of(ctx)!;
+                        return [
+                          if (isMine)
+                            PopupMenuItem(
+                              value: 'delete',
+                              child: ListTile(
+                                dense: true,
+                                leading: const Icon(Icons.delete_outline,
+                                    color: AppColors.danger),
+                                title: Text(l10n.deleteBtn,
+                                    style: const TextStyle(color: AppColors.danger)),
+                              ),
+                            )
+                          else
+                            PopupMenuItem(
+                              value: 'report',
+                              child: ListTile(
+                                dense: true,
+                                leading: const Icon(Icons.flag_outlined),
+                                title: Text(l10n.reportBtn),
+                              ),
                             ),
-                          )
-                        else
-                          const PopupMenuItem(
-                            value: 'report',
-                            child: ListTile(
-                              dense: true,
-                              leading: Icon(Icons.flag_outlined),
-                              title: Text('Şikayet Et'),
-                            ),
-                          ),
-                      ],
+                        ];
+                      },
                     ),
                   ],
                 ),
@@ -120,7 +125,7 @@ class CommentTile extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(
-                        'Yanıtla',
+                        l10n.isTurkish ? 'Yanıtla' : 'Reply',
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,

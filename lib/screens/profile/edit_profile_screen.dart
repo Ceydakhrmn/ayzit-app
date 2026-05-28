@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_background.dart';
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/user_service.dart';
 
@@ -52,6 +53,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     setState(() {
       _loading = true;
       _error = null;
@@ -83,11 +85,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final newPw = _newPwCtrl.text;
       if (newPw.isNotEmpty) {
         if (newPw.length < 6) {
-          setState(() => _error = 'Yeni şifre en az 6 karakter');
+          setState(() => _error = isEn ? 'New password must be at least 6 characters' : 'Yeni şifre en az 6 karakter');
           return;
         }
         if (_currentPwCtrl.text.isEmpty) {
-          setState(() => _error = 'Mevcut şifreyi girmelisin');
+          setState(() => _error = isEn ? 'Enter your current password' : 'Mevcut şifreyi girmelisin');
           return;
         }
         await auth.authService
@@ -98,51 +100,56 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
 
       if (!mounted) return;
-      setState(() => _info = 'Değişiklikler kaydedildi');
+      setState(() => _info = isEn ? 'Changes saved' : 'Değişiklikler kaydedildi');
     } on UsernameTaken {
-      setState(() => _error = 'Bu kullanıcı adı alınmış');
+      setState(() => _error = !AppLocalizations.of(context)!.isTurkish
+          ? 'This username is taken'
+          : 'Bu kullanıcı adı alınmış');
     } on FirebaseAuthException catch (e) {
-      setState(() => _error = _mapError(e));
+      setState(() => _error = _mapError(e, isEn: !AppLocalizations.of(context)!.isTurkish));
     } catch (e) {
-      setState(() => _error = 'Kaydedilemedi: $e');
+      setState(() => _error = !AppLocalizations.of(context)!.isTurkish ? 'Could not save: $e' : 'Kaydedilemedi: $e');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  String _mapError(FirebaseAuthException e) {
+  String _mapError(FirebaseAuthException e, {bool isEn = false}) {
     switch (e.code) {
       case 'wrong-password':
       case 'invalid-credential':
-        return 'Mevcut şifre hatalı';
+        return isEn ? 'Current password is incorrect' : 'Mevcut şifre hatalı';
       case 'weak-password':
-        return 'Yeni şifre çok zayıf';
+        return isEn ? 'New password is too weak' : 'Yeni şifre çok zayıf';
       case 'requires-recent-login':
-        return 'Lütfen tekrar giriş yap ve yeniden dene';
+        return isEn ? 'Please sign in again and try again' : 'Lütfen tekrar giriş yap ve yeniden dene';
       default:
-        return 'Hata: ${e.code}';
+        return isEn ? 'Error: ${e.code}' : 'Hata: ${e.code}';
     }
   }
 
   Future<void> _deleteAccount() async {
     // Capture before any await
     final auth = context.read<AuthProvider>();
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Hesabı Sil'),
-        content: const Text(
-          'Bu işlem geri alınamaz. Tüm verilerin, paylaşımların ve yorumların silinecek. Emin misin?',
+        title: Text(isEn ? 'Delete Account' : 'Hesabı Sil'),
+        content: Text(
+          isEn
+              ? 'This action cannot be undone. All your data, posts, and comments will be deleted. Are you sure?'
+              : 'Bu işlem geri alınamaz. Tüm verilerin, paylaşımların ve yorumların silinecek. Emin misin?',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Vazgeç'),
+            child: Text(isEn ? 'Cancel' : 'Vazgeç'),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Hesabı Sil',
-                style: TextStyle(color: AppColors.danger)),
+            child: Text(isEn ? 'Delete Account' : 'Hesabı Sil',
+                style: const TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -150,7 +157,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (confirmed != true) return;
     if (!mounted) return;
 
-    final pw = await _askPassword();
+    final pw = await _askPassword(isEn: isEn);
     if (pw == null) return;
 
     setState(() {
@@ -171,35 +178,37 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       await auth.authService.deleteAuthAccount();
       // AuthProvider will tear everything down; AuthGate returns to Login.
     } on FirebaseAuthException catch (e) {
-      setState(() => _error = _mapError(e));
+      setState(() => _error = _mapError(e, isEn: isEn));
     } catch (e) {
-      setState(() => _error = 'Silme başarısız: $e');
+      setState(() => _error = isEn ? 'Deletion failed: $e' : 'Silme başarısız: $e');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
 
-  Future<String?> _askPassword() async {
+  Future<String?> _askPassword({bool isEn = false}) async {
     final ctrl = TextEditingController();
     final result = await showDialog<String>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Kimliğini Doğrula'),
+        title: Text(isEn ? 'Verify Identity' : 'Kimliğini Doğrula'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Devam etmek için şifreni gir. Google ile giriş yaptıysan boş bırak.',
-              style: TextStyle(fontSize: 13),
+            Text(
+              isEn
+                  ? 'Enter your password to continue. Leave blank if you signed in with Google.'
+                  : 'Devam etmek için şifreni gir. Google ile giriş yaptıysan boş bırak.',
+              style: const TextStyle(fontSize: 13),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: ctrl,
               obscureText: true,
-              decoration: const InputDecoration(
-                labelText: 'Şifre',
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                labelText: isEn ? 'Password' : 'Şifre',
+                border: const OutlineInputBorder(),
               ),
             ),
           ],
@@ -207,11 +216,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(null),
-            child: const Text('Vazgeç'),
+            child: Text(isEn ? 'Cancel' : 'Vazgeç'),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(ctrl.text),
-            child: const Text('Devam'),
+            child: Text(isEn ? 'Continue' : 'Devam'),
           ),
         ],
       ),
@@ -221,15 +230,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     return AppBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Profili Düzenle'),
+          title: Text(isEn ? 'Edit Profile' : 'Profili Düzenle'),
         actions: [
           TextButton(
             onPressed: _loading ? null : _save,
-            child: const Text('KAYDET'),
+            child: Text(isEn ? 'SAVE' : 'KAYDET'),
           ),
         ],
       ),
@@ -243,33 +253,33 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               TextFormField(
                 controller: _displayNameCtrl,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  labelText: 'Görünen Ad',
-                  prefixIcon: Icon(Icons.badge_outlined),
+                decoration: InputDecoration(
+                  labelText: isEn ? 'Display Name' : 'Görünen Ad',
+                  prefixIcon: const Icon(Icons.badge_outlined),
                 ),
                 validator: (v) {
-                  if ((v ?? '').trim().length < 2) return 'En az 2 karakter';
+                  if ((v ?? '').trim().length < 2) return isEn ? 'At least 2 characters' : 'En az 2 karakter';
                   return null;
                 },
               ),
               const SizedBox(height: 14),
               TextFormField(
                 controller: _usernameCtrl,
-                decoration: const InputDecoration(
-                  labelText: 'Kullanıcı adı',
-                  prefixIcon: Icon(Icons.alternate_email),
-                  helperText: '3-20 karakter, küçük harf/rakam/._',
+                decoration: InputDecoration(
+                  labelText: isEn ? 'Username' : 'Kullanıcı adı',
+                  prefixIcon: const Icon(Icons.alternate_email),
+                  helperText: isEn ? '3-20 chars, lowercase/digits/._' : '3-20 karakter, küçük harf/rakam/._',
                 ),
                 validator: (v) {
                   if (!UserService.isValidUsername(v ?? '')) {
-                    return 'Geçersiz kullanıcı adı';
+                    return isEn ? 'Invalid username' : 'Geçersiz kullanıcı adı';
                   }
                   return null;
                 },
               ),
               const SizedBox(height: 28),
               Text(
-                'Şifreyi değiştir (opsiyonel)',
+                isEn ? 'Change password (optional)' : 'Şifreyi değiştir (opsiyonel)',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
@@ -283,18 +293,18 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               TextFormField(
                 controller: _currentPwCtrl,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Mevcut şifre',
-                  prefixIcon: Icon(Icons.lock_outline),
+                decoration: InputDecoration(
+                  labelText: isEn ? 'Current password' : 'Mevcut şifre',
+                  prefixIcon: const Icon(Icons.lock_outline),
                 ),
               ),
               const SizedBox(height: 10),
               TextFormField(
                 controller: _newPwCtrl,
                 obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: 'Yeni şifre',
-                  prefixIcon: Icon(Icons.lock_reset),
+                decoration: InputDecoration(
+                  labelText: isEn ? 'New password' : 'Yeni şifre',
+                  prefixIcon: const Icon(Icons.lock_reset),
                 ),
               ),
               if (_info != null) ...[
@@ -317,7 +327,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   side: const BorderSide(color: AppColors.danger),
                 ),
                 icon: const Icon(Icons.delete_outline),
-                label: const Text('HESABI SİL'),
+                label: Text(isEn ? 'DELETE ACCOUNT' : 'HESABI SİL'),
               ),
             ],
           ),

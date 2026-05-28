@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/cycle_provider.dart';
 
 class MoodOption {
@@ -148,6 +149,21 @@ MoodOption? moodByKey(String key) {
   }
 }
 
+String _localizedMoodLabel(String key, {bool isEn = false}) {
+  if (!isEn) return kMoods.firstWhere((m) => m.key == key, orElse: () => kMoods.first).label;
+  switch (key) {
+    case 'happy':     return 'Happy';
+    case 'calm':      return 'Calm';
+    case 'tired':     return 'Tired';
+    case 'sad':       return 'Sad';
+    case 'anxious':   return 'Anxious';
+    case 'angry':     return 'Angry';
+    case 'energetic': return 'Energetic';
+    case 'sensitive': return 'Sensitive';
+    default:          return key;
+  }
+}
+
 class MoodCard extends StatefulWidget {
   const MoodCard({super.key});
 
@@ -166,6 +182,7 @@ class _MoodCardState extends State<MoodCard> {
     final selectedDay = provider.selectedDay;
     final targetDay = selectedDay ?? DateTime.now();
     final currentMood = provider.moodForDay(targetDay);
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
 
     final cs = Theme.of(context).colorScheme;
     return Container(
@@ -183,9 +200,9 @@ class _MoodCardState extends State<MoodCard> {
             children: [
               const Icon(Icons.mood, size: 16, color: Color(0xFF7C3AED)),
               const SizedBox(width: 6),
-              const Text(
-                'Ruh Hali',
-                style: TextStyle(
+              Text(
+                isEn ? 'Mood' : 'Ruh Hali',
+                style: const TextStyle(
                   fontSize: 12,
                   color: Color(0xFF7C3AED),
                   fontWeight: FontWeight.w600,
@@ -193,7 +210,7 @@ class _MoodCardState extends State<MoodCard> {
               ),
               const Spacer(),
               Text(
-                selectedDay == null ? 'Bugün' : '${targetDay.day}/${targetDay.month}',
+                selectedDay == null ? (isEn ? 'Today' : 'Bugün') : '${targetDay.day}/${targetDay.month}',
                 style: const TextStyle(fontSize: 11, color: Colors.black38),
               ),
             ],
@@ -263,7 +280,7 @@ class _MoodCardState extends State<MoodCard> {
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          mood.label,
+                          _localizedMoodLabel(mood.key, isEn: isEn),
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,

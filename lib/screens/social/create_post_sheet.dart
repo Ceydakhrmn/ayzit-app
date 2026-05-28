@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../core/utils/profanity_filter.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/post.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/post_service.dart';
@@ -67,12 +68,13 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
 
   Future<void> _submit() async {
     final text = _ctrl.text.trim();
+    // Capture context-dependent references before any await
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
+    final auth = context.read<AuthProvider>();
     if (text.isEmpty) {
-      setState(() => _error = 'Boş post gönderemezsin');
+      setState(() => _error = isEn ? 'Post cannot be empty' : 'Boş post gönderemezsin');
       return;
     }
-    // Capture context-dependent references before any await
-    final auth = context.read<AuthProvider>();
     setState(() {
       _loading = true;
       _error = null;
@@ -82,12 +84,12 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
       final badWords = await _profanityService.loadList();
       if (!mounted) return;
       if (ProfanityFilter.contains(text, badWords)) {
-        setState(() => _error = 'İçerik topluluk kurallarına uygun değil');
+        setState(() => _error = isEn ? 'Content violates community guidelines' : 'İçerik topluluk kurallarına uygun değil');
         return;
       }
       final user = auth.appUser;
       if (user == null) {
-        setState(() => _error = 'Giriş gerekli');
+        setState(() => _error = isEn ? 'Sign in required' : 'Giriş gerekli');
         return;
       }
 
@@ -109,7 +111,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
       if (!mounted) return;
       Navigator.of(context).pop(true);
     } catch (e) {
-      setState(() => _error = 'Gönderim başarısız: $e');
+      setState(() => _error = isEn ? 'Failed to send: $e' : 'Gönderim başarısız: $e');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -117,6 +119,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       child: Column(
@@ -137,7 +140,9 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
           Row(
             children: [
               Text(
-                _isEdit ? 'Postu Düzenle' : 'Yeni Paylaşım',
+                _isEdit
+                    ? (isEn ? 'Edit Post' : 'Postu Düzenle')
+                    : (isEn ? 'New Post' : 'Yeni Paylaşım'),
                 style: const TextStyle(
                     fontSize: 18, fontWeight: FontWeight.w700),
               ),
@@ -156,10 +161,10 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
             minLines: 4,
             autofocus: true,
             style: const TextStyle(color: Colors.black87),
-            decoration: const InputDecoration(
-              hintText: 'Ne düşünüyorsun?',
-              hintStyle: TextStyle(color: Colors.black45),
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              hintText: isEn ? 'What\'s on your mind?' : 'Ne düşünüyorsun?',
+              hintStyle: const TextStyle(color: Colors.black45),
+              border: const OutlineInputBorder(),
             ),
           ),
           const SizedBox(height: 12),
@@ -168,8 +173,8 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
               contentPadding: EdgeInsets.zero,
               value: _anonymous,
               onChanged: _loading ? null : (v) => setState(() => _anonymous = v),
-              title: const Text('Anonim paylaş'),
-              subtitle: const Text('Kullanıcı adın feed\'de gözükmez'),
+              title: Text(isEn ? 'Post anonymously' : 'Anonim paylaş'),
+              subtitle: Text(isEn ? 'Your username won\'t appear in the feed' : 'Kullanıcı adın feed\'de gözükmez'),
             ),
           if (_error != null) ...[
             const SizedBox(height: 8),
@@ -188,7 +193,7 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
                     child: CircularProgressIndicator(
                         strokeWidth: 2, color: Colors.white),
                   )
-                : Text(_isEdit ? 'KAYDET' : 'PAYLAŞ'),
+                : Text(_isEdit ? (isEn ? 'SAVE' : 'KAYDET') : (isEn ? 'POST' : 'PAYLAŞ')),
           ),
         ],
       ),

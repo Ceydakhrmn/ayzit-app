@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../core/theme/app_colors.dart';
+import '../../../l10n/app_localizations.dart';
 import '../../../models/post_report.dart';
 import '../../../providers/auth_provider.dart';
 import '../../../services/report_service.dart';
@@ -57,28 +58,29 @@ class _ReportSheetState extends State<_ReportSheet> {
     super.dispose();
   }
 
-  String _label(ReportReason r) {
+  String _label(ReportReason r, {bool isEn = false}) {
     switch (r) {
       case ReportReason.spam:
         return 'Spam';
       case ReportReason.harassment:
-        return 'Taciz';
+        return isEn ? 'Harassment' : 'Taciz';
       case ReportReason.inappropriate:
-        return 'Uygunsuz içerik';
+        return isEn ? 'Inappropriate content' : 'Uygunsuz içerik';
       case ReportReason.hate:
-        return 'Nefret söylemi';
+        return isEn ? 'Hate speech' : 'Nefret söylemi';
       case ReportReason.other:
-        return 'Diğer';
+        return isEn ? 'Other' : 'Diğer';
     }
   }
 
   Future<void> _submit() async {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
+    final uid = context.read<AuthProvider>().firebaseUser?.uid;
     setState(() {
       _loading = true;
       _error = null;
     });
     try {
-      final uid = context.read<AuthProvider>().firebaseUser?.uid;
       if (uid == null) throw Exception('auth');
       await _service.createReport(
         target: widget.target,
@@ -90,12 +92,12 @@ class _ReportSheetState extends State<_ReportSheet> {
       if (!mounted) return;
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Şikayetin alındı, teşekkürler')),
+        SnackBar(content: Text(isEn ? 'Report received, thank you' : 'Şikayetin alındı, teşekkürler')),
       );
     } on ReportAlreadyExists {
-      setState(() => _error = 'Bunu zaten şikayet etmişsin');
+      setState(() => _error = isEn ? 'You already reported this' : 'Bunu zaten şikayet etmişsin');
     } catch (e) {
-      setState(() => _error = 'Gönderim başarısız: $e');
+      setState(() => _error = isEn ? 'Failed to send: $e' : 'Gönderim başarısız: $e');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
@@ -103,6 +105,7 @@ class _ReportSheetState extends State<_ReportSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       child: Column(
@@ -120,14 +123,14 @@ class _ReportSheetState extends State<_ReportSheet> {
             ),
           ),
           const SizedBox(height: 16),
-          const Text(
-            'Şikayet Et',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          Text(
+            isEn ? 'Report' : 'Şikayet Et',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'Lütfen sebebi seç',
-            style: TextStyle(fontSize: 13, color: Colors.black54),
+          Text(
+            isEn ? 'Please select a reason' : 'Lütfen sebebi seç',
+            style: const TextStyle(fontSize: 13, color: Colors.black54),
           ),
           const SizedBox(height: 16),
           ...ReportReason.values.map(
@@ -135,7 +138,7 @@ class _ReportSheetState extends State<_ReportSheet> {
               contentPadding: EdgeInsets.zero,
               value: r,
               groupValue: _reason,
-              title: Text(_label(r)),
+              title: Text(_label(r, isEn: isEn)),
               onChanged: _loading ? null : (v) => setState(() => _reason = v!),
             ),
           ),
@@ -143,9 +146,9 @@ class _ReportSheetState extends State<_ReportSheet> {
           TextField(
             controller: _descCtrl,
             maxLines: 3,
-            decoration: const InputDecoration(
-              labelText: 'Açıklama (opsiyonel)',
-              border: OutlineInputBorder(),
+            decoration: InputDecoration(
+              labelText: isEn ? 'Description (optional)' : 'Açıklama (opsiyonel)',
+              border: const OutlineInputBorder(),
             ),
           ),
           if (_error != null) ...[
@@ -165,7 +168,7 @@ class _ReportSheetState extends State<_ReportSheet> {
                     child: CircularProgressIndicator(
                         strokeWidth: 2, color: Colors.white),
                   )
-                : const Text('GÖNDER'),
+                : Text(isEn ? 'SEND' : 'GÖNDER'),
           ),
         ],
       ),

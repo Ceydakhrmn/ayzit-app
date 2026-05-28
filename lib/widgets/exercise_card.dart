@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 enum ExerciseType {
   // Regl
@@ -99,6 +100,7 @@ class ExerciseCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
@@ -187,7 +189,7 @@ class ExerciseCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Nasıl yapılır?',
+                  isEn ? 'How to do it?' : 'Nasıl yapılır?',
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,

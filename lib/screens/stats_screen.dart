@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../core/theme/app_background.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/cycle_provider.dart';
 
 class StatsScreen extends StatelessWidget {
@@ -18,6 +19,7 @@ class StatsScreen extends StatelessWidget {
     final cycleLens  = provider.lastCycleLengths(n: 6);
     final periodLens = provider.lastPeriodLengths(n: 6);
     final history    = provider.cycleHistory;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
 
     return AppBackground(
       child: Scaffold(
@@ -29,9 +31,9 @@ class StatsScreen extends StatelessWidget {
           icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: kPurple),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'İstatistikler',
-          style: TextStyle(
+        title: Text(
+          isEn ? 'Statistics' : 'İstatistikler',
+          style: const TextStyle(
             fontSize: 17,
             fontWeight: FontWeight.w700,
             color: Colors.black87,
@@ -47,22 +49,22 @@ class StatsScreen extends StatelessWidget {
             // ── Özet kartları ──
             Row(children: [
               _StatChip(
-                label: 'Ort. Süre',
-                value: '${_avg(cycleLens)} gün',
+                label: isEn ? 'Avg. Cycle' : 'Ort. Süre',
+                value: isEn ? '${_avg(cycleLens)} days' : '${_avg(cycleLens)} gün',
                 icon: Icons.loop,
                 color: kPurple,
               ),
               const SizedBox(width: 10),
               _StatChip(
-                label: 'Ort. Regl',
-                value: '${_avg(periodLens)} gün',
+                label: isEn ? 'Avg. Period' : 'Ort. Regl',
+                value: isEn ? '${_avg(periodLens)} days' : '${_avg(periodLens)} gün',
                 icon: Icons.water_drop,
                 color: kBlue,
               ),
               const SizedBox(width: 10),
               _StatChip(
-                label: 'Kayıt',
-                value: '${history.length} kayıt',
+                label: isEn ? 'Records' : 'Kayıt',
+                value: isEn ? '${history.length}' : '${history.length} kayıt',
                 icon: Icons.calendar_today,
                 color: kPurpleLight,
               ),
@@ -71,7 +73,7 @@ class StatsScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // ── Döngü uzunluğu grafiği ──
-            _SectionTitle(title: 'Son 6 Adet Süresi'),
+            _SectionTitle(title: isEn ? 'Last 6 Cycle Lengths' : 'Son 6 Adet Süresi'),
             const SizedBox(height: 10),
             _ChartCard(
               child: SizedBox(
@@ -85,7 +87,7 @@ class StatsScreen extends StatelessWidget {
                       touchTooltipData: BarTouchTooltipData(
                         getTooltipColor: (_) => kPurple,
                         getTooltipItem: (group, gI, rod, rI) => BarTooltipItem(
-                          '${rod.toY.round()} gün',
+                          isEn ? '${rod.toY.round()} d' : '${rod.toY.round()} gün',
                           const TextStyle(color: Colors.white, fontSize: 12),
                         ),
                       ),
@@ -145,7 +147,7 @@ class StatsScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // ── Regl süresi grafiği ──
-            _SectionTitle(title: 'Son 6 Regl Süresi'),
+            _SectionTitle(title: isEn ? 'Last 6 Period Lengths' : 'Son 6 Regl Süresi'),
             const SizedBox(height: 10),
             _ChartCard(
               child: SizedBox(
@@ -158,7 +160,7 @@ class StatsScreen extends StatelessWidget {
                       touchTooltipData: LineTouchTooltipData(
                         getTooltipColor: (_) => kBlue,
                         getTooltipItems: (spots) => spots.map((s) => LineTooltipItem(
-                          '${s.y.round()} gün',
+                          isEn ? '${s.y.round()} d' : '${s.y.round()} gün',
                           const TextStyle(color: Colors.white, fontSize: 12),
                         )).toList(),
                       ),
@@ -224,7 +226,7 @@ class StatsScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             // ── Döngü geçmişi tablosu ──
-            _SectionTitle(title: 'Geçmiş'),
+            _SectionTitle(title: isEn ? 'History' : 'Geçmiş'),
             const SizedBox(height: 10),
             if (history.isEmpty)
               Container(
@@ -234,10 +236,12 @@ class StatsScreen extends StatelessWidget {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: const Text(
-                  'Henüz kayıt yok.\nRegl başlatıp bitirince buraya işlenir.',
+                child: Text(
+                  isEn
+                      ? 'No records yet.\nStart and end a period to see your history.'
+                      : 'Henüz kayıt yok.\nRegl başlatıp bitirince buraya işlenir.',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black38, fontSize: 13),
+                  style: const TextStyle(color: Colors.black38, fontSize: 13),
                 ),
               )
             else
@@ -247,11 +251,11 @@ class StatsScreen extends StatelessWidget {
                     // Tablo başlığı
                     Padding(
                       padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
-                      child: Row(children: const [
-                        Expanded(child: Text('Başlangıç', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black45))),
-                        SizedBox(width: 8),
-                        SizedBox(width: 70, child: Text('Regl', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black45))),
-                        SizedBox(width: 70, child: Text('Süre', textAlign: TextAlign.center, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black45))),
+                      child: Row(children: [
+                        Expanded(child: Text(isEn ? 'Start' : 'Başlangıç', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black45))),
+                        const SizedBox(width: 8),
+                        SizedBox(width: 70, child: Text(isEn ? 'Period' : 'Regl', textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black45))),
+                        SizedBox(width: 70, child: Text(isEn ? 'Cycle' : 'Süre', textAlign: TextAlign.center, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.black45))),
                       ]),
                     ),
                     const Divider(height: 1),
@@ -261,15 +265,15 @@ class StatsScreen extends StatelessWidget {
                           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
                           child: Row(children: [
                             Expanded(child: Text(
-                              _fmtDate(r.start),
+                              _fmtDate(r.start, isEn: isEn),
                               style: const TextStyle(fontSize: 13, color: Colors.black87),
                             )),
                             SizedBox(width: 70, child: _PillBadge(
-                              value: '${r.periodDays} gün',
+                              value: isEn ? '${r.periodDays}d' : '${r.periodDays} gün',
                               color: kBlue,
                             )),
                             SizedBox(width: 70, child: _PillBadge(
-                              value: '${r.cycleDays} gün',
+                              value: isEn ? '${r.cycleDays}d' : '${r.cycleDays} gün',
                               color: kPurple,
                             )),
                           ]),
@@ -299,9 +303,12 @@ class StatsScreen extends StatelessWidget {
     return list.reduce((a, b) => a > b ? a : b);
   }
 
-  String _fmtDate(DateTime d) {
-    const months = ['', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-                    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  String _fmtDate(DateTime d, {bool isEn = false}) {
+    const monthsTr = ['', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+                      'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+    const monthsEn = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = isEn ? monthsEn : monthsTr;
     return '${d.day} ${months[d.month]} ${d.year}';
   }
 }

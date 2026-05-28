@@ -135,8 +135,8 @@ class _PrivacyContent extends StatelessWidget {
         _h2(isEn ? '7. Contact Us' : '7. İletişim', cs),
         _p(
           isEn
-              ? 'If you have questions about this Privacy Policy or your data, please contact us at:\n\nsupport@lunora.app'
-              : 'Bu Gizlilik Politikası veya verileriniz hakkında sorularınız için bize ulaşın:\n\nsupport@lunora.app',
+              ? 'If you have questions about this Privacy Policy or your data, please contact us at:\n\nlunora.support@gmail.com'
+              : 'Bu Gizlilik Politikası veya verileriniz hakkında sorularınız için bize ulaşın:\n\nlunora.support@gmail.com',
           cs,
         ),
       ],
@@ -212,7 +212,7 @@ class _TermsContent extends StatelessWidget {
         ),
 
         _h2(isEn ? '7. Contact' : '7. İletişim', cs),
-        _p('support@lunora.app', cs),
+        _p('lunora.support@gmail.com', cs),
       ],
     );
   }

@@ -98,23 +98,25 @@ class _GeneralSettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CycleProvider>();
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = !l10n.isTurkish;
 
     return _Section(
-      title: 'Genel Ayarlar',
+      title: isEn ? 'General Settings' : 'Genel Ayarlar',
       icon: Icons.tune,
       children: [
-        _subLabel(context, 'Uygulama amacı'),
+        _subLabel(context, isEn ? 'App purpose' : 'Uygulama amacı'),
         _ModeCard(
-          title: 'Regl Takip',
-          subtitle: 'Adet döngünüzü takip edin',
+          title: isEn ? 'Period Tracking' : 'Regl Takip',
+          subtitle: isEn ? 'Track your menstrual cycle' : 'Adet döngünüzü takip edin',
           icon: Icons.water_drop_outlined,
           selected: provider.appMode == AppMode.reglTakip,
           onTap: () => provider.updateAppMode(AppMode.reglTakip),
         ),
         const SizedBox(height: 8),
         _ModeCard(
-          title: 'Hamile Takip',
-          subtitle: 'Hamilelik sürecinizi takip edin',
+          title: isEn ? 'Pregnancy Tracking' : 'Hamile Takip',
+          subtitle: isEn ? 'Track your pregnancy journey' : 'Hamilelik sürecinizi takip edin',
           icon: Icons.pregnant_woman_outlined,
           selected: provider.appMode == AppMode.hamileTakip,
           onTap: () async {
@@ -125,9 +127,9 @@ class _GeneralSettingsSection extends StatelessWidget {
                   DateTime.now().subtract(const Duration(days: 70)),
               firstDate: DateTime.now().subtract(const Duration(days: 280)),
               lastDate: DateTime.now(),
-              helpText: 'Son Adet Tarihinizi Seçin (LMP)',
-              cancelText: 'İPTAL',
-              confirmText: 'TAMAM',
+              helpText: isEn ? 'Select Last Menstrual Period (LMP)' : 'Son Adet Tarihinizi Seçin (LMP)',
+              cancelText: isEn ? 'CANCEL' : 'İPTAL',
+              confirmText: isEn ? 'OK' : 'TAMAM',
             );
             if (picked != null) {
               provider.updatePregnancyStartDate(picked);
@@ -140,8 +142,8 @@ class _GeneralSettingsSection extends StatelessWidget {
         ],
         const SizedBox(height: 8),
         _ModeCard(
-          title: 'Hamile Kalma',
-          subtitle: 'Doğurganlık pencerelerinizi takip edin',
+          title: isEn ? 'Trying to Conceive' : 'Hamile Kalma',
+          subtitle: isEn ? 'Track your fertility windows' : 'Doğurganlık pencerelerinizi takip edin',
           icon: Icons.favorite_outline,
           selected: provider.appMode == AppMode.hamilleKalma,
           onTap: () => provider.updateAppMode(AppMode.hamilleKalma),
@@ -162,6 +164,8 @@ class _NotificationsSection extends StatelessWidget {
     final auth = context.watch<AuthProvider>();
     final user = auth.appUser;
     final prefs = user?.preferences.notifications ?? const NotificationPrefs();
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = !l10n.isTurkish;
 
     Future<void> update(NotificationPrefs newPrefs) async {
       if (user == null) return;
@@ -170,68 +174,68 @@ class _NotificationsSection extends StatelessWidget {
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text('Kaydedilemedi: $e')));
+              .showSnackBar(SnackBar(content: Text(isEn ? 'Could not save: $e' : 'Kaydedilemedi: $e')));
         }
       }
     }
 
     String intervalLabel(int minutes) {
-      if (minutes < 60) return '$minutes dakika';
-      if (minutes == 60) return '1 saat';
-      if (minutes % 60 == 0) return '${minutes ~/ 60} saat';
-      return '${minutes ~/ 60} sa ${minutes % 60} dk';
+      if (minutes < 60) return isEn ? '$minutes min' : '$minutes dakika';
+      if (minutes == 60) return isEn ? '1 hr' : '1 saat';
+      if (minutes % 60 == 0) return isEn ? '${minutes ~/ 60} hr' : '${minutes ~/ 60} saat';
+      return isEn ? '${minutes ~/ 60}h ${minutes % 60}m' : '${minutes ~/ 60} sa ${minutes % 60} dk';
     }
 
     return _Section(
-      title: 'Bildirimler',
+      title: isEn ? 'Notifications' : 'Bildirimler',
       icon: Icons.notifications_outlined,
       children: [
         _SwitchRow(
-          title: 'Postuma yorum geldiğinde',
-          subtitle: 'Paylaşımlarına yorum geldiğinde bildirim al',
+          title: isEn ? 'Comment on my post' : 'Postuma yorum geldiğinde',
+          subtitle: isEn ? 'Get notified when someone comments on your post' : 'Paylaşımlarına yorum geldiğinde bildirim al',
           value: prefs.commentOnPost,
           onChanged: (v) => update(prefs.copyWith(commentOnPost: v)),
         ),
         _SwitchRow(
-          title: 'Regl başladı',
-          subtitle: 'Regl günün geldiğinde hatırlat',
+          title: isEn ? 'Period started' : 'Regl başladı',
+          subtitle: isEn ? 'Remind me when my period is due' : 'Regl günün geldiğinde hatırlat',
           value: prefs.periodStart,
           onChanged: (v) => update(prefs.copyWith(periodStart: v)),
         ),
         _SwitchRow(
-          title: 'Regl bitti',
-          subtitle: 'Regl bitiş günü hatırlat',
+          title: isEn ? 'Period ended' : 'Regl bitti',
+          subtitle: isEn ? 'Remind me on the last day of my period' : 'Regl bitiş günü hatırlat',
           value: prefs.periodEnd,
           onChanged: (v) => update(prefs.copyWith(periodEnd: v)),
         ),
         _SwitchRow(
-          title: 'Egzersiz hatırlatıcısı',
-          subtitle: 'Düzenli egzersiz zamanı hatırlatıcısı',
+          title: isEn ? 'Exercise reminder' : 'Egzersiz hatırlatıcısı',
+          subtitle: isEn ? 'Regular exercise time reminder' : 'Düzenli egzersiz zamanı hatırlatıcısı',
           value: prefs.exerciseReminder,
           onChanged: (v) => update(prefs.copyWith(exerciseReminder: v)),
         ),
         if (prefs.exerciseReminder) ...[
           const SizedBox(height: 8),
-          _subLabel(context, 'Her ${prefs.exerciseReminderIntervalDays} günde bir hatırlat'),
+          _subLabel(context, isEn ? 'Remind every ${prefs.exerciseReminderIntervalDays} day(s)' : 'Her ${prefs.exerciseReminderIntervalDays} günde bir hatırlat'),
           _SliderTile(
             value: prefs.exerciseReminderIntervalDays.toDouble(),
             min: 1,
             max: 7,
             divisions: 6,
-            label: '${prefs.exerciseReminderIntervalDays} gün',
+            label: isEn ? '${prefs.exerciseReminderIntervalDays}d' : '${prefs.exerciseReminderIntervalDays} gün',
             onChanged: (v) => update(prefs.copyWith(exerciseReminderIntervalDays: v.round())),
           ),
         ],
         const Divider(height: 24),
         _SwitchRow(
-          title: 'Su içme hatırlatıcısı',
-          subtitle: 'Düzenli aralıklarla su iç',
+          title: isEn ? 'Water reminder' : 'Su içme hatırlatıcısı',
+          subtitle: isEn ? 'Drink water regularly' : 'Düzenli aralıklarla su iç',
           value: prefs.waterReminder,
           onChanged: (v) => update(prefs.copyWith(waterReminder: v)),
         ),
         if (prefs.waterReminder) ...[
           const SizedBox(height: 8),
-          _subLabel(context, 'Hatırlatma sıklığı: ${intervalLabel(prefs.waterReminderIntervalMinutes)}'),
+          _subLabel(context, isEn ? 'Reminder frequency: ${intervalLabel(prefs.waterReminderIntervalMinutes)}' : 'Hatırlatma sıklığı: ${intervalLabel(prefs.waterReminderIntervalMinutes)}'),
           _SliderTile(
             value: prefs.waterReminderIntervalMinutes.toDouble(),
             min: 15,
@@ -269,24 +273,25 @@ class _ThemeSection extends StatelessWidget {
       }
     }
 
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     return _Section(
-      title: 'Tema',
+      title: isEn ? 'Theme' : 'Tema',
       icon: Icons.palette_outlined,
       children: [
         _ThemeRadio(
-          label: 'Sistemi takip et',
+          label: isEn ? 'Follow system' : 'Sistemi takip et',
           value: AppThemeMode.system,
           groupValue: current,
           onChanged: setMode,
         ),
         _ThemeRadio(
-          label: 'Açık',
+          label: isEn ? 'Light' : 'Açık',
           value: AppThemeMode.light,
           groupValue: current,
           onChanged: setMode,
         ),
         _ThemeRadio(
-          label: 'Koyu',
+          label: isEn ? 'Dark' : 'Koyu',
           value: AppThemeMode.dark,
           groupValue: current,
           onChanged: setMode,
@@ -305,28 +310,29 @@ class _CycleSettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CycleProvider>();
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
 
     return _Section(
-      title: 'Döngü',
+      title: isEn ? 'Cycle' : 'Döngü',
       icon: Icons.loop,
       children: [
-        _subLabel(context, 'Ortalama döngü uzunluğu'),
+        _subLabel(context, isEn ? 'Average cycle length' : 'Ortalama döngü uzunluğu'),
         _SliderTile(
           value: provider.cycleLength.toDouble(),
           min: 21,
           max: 40,
           divisions: 19,
-          label: '${provider.cycleLength} gün',
+          label: isEn ? '${provider.cycleLength}d' : '${provider.cycleLength} gün',
           onChanged: (v) => provider.updateCycleLength(v.round()),
         ),
         const SizedBox(height: 16),
-        _subLabel(context, 'Regl süresi'),
+        _subLabel(context, isEn ? 'Period duration' : 'Regl süresi'),
         _SliderTile(
           value: provider.periodLength.toDouble(),
           min: 2,
           max: 10,
           divisions: 8,
-          label: '${provider.periodLength} gün',
+          label: isEn ? '${provider.periodLength}d' : '${provider.periodLength} gün',
           onChanged: (v) => provider.updatePeriodLength(v.round()),
         ),
       ],
@@ -414,9 +420,12 @@ class _LmpRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final provider = context.watch<CycleProvider>();
     final lmp = provider.pregnancyStartDate;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
     final label = lmp != null
-        ? 'Son adet tarihi: ${lmp.day}/${lmp.month}/${lmp.year}  •  ${provider.pregnancyWeek}. hafta'
-        : 'Son adet tarihi girilmedi';
+        ? (isEn
+            ? 'Last period: ${lmp.day}/${lmp.month}/${lmp.year}  •  Week ${provider.pregnancyWeek}'
+            : 'Son adet tarihi: ${lmp.day}/${lmp.month}/${lmp.year}  •  ${provider.pregnancyWeek}. hafta')
+        : (isEn ? 'Last period date not entered' : 'Son adet tarihi girilmedi');
 
     return InkWell(
       borderRadius: BorderRadius.circular(12),
@@ -426,9 +435,9 @@ class _LmpRow extends StatelessWidget {
           initialDate: lmp ?? DateTime.now().subtract(const Duration(days: 70)),
           firstDate: DateTime.now().subtract(const Duration(days: 280)),
           lastDate: DateTime.now(),
-          helpText: 'Son Adet Tarihinizi Seçin (LMP)',
-          cancelText: 'İPTAL',
-          confirmText: 'TAMAM',
+          helpText: isEn ? 'Select Last Menstrual Period (LMP)' : 'Son Adet Tarihinizi Seçin (LMP)',
+          cancelText: isEn ? 'CANCEL' : 'İPTAL',
+          confirmText: isEn ? 'OK' : 'TAMAM',
         );
         if (picked != null) provider.updatePregnancyStartDate(picked);
       },

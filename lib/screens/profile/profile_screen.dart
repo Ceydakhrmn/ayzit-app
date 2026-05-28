@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import '../../core/theme/app_background.dart';
 
 import '../../core/theme/app_colors.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/post.dart';
 import '../../models/post_report.dart';
 import '../../providers/auth_provider.dart';
@@ -73,20 +74,24 @@ class _ProfileScreenState extends State<ProfileScreen>
   }
 
   Future<void> _handleDeletePost(Post post) async {
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = !l10n.isTurkish;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Postu Sil'),
-        content: const Text('Bu paylaşımı silmek istediğine emin misin?'),
+        title: Text(isEn ? 'Delete Post' : 'Postu Sil'),
+        content: Text(isEn
+            ? 'Are you sure you want to delete this post?'
+            : 'Bu paylaşımı silmek istediğine emin misin?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Vazgeç'),
+            child: Text(l10n.dismissBtn),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Sil',
-                style: TextStyle(color: AppColors.danger)),
+            child: Text(l10n.deleteBtn,
+                style: const TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -98,26 +103,30 @@ class _ProfileScreenState extends State<ProfileScreen>
       setState(() => _myPosts.removeWhere((p) => p.id == post.id));
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Silinemedi: $e')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(isEn ? 'Could not delete: $e' : 'Silinemedi: $e')));
     }
   }
 
   Future<void> _confirmLogout() async {
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = !l10n.isTurkish;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Çıkış Yap'),
-        content: const Text('Oturumu kapatmak istediğinden emin misin?'),
+        title: Text(isEn ? 'Log Out' : 'Çıkış Yap'),
+        content: Text(isEn
+            ? 'Are you sure you want to sign out?'
+            : 'Oturumu kapatmak istediğinden emin misin?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(false),
-            child: const Text('Vazgeç'),
+            child: Text(l10n.dismissBtn),
           ),
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            child: const Text('Çıkış Yap',
-                style: TextStyle(color: AppColors.danger)),
+            child: Text(l10n.logoutBtn,
+                style: const TextStyle(color: AppColors.danger)),
           ),
         ],
       ),
@@ -132,12 +141,14 @@ class _ProfileScreenState extends State<ProfileScreen>
     super.build(context);
     final auth = context.watch<AuthProvider>();
     final user = auth.appUser;
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = !l10n.isTurkish;
 
     return AppBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Profil'),
+          title: Text(l10n.profileLabel),
         ),
       body: RefreshIndicator(
         onRefresh: _refresh,
@@ -178,14 +189,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                 children: [
                   Expanded(
                     child: _StatTile(
-                      label: 'Paylaşım',
+                      label: l10n.isTurkish ? 'Paylaşım' : 'Posts',
                       value: '${user?.postCount ?? 0}',
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _StatTile(
-                      label: 'Beğeni',
+                      label: l10n.isTurkish ? 'Beğeni' : 'Likes',
                       value: '${user?.likesReceived ?? 0}',
                     ),
                   ),
@@ -197,7 +208,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             ListTile(
               leading:
                   const Icon(Icons.edit_outlined, color: AppColors.primary),
-              title: const Text('Profili Düzenle'),
+              title: Text(l10n.editProfileLabel),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
@@ -208,7 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen>
             ListTile(
               leading: const Icon(Icons.settings_outlined,
                   color: AppColors.primary),
-              title: const Text('Ayarlar'),
+              title: Text(l10n.settingsLabel),
               trailing: const Icon(Icons.chevron_right),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const SettingsScreen()),
@@ -216,15 +227,15 @@ class _ProfileScreenState extends State<ProfileScreen>
             ),
             ListTile(
               leading: const Icon(Icons.logout, color: AppColors.danger),
-              title: const Text('Çıkış Yap',
-                  style: TextStyle(color: AppColors.danger)),
+              title: Text(l10n.logoutBtn,
+                  style: const TextStyle(color: AppColors.danger)),
               onTap: _confirmLogout,
             ),
             const Divider(height: 1),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 8),
               child: Text(
-                'Paylaşımlarım',
+                l10n.myPostsLabel,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
@@ -242,7 +253,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 padding: const EdgeInsets.all(24),
                 child: Center(
                   child: Text(
-                    'Henüz paylaşımın yok',
+                    isEn ? 'No posts yet' : 'Henüz paylaşımın yok',
                     style: TextStyle(
                       color: Theme.of(context)
                           .colorScheme

@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers/cycle_provider.dart';
 
 const Color _gardenGreen = Color(0xFF558B2F);
@@ -72,6 +73,7 @@ class _GrowthGardenCardState extends State<GrowthGardenCard>
     final week = context.select<CycleProvider, int>((p) => p.pregnancyWeek);
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
 
     // Hafta ilerlediyse ağacı yumuşakça yeni kareye büyüt.
     if (_ready && week != _animatedWeek) {
@@ -100,13 +102,13 @@ class _GrowthGardenCardState extends State<GrowthGardenCard>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Row(
+          Row(
             children: [
-              Icon(Icons.eco, size: 15, color: _gardenGreen),
-              SizedBox(width: 6),
+              const Icon(Icons.eco, size: 15, color: _gardenGreen),
+              const SizedBox(width: 6),
               Text(
-                'BÜYÜME BAHÇEM',
-                style: TextStyle(
+                isEn ? 'GROWTH GARDEN' : 'BÜYÜME BAHÇEM',
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.6,
@@ -152,7 +154,7 @@ class _GrowthGardenCardState extends State<GrowthGardenCard>
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '$week. haftadasın',
+                      isEn ? 'Week $week' : '$week. haftadasın',
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -161,8 +163,9 @@ class _GrowthGardenCardState extends State<GrowthGardenCard>
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Sen büyüdükçe bahçen de büyüyor — ağacın her hafta '
-                      'biraz daha serpiliyor.',
+                      isEn
+                          ? 'As you grow, so does your garden — your tree blooms a little more each week.'
+                          : 'Sen büyüdükçe bahçen de büyüyor — ağacın her hafta biraz daha serpiliyor.',
                       style: TextStyle(
                         fontSize: 12,
                         height: 1.35,

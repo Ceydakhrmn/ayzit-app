@@ -589,4 +589,15 @@ class AppLocalizationsDe extends AppLocalizations {
   @override String get emotionalLabel => 'Emotional';
   @override String get saveBtn => 'SAVE';
   @override String get symptomsSavedSnack => 'Symptoms saved!';
+
+  // ── Common action buttons ─────────────────────────────────────────────────
+  @override String get deleteBtn => 'Delete';
+  @override String get editBtn => 'Edit';
+  @override String get reportBtn => 'Report';
+  @override String get logoutBtn => 'Log Out';
+  @override String get profileLabel => 'Profile';
+  @override String get settingsLabel => 'Settings';
+  @override String get editProfileLabel => 'Edit Profile';
+  @override String get myPostsLabel => 'My Posts';
+  @override String get dismissBtn => 'Cancel';
 }

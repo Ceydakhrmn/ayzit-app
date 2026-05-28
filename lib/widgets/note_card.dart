@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/cycle_provider.dart';
 
 class NoteCard extends StatefulWidget {
@@ -28,6 +29,7 @@ class _NoteCardState extends State<NoteCard> {
     final provider = context.watch<CycleProvider>();
     final selected = provider.selectedDay;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
 
     final currentKey = _dayKey(selected);
     if (currentKey != _loadedDayKey) {
@@ -78,8 +80,8 @@ class _NoteCardState extends State<NoteCard> {
             style: TextStyle(fontSize: 13, color: textColor),
             decoration: InputDecoration(
               hintText: selected == null
-                  ? 'Takvimden bir gün seç...'
-                  : 'Notunu buraya yaz...',
+                  ? (isEn ? 'Select a day from the calendar...' : 'Takvimden bir gün seç...')
+                  : (isEn ? 'Write your note here...' : 'Notunu buraya yaz...'),
               hintStyle: TextStyle(fontSize: 13, color: hintColor),
               border: InputBorder.none,
               enabledBorder: InputBorder.none,

@@ -589,4 +589,15 @@ class AppLocalizationsTr extends AppLocalizations {
   @override String get emotionalLabel => 'Duygusal';
   @override String get saveBtn => 'KAYDET';
   @override String get symptomsSavedSnack => 'Belirtiler kaydedildi!';
+
+  // ── Common action buttons ─────────────────────────────────────────────────
+  @override String get deleteBtn => 'Sil';
+  @override String get editBtn => 'Düzenle';
+  @override String get reportBtn => 'Şikayet Et';
+  @override String get logoutBtn => 'Çıkış Yap';
+  @override String get profileLabel => 'Profil';
+  @override String get settingsLabel => 'Ayarlar';
+  @override String get editProfileLabel => 'Profili Düzenle';
+  @override String get myPostsLabel => 'Paylaşımlarım';
+  @override String get dismissBtn => 'Vazgeç';
 }
