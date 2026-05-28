@@ -52,8 +52,6 @@ class CalendarGrid extends StatelessWidget {
         for (int r = 0; r < rowCount; r++) ...[
           _buildWeekRow(context, provider, appts, firstDay, startOffset,
               daysInMonth, r, isPregnancy, lmp),
-          if (isPregnancy)
-            _buildWeekLabel(context, firstDay, startOffset, r, lmp),
           const SizedBox(height: 6),
         ],
       ],
@@ -310,116 +308,6 @@ class CalendarGrid extends StatelessWidget {
           lmp: lmp,
           dueDate: dueDate,
         ),
-      ),
-    );
-  }
-
-  /// Satırın hafta etiketi + varsa önemli olay bantları.
-  Widget _buildWeekLabel(
-    BuildContext context,
-    DateTime firstDay,
-    int startOffset,
-    int row,
-    DateTime? lmp,
-  ) {
-    final l10n = AppLocalizations.of(context)!;
-    final isEnglish = !l10n.isTurkish;
-
-    final firstDateOfRow =
-        firstDay.add(Duration(days: row * 7 - startOffset));
-    final midDate = firstDateOfRow.add(const Duration(days: 3));
-    final week = pregnancyWeekForDate(midDate, lmp);
-    if (week == null) return const SizedBox.shrink();
-
-    // WeekEvent'ler (hafta-bazlı)
-    WeekEvent? rowWeekEvent;
-    for (int d = 0; d < 7; d++) {
-      final ev = weekEventForDate(
-          firstDateOfRow.add(Duration(days: d)), lmp);
-      if (ev != null) { rowWeekEvent = ev; break; }
-    }
-
-    // Bu satırda başlayan kMilestones
-    final startingMilestones =
-        milestonesStartingInRow(firstDateOfRow, lmp);
-
-    // İkisi de yoksa satır boş
-    if (rowWeekEvent == null && startingMilestones.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final weekSuffix = isEnglish ? 'Week $week · ' : '$week. Hafta · ';
-
-    // Tüm bantları listele
-    final bands = <Widget>[];
-
-    if (rowWeekEvent != null) {
-      bands.add(_eventBand(
-        rowWeekEvent.emoji,
-        '$weekSuffix${rowWeekEvent.getTitle(isEnglish)}',
-        rowWeekEvent.color,
-        isDark,
-      ));
-    }
-
-    for (final m in startingMilestones) {
-      // WeekEvent ile başlığı aynıysa tekrar gösterme
-      if (rowWeekEvent != null &&
-          m.getTitle(isEnglish).toLowerCase() ==
-              rowWeekEvent.getTitle(isEnglish).toLowerCase()) { continue; }
-      bands.add(_eventBand(
-        m.category.emoji,
-        m.getTitle(isEnglish),
-        m.color,
-        isDark,
-      ));
-    }
-
-    if (bands.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 3, bottom: 1),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: bands
-            .map((b) => Padding(
-                  padding: const EdgeInsets.only(bottom: 3),
-                  child: b,
-                ))
-            .toList(),
-      ),
-    );
-  }
-
-  Widget _eventBand(
-      String emoji, String label, Color color, bool isDark) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: isDark ? 0.2 : 0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: color.withValues(alpha: isDark ? 0.4 : 0.28),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(emoji, style: const TextStyle(fontSize: 12)),
-          const SizedBox(width: 5),
-          Flexible(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w700,
-                color: color,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

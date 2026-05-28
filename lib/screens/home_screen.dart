@@ -12,6 +12,7 @@ import '../widgets/cycle_summary_card.dart';
 import '../widgets/pregnancy/appointments_card.dart';
 import '../widgets/pregnancy/important_days_card.dart';
 import '../widgets/pregnancy/pregnancy_calculator_card.dart';
+import '../widgets/pregnancy/pregnancy_week_events_card.dart';
 import '../widgets/fertility/fertility_info_cards.dart';
 
 void showLegendDialog(BuildContext context) {
@@ -344,6 +345,8 @@ class HomeScreen extends StatelessWidget {
 
                 // ── Hamile takip modu ──
                 if (isPregnancy) ...[
+                  const PregnancyWeekEventsCard(),
+                  const SizedBox(height: 12),
                   const ImportantDaysCard(),
                   const SizedBox(height: 12),
                   const AppointmentsCard(),
