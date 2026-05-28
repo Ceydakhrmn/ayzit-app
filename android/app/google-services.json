@@ -9,7 +9,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:198781995461:android:94b290ba385589343963ac",
         "android_client_info": {
-          "package_name": "com.example.lunora"
+          "package_name": "com.lunora.app"
         }
       },
       "oauth_client": [
@@ -17,7 +17,7 @@
           "client_id": "198781995461-bhd4sgpafgmck7u3abfjohi80h3kmpbh.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.lunora",
+            "package_name": "com.lunora.app",
             "certificate_hash": "6caff517a94fada21afd8e7a9821c820e3365f21"
           }
         },

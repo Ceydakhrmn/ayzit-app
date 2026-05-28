@@ -71,6 +71,8 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
       setState(() => _error = 'Boş post gönderemezsin');
       return;
     }
+    // Capture context-dependent references before any await
+    final auth = context.read<AuthProvider>();
     setState(() {
       _loading = true;
       _error = null;
@@ -78,12 +80,11 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
     try {
       // Profanity check
       final badWords = await _profanityService.loadList();
+      if (!mounted) return;
       if (ProfanityFilter.contains(text, badWords)) {
         setState(() => _error = 'İçerik topluluk kurallarına uygun değil');
         return;
       }
-
-      final auth = context.read<AuthProvider>();
       final user = auth.appUser;
       if (user == null) {
         setState(() => _error = 'Giriş gerekli');

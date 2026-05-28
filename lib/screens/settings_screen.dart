@@ -21,6 +21,7 @@ import '../models/notification_prefs.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cycle_provider.dart';
 import '../providers/language_provider.dart';
+import 'privacy_policy_screen.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -41,6 +42,7 @@ class SettingsScreen extends StatelessWidget {
           _NotificationsSection(),
           _ThemeSection(),
           _CycleSettingsSection(),
+          _LegalSection(),
           SizedBox(height: 32),
         ],
       ),
@@ -666,6 +668,62 @@ class _SliderTile extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
             textAlign: TextAlign.right,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ────────────────────────────────────────────
+// Yasal / Legal
+// ────────────────────────────────────────────
+
+class _LegalSection extends StatelessWidget {
+  const _LegalSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = !l10n.isTurkish;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+          child: Text(
+            isEn ? 'Legal' : 'Yasal',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w700,
+              color: cs.onSurface.withValues(alpha: 0.45),
+              letterSpacing: 0.6,
+            ),
+          ),
+        ),
+        ListTile(
+          leading: const Icon(Icons.shield_outlined, size: 22),
+          title: Text(
+            isEn ? 'Privacy Policy' : 'Gizlilik Politikası',
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          trailing: const Icon(Icons.chevron_right, size: 20),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen()),
+          ),
+        ),
+        const Divider(indent: 16, endIndent: 16, height: 1),
+        ListTile(
+          leading: const Icon(Icons.description_outlined, size: 22),
+          title: Text(
+            isEn ? 'Terms of Use' : 'Kullanım Koşulları',
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          ),
+          trailing: const Icon(Icons.chevron_right, size: 20),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+                builder: (_) => const PrivacyPolicyScreen(showTerms: true)),
           ),
         ),
       ],
