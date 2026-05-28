@@ -30,6 +30,49 @@ import 'package:flutter/material.dart';
 import '../../data/pregnancy_data.dart';
 import 'embryo_painter.dart';
 
+String _pathForWeek(int week) {
+  if (week == 1)  return 'assets/images/baby_stages/week_1.png';
+  if (week == 2)  return 'assets/images/baby_stages/week_2.png';
+  if (week == 3)  return 'assets/images/baby_stages/week_3.png';
+  if (week == 4)  return 'assets/images/baby_stages/week_4.png';
+  if (week == 5)  return 'assets/images/baby_stages/week_5.png';
+  if (week <= 7)  return 'assets/images/baby_stages/week_6:7.png';
+  if (week <= 9)  return 'assets/images/baby_stages/week_8:9.png';
+  if (week == 10) return 'assets/images/baby_stages/week_10.png';
+  if (week <= 16) return 'assets/images/baby_stages/week_11:16.png';
+  if (week <= 28) return 'assets/images/baby_stages/week_17:28.png';
+  if (week <= 36) return 'assets/images/baby_stages/week_29:36.png';
+  return              'assets/images/baby_stages/week_37:40.png';
+}
+
+// Animasyonsuz statik bebek gelişim görseli.
+class BabyStageImage extends StatelessWidget {
+  final int week;
+  final double size;
+
+  const BabyStageImage({
+    super.key,
+    required this.week,
+    this.size = 140,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final w = week.clamp(1, 40);
+    final stage = embryoStageForWeek(w);
+    final path = _pathForWeek(w);
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Image.asset(
+        path,
+        fit: BoxFit.contain,
+        errorBuilder: (ctx, err, st) => EmbryoIcon(stage: stage, size: size),
+      ),
+    );
+  }
+}
+
 class AnimatedBabyStage extends StatefulWidget {
   final int week;
   final double size;
@@ -61,21 +104,6 @@ class _AnimatedBabyStageState extends State<AnimatedBabyStage>
   void dispose() {
     _ctrl.dispose();
     super.dispose();
-  }
-
-  static String _pathForWeek(int week) {
-    if (week == 1)  return 'assets/images/baby_stages/week_1.png';
-    if (week == 2)  return 'assets/images/baby_stages/week_2.png';
-    if (week == 3)  return 'assets/images/baby_stages/week_3.png';
-    if (week == 4)  return 'assets/images/baby_stages/week_4.png';
-    if (week == 5)  return 'assets/images/baby_stages/week_5.png';
-    if (week <= 7)  return 'assets/images/baby_stages/week_6:7.png';
-    if (week <= 9)  return 'assets/images/baby_stages/week_8:9.png';
-    if (week == 10) return 'assets/images/baby_stages/week_10.png';
-    if (week <= 16) return 'assets/images/baby_stages/week_11:16.png';
-    if (week <= 28) return 'assets/images/baby_stages/week_17:28.png';
-    if (week <= 36) return 'assets/images/baby_stages/week_29:36.png';
-    return              'assets/images/baby_stages/week_37:40.png';
   }
 
   @override

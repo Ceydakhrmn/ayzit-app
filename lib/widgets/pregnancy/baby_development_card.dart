@@ -102,22 +102,16 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // SOL %42 — bebek gelişim görseli
+              // SOL %42 — bebek gelişim görseli (animasyonsuz)
               Expanded(
                 flex: 42,
                 child: SizedBox(
                   height: 148,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(14),
-                    child: AnimatedSwitcher(
-                      duration: const Duration(milliseconds: 500),
-                      switchInCurve: Curves.easeOut,
-                      switchOutCurve: Curves.easeIn,
-                      child: AnimatedBabyStage(
-                        key: ValueKey(week),
-                        week: week,
-                        size: 140,
-                      ),
+                    child: BabyStageImage(
+                      week: week,
+                      size: 140,
                     ),
                   ),
                 ),
