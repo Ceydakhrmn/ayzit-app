@@ -180,7 +180,7 @@ class PostCard extends StatelessWidget {
   }
 }
 
-class _LikeButton extends StatelessWidget {
+class _LikeButton extends StatefulWidget {
   const _LikeButton({
     required this.post,
     required this.uid,
@@ -192,50 +192,91 @@ class _LikeButton extends StatelessWidget {
   final PostService postService;
 
   @override
+  State<_LikeButton> createState() => _LikeButtonState();
+}
+
+class _LikeButtonState extends State<_LikeButton> {
+  // Optimistic local count — null means "use widget.post.likeCount"
+  int? _localCount;
+  bool _pending = false;
+
+  @override
+  void didUpdateWidget(_LikeButton old) {
+    super.didUpdateWidget(old);
+    // Post nesnesi değişince (örn. feed yenilenince) local count sıfırla
+    if (old.post.id != widget.post.id) _localCount = null;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (uid == null) {
-      return Row(
-        children: [
-          const Icon(Icons.favorite_border, size: 20),
-          const SizedBox(width: 6),
-          Text('${post.likeCount}',
-              style: const TextStyle(fontSize: 13)),
-        ],
-      );
+    final displayCount = _localCount ?? widget.post.likeCount;
+
+    if (widget.uid == null) {
+      return Row(children: [
+        const Icon(Icons.favorite_border, size: 20),
+        const SizedBox(width: 6),
+        Text('$displayCount', style: const TextStyle(fontSize: 13)),
+      ]);
     }
+
     return StreamBuilder<bool>(
-      stream: postService.likeStream(postId: post.id, uid: uid!),
+      stream: widget.postService.likeStream(
+          postId: widget.post.id, uid: widget.uid!),
       builder: (context, snapshot) {
         final liked = snapshot.data ?? false;
         return InkWell(
           borderRadius: BorderRadius.circular(20),
-          onTap: () async {
-            try {
-              await postService.toggleLike(postId: post.id, uid: uid!);
-            } catch (_) {}
-          },
+          onTap: _pending
+              ? null
+              : () async {
+                  final currentCount =
+                      _localCount ?? widget.post.likeCount;
+                  setState(() {
+                    _pending = true;
+                    // Optimistic update
+                    _localCount =
+                        liked ? currentCount - 1 : currentCount + 1;
+                  });
+                  try {
+                    await widget.postService.toggleLike(
+                        postId: widget.post.id, uid: widget.uid!);
+                  } catch (_) {
+                    // Revert on error
+                    if (mounted) setState(() => _localCount = currentCount);
+                  } finally {
+                    if (mounted) setState(() => _pending = false);
+                  }
+                },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
             child: Row(
               children: [
-                Icon(
-                  liked ? Icons.favorite : Icons.favorite_border,
-                  size: 20,
-                  color: liked
-                      ? AppColors.likeRed
-                      : Theme.of(context)
-                          .colorScheme
-                          .onSurface
-                          .withValues(alpha: 0.7),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  '${post.likeCount}',
-                  style: TextStyle(
-                    fontSize: 13,
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  child: Icon(
+                    liked ? Icons.favorite : Icons.favorite_border,
+                    key: ValueKey(liked),
+                    size: 20,
                     color: liked
                         ? AppColors.likeRed
-                        : Theme.of(context).colorScheme.onSurface,
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withValues(alpha: 0.7),
+                  ),
+                ),
+                const SizedBox(width: 6),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  child: Text(
+                    '$displayCount',
+                    key: ValueKey(displayCount),
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: liked
+                          ? AppColors.likeRed
+                          : Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ],

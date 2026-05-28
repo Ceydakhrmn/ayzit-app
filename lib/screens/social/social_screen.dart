@@ -17,6 +17,7 @@ import '../../models/post_report.dart';
 import '../../services/post_service.dart';
 import 'create_post_sheet.dart';
 import 'post_detail_screen.dart';
+import 'widgets/avatar_circle.dart';
 import 'widgets/post_card.dart';
 import 'widgets/report_sheet.dart';
 
@@ -105,6 +106,7 @@ class _FeedListState extends State<_FeedList>
   bool _loadingMore = false;
   bool _hasMore = true;
   String? _error;
+  bool _firstLoadStarted = false;
 
   @override
   bool get wantKeepAlive => true;
@@ -113,7 +115,17 @@ class _FeedListState extends State<_FeedList>
   void initState() {
     super.initState();
     _scrollCtrl.addListener(_onScroll);
-    _loadFirstPage();
+    // initState içinde context'e bağlı widget'lar kullanılamaz;
+    // ilk yükleme didChangeDependencies'e taşındı.
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_firstLoadStarted) {
+      _firstLoadStarted = true;
+      _loadFirstPage();
+    }
   }
 
   @override
@@ -281,21 +293,39 @@ class _FeedListState extends State<_FeedList>
       );
     }
 
+    final isPopular = widget.mode == _FeedMode.popularThisMonth;
+    // Popular modda boş olmayan feed'in başına banner gelir
+    final hasBanner = isPopular && _posts.isNotEmpty;
+    final bannerOffset = hasBanner ? 1 : 0;
+
     return RefreshIndicator(
       onRefresh: _refresh,
       child: ListView.builder(
         controller: _scrollCtrl,
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.only(bottom: 80, top: 4),
-        itemCount: _posts.length + (_hasMore ? 1 : 0),
+        itemCount: _posts.length + bannerOffset + (_hasMore ? 1 : 0),
         itemBuilder: (context, index) {
-          if (index == _posts.length) {
+          // Ayın popüleri banner'ı
+          if (hasBanner && index == 0) {
+            return _MonthTopBanner(
+              post: _posts.first,
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => PostDetailScreen(postId: _posts.first.id),
+                ),
+              ),
+            );
+          }
+          // Sonsuz scroll yükleme göstergesi
+          final postIndex = index - bannerOffset;
+          if (postIndex == _posts.length) {
             return const Padding(
               padding: EdgeInsets.symmetric(vertical: 16),
               child: Center(child: CircularProgressIndicator()),
             );
           }
-          final post = _posts[index];
+          final post = _posts[postIndex];
           return PostCard(
             post: post,
             postService: _service,
@@ -319,6 +349,150 @@ class _FeedListState extends State<_FeedList>
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+// ── Ayın Popüleri Banner ────────────────────────────────────────────────────
+class _MonthTopBanner extends StatelessWidget {
+  const _MonthTopBanner({required this.post, required this.onTap});
+
+  final Post post;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final isEn = !AppLocalizations.of(context)!.isTurkish;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final displayName = post.isAnonymous
+        ? (isEn ? 'Anonymous' : 'Anonim')
+        : (post.authorUsername.isEmpty ? '—' : post.authorUsername);
+
+    final preview = post.content.length > 130
+        ? '${post.content.substring(0, 130)}…'
+        : post.content;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isDark
+                ? [const Color(0xFF3B1E6E), const Color(0xFF4A1252)]
+                : [const Color(0xFF7C3AED), const Color(0xFFA855F7)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF7C3AED).withValues(alpha: 0.35),
+              blurRadius: 18,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Başlık satırı
+            Row(
+              children: [
+                const Text('🏆', style: TextStyle(fontSize: 18)),
+                const SizedBox(width: 8),
+                Text(
+                  isEn ? 'POST OF THE MONTH' : 'AYININ POPÜLERİ',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    letterSpacing: 1.0,
+                  ),
+                ),
+                const Spacer(),
+                // Beğeni sayısı rozeti
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.22),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.favorite, size: 13, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${post.likeCount}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            // Yazar satırı
+            Row(
+              children: [
+                AvatarCircle(
+                  seed: post.authorAvatarSeed,
+                  label: displayName,
+                  anonymous: post.isAnonymous,
+                  size: 28,
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  displayName,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            // İçerik önizlemesi
+            Text(
+              preview,
+              style: const TextStyle(
+                fontSize: 14,
+                color: Colors.white,
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: 14),
+            // Alt satır
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  isEn ? 'See full post' : 'Gönderiyi gör',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white.withValues(alpha: 0.85),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_forward_ios,
+                  size: 11,
+                  color: Colors.white.withValues(alpha: 0.85),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
