@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/cycle_provider.dart';
 import '../../data/pregnancy_data.dart';
+import '../../l10n/app_localizations.dart';
 
 class PregnancyCalculatorCard extends StatefulWidget {
   const PregnancyCalculatorCard({super.key});
@@ -59,19 +60,29 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
     });
   }
 
-  static String _weekToMonthLabel(int week) {
+  static String _weekToMonthLabel(int week, {bool isEnglish = false}) {
     final month = week ~/ 4;
     final rem = week % 4;
+    if (isEnglish) {
+      if (rem == 0) return 'You are $month months pregnant';
+      if (month == 0) return 'You are 0 months $rem weeks pregnant';
+      return 'You are $month months $rem weeks pregnant';
+    }
     if (rem == 0) return '$month aylık hamilesiniz';
     if (month == 0) return '0 ay $rem haftalık hamilesiniz';
     return '$month ay $rem haftalık hamilesiniz';
   }
 
-  static String _formatDate(DateTime d) {
-    const months = [
+  static String _formatDate(DateTime d, {bool isEnglish = false}) {
+    const monthsTr = [
       'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
       'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
     ];
+    const monthsEn = [
+      'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    final months = isEnglish ? monthsEn : monthsTr;
     return '${d.day} ${months[d.month - 1]} ${d.year}';
   }
 
@@ -81,7 +92,7 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
       initialDate: _sat ?? DateTime.now().subtract(const Duration(days: 14)),
       firstDate: DateTime(2020),
       lastDate: DateTime.now(),
-      helpText: 'Son Adet Tarihi',
+      helpText: AppLocalizations.of(context)?.satInputLabel ?? 'Son Adet Tarihi',
     );
     if (picked != null) setState(() => _sat = picked);
   }
@@ -90,7 +101,13 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+    final isEnglish = !l10n.isTurkish;
     final cardBg = isDark ? const Color(0xFF2A2440) : const Color(0xFFF3EFFB);
+    // Re-compute locale-aware month label on each build
+    final displayMonthLabel = _week != null
+        ? _weekToMonthLabel(_week!.clamp(1, 40), isEnglish: isEnglish)
+        : _monthLabel;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -110,9 +127,9 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
                     shape: BoxShape.circle, color: _purple),
               ),
               const SizedBox(width: 6),
-              const Text(
-                'GEBELİK HESAPLAMA',
-                style: TextStyle(
+              Text(
+                l10n.pregnancyCalcTitle.toUpperCase(),
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.6,
@@ -143,8 +160,8 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
                   Expanded(
                     child: Text(
                       _sat != null
-                          ? 'Son Adet Tarihi: ${_formatDate(_sat!)}'
-                          : 'Son Adet Tarihi seç',
+                          ? '${l10n.satInputLabel}: ${_formatDate(_sat!, isEnglish: isEnglish)}'
+                          : l10n.satInputLabel,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -168,7 +185,9 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
             children: [
               Expanded(
                 child: Text(
-                  'Döngü uzunluğu: $_cycleLength gün',
+                  isEnglish
+                      ? '${l10n.cycleLengthInputLabel}: $_cycleLength days'
+                      : '${l10n.cycleLengthInputLabel}: $_cycleLength gün',
                   style: TextStyle(
                     fontSize: 12.5,
                     color: cs.onSurface.withValues(alpha: 0.75),
@@ -190,7 +209,9 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Daha uzun döngülerde tahmini doğum tarihi birkaç gün öteye kayar.',
+            isEnglish
+                ? 'Longer cycles shift the estimated due date by a few days.'
+                : 'Daha uzun döngülerde tahmini doğum tarihi birkaç gün öteye kayar.',
             style: TextStyle(
               fontSize: 11,
               color: cs.onSurface.withValues(alpha: 0.45),
@@ -214,9 +235,9 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
                         borderRadius: BorderRadius.circular(12)),
                     padding: const EdgeInsets.symmetric(vertical: 12),
                   ),
-                  child: const Text(
-                    'Hesapla',
-                    style: TextStyle(
+                  child: Text(
+                    l10n.calculateBtn,
+                    style: const TextStyle(
                         fontWeight: FontWeight.w700, fontSize: 14),
                   ),
                 ),
@@ -230,7 +251,7 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
                     _cycleLength = 28;
                   }),
                   child: Text(
-                    'Sıfırla',
+                    isEnglish ? 'Reset' : 'Sıfırla',
                     style: TextStyle(
                         color: cs.onSurface.withValues(alpha: 0.5),
                         fontSize: 13),
@@ -249,31 +270,31 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
             const SizedBox(height: 14),
             _ResultRow(
               icon: Icons.pregnant_woman_outlined,
-              label: 'Gebelik Haftası',
-              value: '$_week. hafta',
+              label: l10n.pregnancyWeekResult,
+              value: isEnglish ? 'Week $_week' : '$_week. hafta',
               color: _purple,
               isDark: isDark,
             ),
             const SizedBox(height: 8),
             _ResultRow(
               icon: Icons.event_available_outlined,
-              label: 'Tahmini Doğum',
-              value: _formatDate(_dueDate!),
+              label: l10n.dueDateResult,
+              value: _formatDate(_dueDate!, isEnglish: isEnglish),
               color: const Color(0xFF0891B2),
               isDark: isDark,
             ),
             const SizedBox(height: 8),
             _ResultRow(
               icon: Icons.timeline_outlined,
-              label: 'Ay Bilgisi',
-              value: _monthLabel ?? '',
+              label: isEnglish ? 'Month Info' : 'Ay Bilgisi',
+              value: displayMonthLabel ?? '',
               color: const Color(0xFF059669),
               isDark: isDark,
             ),
             const SizedBox(height: 8),
             // ── Burç ────────────────────────────────────────────
-            Builder(builder: (_) {
-              final zodiac = zodiacForDate(_dueDate!);
+            Builder(builder: (bCtx) {
+              final zodiac = zodiacForDate(_dueDate!, isEnglish: isEnglish);
               return Container(
                 padding: const EdgeInsets.symmetric(
                     horizontal: 12, vertical: 10),
@@ -304,14 +325,14 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Bebeğinin Burcu',
+                            l10n.babyZodiacTitle,
                             style: TextStyle(
                               fontSize: 11,
                               color: _purple.withValues(alpha: 0.65),
                             ),
                           ),
                           Text(
-                            '${zodiac.name} · ${zodiac.dateRange}',
+                            '${zodiac.getName(isEnglish)} · ${zodiac.getDateRange(isEnglish)}',
                             style: const TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w800,
@@ -339,7 +360,9 @@ class _PregnancyCalculatorCardState extends State<PregnancyCalculatorCard> {
                 const Text('📖', style: TextStyle(fontSize: 14)),
                 const SizedBox(width: 6),
                 Text(
-                  'Gebelik hesaplama hakkında detaylı bilgi',
+                  isEnglish
+                      ? 'Detailed info about pregnancy calculation'
+                      : 'Gebelik hesaplama hakkında detaylı bilgi',
                   style: TextStyle(
                     fontSize: 12.5,
                     fontWeight: FontWeight.w700,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/cycle_provider.dart';
 import '../screens/stats_screen.dart';
 
@@ -15,6 +16,8 @@ class CycleSummaryCard extends StatelessWidget {
     final cs       = Theme.of(context).colorScheme;
     final isDark   = Theme.of(context).brightness == Brightness.dark;
     final provider = context.watch<CycleProvider>();
+    final l10n     = AppLocalizations.of(context)!;
+    final isEn     = !l10n.isTurkish;
     final now      = DateTime.now();
     final start    = provider.cycle.cycleStart;
     final cLen     = provider.cycleLength;
@@ -60,7 +63,7 @@ class CycleSummaryCard extends StatelessWidget {
               child: Row(
                 children: [
                   Text(
-                    'Genel Özet',
+                    l10n.cycleSummaryTitle,
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
@@ -80,7 +83,7 @@ class CycleSummaryCard extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  'Geçmiş',
+                  l10n.historyLabel,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -114,14 +117,14 @@ class CycleSummaryCard extends StatelessWidget {
                       children: [
                         TextSpan(
                           text: isCurrentCycle
-                              ? 'Şu Anki Periyot: '
-                              : '$actualLen Gün: ',
+                              ? '${l10n.currentPeriodLabel}: '
+                              : '$actualLen ${l10n.daysUnit}: ',
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                         TextSpan(
                           text: isCurrentCycle
-                              ? 'Başlangıç ${_fmt(cycleStart)} ($cLen gün)'
-                              : '${_fmt(cycleStart)} - ${_fmt(cycleEnd)}',
+                              ? '${l10n.periodStartPrefix} ${_fmt(cycleStart, isEn)} ($cLen ${l10n.daysUnit})'
+                              : '${_fmt(cycleStart, isEn)} - ${_fmt(cycleEnd, isEn)}',
                           style: const TextStyle(fontWeight: FontWeight.w400),
                         ),
                       ],
@@ -131,7 +134,7 @@ class CycleSummaryCard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 16, bottom: 2),
                   child: Text(
-                    '$pLen günlük süre',
+                    '$pLen ${l10n.periodDurationSuffix}',
                     style: TextStyle(
                       fontSize: 11,
                       color: cs.onSurface.withValues(alpha: 0.45),
@@ -162,7 +165,7 @@ class CycleSummaryCard extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  'Özetin',
+                  l10n.yourSummaryLabel,
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
@@ -177,21 +180,21 @@ class CycleSummaryCard extends StatelessWidget {
 
           // ── Özet satırları ──
           _SummaryRow(
-            label: 'Son Adet Dönemi',
-            value: 'Başlangıç: ${_fmtFull(start)}',
-            sub: '${daysAgo > 0 ? daysAgo : 0} Gün Önce',
+            label: l10n.lastPeriodLabel,
+            value: '${l10n.periodStartPrefix}: ${_fmtFull(start, isEn)}',
+            sub: '${daysAgo > 0 ? daysAgo : 0} ${l10n.daysAgoSuffix}',
           ),
           Divider(height: 1, indent: 16, endIndent: 16,
               color: cs.onSurface.withValues(alpha: 0.1)),
           _SummaryRow(
-            label: 'Normal Adet Süresi',
-            value: '$pLen Gün',
+            label: l10n.normalPeriodDurationLabel,
+            value: '$pLen ${l10n.daysUnit}',
           ),
           Divider(height: 1, indent: 16, endIndent: 16,
               color: cs.onSurface.withValues(alpha: 0.1)),
           _SummaryRow(
-            label: 'Normal Adet Uzunluğu',
-            value: '$cLen Gün',
+            label: l10n.normalCycleLengthLabel,
+            value: '$cLen ${l10n.daysUnit}',
           ),
 
           const SizedBox(height: 12),
@@ -200,15 +203,21 @@ class CycleSummaryCard extends StatelessWidget {
     );
   }
 
-  String _fmt(DateTime d) {
-    const months = ['', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
-                    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+  String _fmt(DateTime d, bool isEn) {
+    const trMonths = ['', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+                      'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+    const enMonths = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final months = isEn ? enMonths : trMonths;
     return '${d.day} ${months[d.month]}';
   }
 
-  String _fmtFull(DateTime d) {
-    const months = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-                    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+  String _fmtFull(DateTime d, bool isEn) {
+    const trMonths = ['', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
+                      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
+    const enMonths = ['', 'January', 'February', 'March', 'April', 'May', 'June',
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+    final months = isEn ? enMonths : trMonths;
     return '${d.day} ${months[d.month]}';
   }
 }

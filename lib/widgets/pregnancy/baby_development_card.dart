@@ -14,6 +14,7 @@ import 'package:provider/provider.dart';
 import '../../providers/cycle_provider.dart';
 import '../../utils/phase_colors.dart';
 import '../../data/pregnancy_data.dart';
+import '../../l10n/app_localizations.dart';
 import 'baby_stage_image.dart';
 import 'fruit_painter.dart';
 
@@ -36,6 +37,8 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
     final provider = context.watch<CycleProvider>();
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+    final isEnglish = !l10n.isTurkish;
     final lmp = provider.pregnancyStartDate;
     final currentWeek = provider.pregnancyWeek;
 
@@ -48,7 +51,7 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
     }
 
     final week = (_viewWeek ?? currentWeek).clamp(1, 40).toInt();
-    final info = pregnancyWeekInfo(week);
+    final info = pregnancyWeekInfo(week, isEnglish: isEnglish);
     final trimester = provider.trimesterForWeek(week);
     final progress = (week / 40.0).clamp(0.0, 1.0).toDouble();
     final browsing = _viewWeek != null && _viewWeek != currentWeek;
@@ -56,9 +59,11 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
     final String weekLabel;
     if (week == currentWeek && lmp != null) {
       final dayInWeek = DateTime.now().difference(lmp).inDays % 7;
-      weekLabel = '$week Hafta $dayInWeek Gün';
+      weekLabel = isEnglish
+          ? 'Week $week Day $dayInWeek'
+          : '$week Hafta $dayInWeek Gün';
     } else {
-      weekLabel = '$week. Hafta';
+      weekLabel = isEnglish ? 'Week $week' : '$week. Hafta';
     }
 
     final cardBg =
@@ -77,13 +82,13 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
           // ── Başlık satırı ─────────────────────────────────────────
           Row(
             children: [
-              const _DotLabel(
-                color: Color(0xFF9333EA),
-                text: 'BEBEĞİN GELİŞİMİ',
+              _DotLabel(
+                color: const Color(0xFF9333EA),
+                text: l10n.babyDevCardTitle.toUpperCase(),
               ),
               const Spacer(),
               Text(
-                '$trimester. trimester',
+                isEnglish ? 'Trimester $trimester' : '$trimester. trimester',
                 style: TextStyle(
                   fontSize: 11,
                   color: cs.onSurface.withValues(alpha: 0.5),
@@ -175,7 +180,7 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
-                          '$trimester. Trimester',
+                          isEnglish ? 'Trimester $trimester' : '$trimester. Trimester',
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
@@ -265,7 +270,7 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
           // ── Bebek gelişimi ─────────────────────────────────────────
           _DetailSection(
             emoji: '👶',
-            title: 'Bebek Gelişimi',
+            title: l10n.babyDevTitle,
             text: info.summary,
             color: const Color(0xFF9333EA),
             isDark: isDark,
@@ -276,7 +281,7 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
             const SizedBox(height: 10),
             _DetailSection(
               emoji: '💜',
-              title: 'Annedeki Değişimler',
+              title: l10n.maternalChangesTitle,
               text: info.motherInfo,
               color: const Color(0xFFEC4899),
               isDark: isDark,
@@ -301,7 +306,9 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
           Row(
             children: [
               Text(
-                '40 haftalık yolculuğun %${(progress * 100).round()}\'i',
+                isEnglish
+                    ? '${(progress * 100).round()}% of 40-week journey'
+                    : '40 haftalık yolculuğun %${(progress * 100).round()}\'i',
                 style: TextStyle(
                   fontSize: 10.5,
                   color: cs.onSurface.withValues(alpha: 0.5),
@@ -311,14 +318,14 @@ class _BabyDevelopmentCardState extends State<BabyDevelopmentCard> {
               if (browsing)
                 GestureDetector(
                   onTap: () => setState(() => _viewWeek = null),
-                  child: const Row(
+                  child: Row(
                     children: [
-                      Icon(Icons.today,
+                      const Icon(Icons.today,
                           size: 13, color: Color(0xFF9333EA)),
-                      SizedBox(width: 3),
+                      const SizedBox(width: 3),
                       Text(
-                        'Bugüne dön',
-                        style: TextStyle(
+                        isEnglish ? 'Back to today' : 'Bugüne dön',
+                        style: const TextStyle(
                           fontSize: 10.5,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF9333EA),

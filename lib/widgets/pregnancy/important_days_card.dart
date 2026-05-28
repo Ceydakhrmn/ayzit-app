@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../data/pregnancy_data.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/cycle_provider.dart';
 
 class ImportantDaysCard extends StatelessWidget {
@@ -42,12 +43,14 @@ class _MilestoneTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final isEnglish = !l10n.isTurkish;
     return Material(
       color: cs.surfaceContainerHighest,
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () => _showDetail(context),
+        onTap: () => _showDetail(context, isEnglish: isEnglish),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           child: Row(
@@ -57,7 +60,7 @@ class _MilestoneTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'ÖNEMLİ GÜNLER',
+                      l10n.importantDaysTitle,
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
@@ -67,7 +70,7 @@ class _MilestoneTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      milestone.title,
+                      milestone.getTitle(isEnglish),
                       style: TextStyle(
                         fontSize: 14.5,
                         fontWeight: FontWeight.w700,
@@ -93,7 +96,8 @@ class _MilestoneTile extends StatelessWidget {
     );
   }
 
-  void _showDetail(BuildContext context) {
+  void _showDetail(BuildContext context, {bool isEnglish = false}) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -111,7 +115,7 @@ class _MilestoneTile extends StatelessWidget {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                milestone.title,
+                milestone.getTitle(isEnglish),
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
               ),
             ),
@@ -124,7 +128,7 @@ class _MilestoneTile extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Tamam', style: TextStyle(color: Color(0xFF7C3AED))),
+            child: Text(l10n.cancelBtn, style: const TextStyle(color: Color(0xFF7C3AED))),
           ),
         ],
       ),

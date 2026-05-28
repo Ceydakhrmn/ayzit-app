@@ -5,6 +5,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/cycle_provider.dart';
 
 class MonthHeader extends StatelessWidget {
@@ -13,10 +14,10 @@ class MonthHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CycleProvider>();
+    final l10n = AppLocalizations.of(context)!;
     final month = provider.focusedMonth;
 
-    // Ay adını Türkçe büyük harfle yaz
-    final monthName = _turkishMonth(month.month).toUpperCase();
+    final monthName = _monthName(month.month, l10n.isTurkish).toUpperCase();
     final title = '$monthName ${month.year}';
 
     return Row(
@@ -45,11 +46,15 @@ class MonthHeader extends StatelessWidget {
     );
   }
 
-  String _turkishMonth(int month) {
-    const months = [
+  String _monthName(int month, bool isTurkish) {
+    const tr = [
       '', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
-      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+      'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
     ];
-    return months[month];
+    const en = [
+      '', 'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    return isTurkish ? tr[month] : en[month];
   }
 }

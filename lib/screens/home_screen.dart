@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/cycle_provider.dart';
 import '../widgets/calendar_grid.dart';
 import 'symptom_sheet.dart';
@@ -14,33 +15,34 @@ import '../widgets/pregnancy/pregnancy_calculator_card.dart';
 import '../widgets/fertility/fertility_info_cards.dart';
 
 void showLegendDialog(BuildContext context) {
+  final l10n = AppLocalizations.of(context)!;
   showDialog(
     context: context,
     builder: (ctx) => AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: const Text(
-        'Sanırım yardıma ihtiyacın var.',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+      title: Text(
+        l10n.legendTitle,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         textAlign: TextAlign.center,
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Renkler dönemleri gösterir. Ben de sana bu dönemlere göre tavsiyeler veririm ;)',
-            style: TextStyle(fontSize: 13, color: Colors.black54),
+          Text(
+            l10n.legendSubtitle,
+            style: const TextStyle(fontSize: 13, color: Colors.black54),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 16),
-          _LegendRow(color: const Color(0xFF7C3AED), label: 'Regl dönemi (yoğun).'),
-          _LegendRow(color: const Color(0xFFC084FC), label: 'Regl dönemi (hafif).'),
-          _LegendRow(color: const Color(0xFF3B82F6), label: 'Ovulasyon günü.'),
-          _LegendRow(color: const Color(0xFFDC2626), label: 'Doğurganlık — en yüksek.'),
-          _LegendRow(color: const Color(0xFFF97316), label: 'Doğurganlık — orta.'),
-          _LegendRow(color: const Color(0xFFFDE047), label: 'Doğurganlık — düşük.'),
-          _LegendRow(isBlend: true, label: 'Soluk renkli olanlar benim tahminimdir.'),
-          _LegendRow(color: Colors.grey.shade300, label: 'Takvime bilgi girdiğini gösterir.'),
+          _LegendRow(color: const Color(0xFF7C3AED), label: l10n.legendPeriodHeavy),
+          _LegendRow(color: const Color(0xFFC084FC), label: l10n.legendPeriodLight),
+          _LegendRow(color: const Color(0xFF3B82F6), label: l10n.legendOvulation),
+          _LegendRow(color: const Color(0xFFDC2626), label: l10n.legendFertileHigh),
+          _LegendRow(color: const Color(0xFFF97316), label: l10n.legendFertileMedium),
+          _LegendRow(color: const Color(0xFFFDE047), label: l10n.legendFertileLow),
+          _LegendRow(isBlend: true, label: l10n.legendBlend),
+          _LegendRow(color: Colors.grey.shade300, label: l10n.legendDot),
         ],
       ),
       actions: [
@@ -53,9 +55,9 @@ void showLegendDialog(BuildContext context) {
               side: const BorderSide(color: Colors.black12),
               padding: const EdgeInsets.symmetric(vertical: 14),
             ),
-            child: const Text(
-              'ANLADIM',
-              style: TextStyle(
+            child: Text(
+              l10n.gotIt,
+              style: const TextStyle(
                 color: Colors.black54,
                 fontWeight: FontWeight.w700,
                 letterSpacing: 1,
@@ -133,12 +135,13 @@ class _HamilleKalmaContentState extends State<_HamilleKalmaContent> {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // ── Soru başlığı ─────────────────────────────────────────────────
         Text(
-          'Nasıl hamile kalmayı planlıyorsunuz?',
+          l10n.conceptionQuestion,
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -149,11 +152,11 @@ class _HamilleKalmaContentState extends State<_HamilleKalmaContent> {
         // ── Üç seçenek ───────────────────────────────────────────────────
         Row(
           children: [
-            _chip(context, '🌸', 'Doğal', _ConceptionMode.dogal, isDark),
+            _chip(context, '🌸', l10n.conceptionNatural, _ConceptionMode.dogal, isDark),
             const SizedBox(width: 8),
-            _chip(context, '🔬', 'Aşılama', _ConceptionMode.asilama, isDark),
+            _chip(context, '🔬', l10n.conceptionIUI, _ConceptionMode.asilama, isDark),
             const SizedBox(width: 8),
-            _chip(context, '🧬', 'Tüp Bebek', _ConceptionMode.tupBebek, isDark),
+            _chip(context, '🧬', l10n.conceptionIVF, _ConceptionMode.tupBebek, isDark),
           ],
         ),
         const SizedBox(height: 20),
@@ -229,12 +232,13 @@ class HomeScreen extends StatelessWidget {
 
   /// Tam genişlikte "BELİRTİ GİR" butonu.
   Widget _symptomButton(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return SizedBox(
       width: double.infinity,
       child: ElevatedButton.icon(
         onPressed: () => showSymptomSheet(context),
         icon: const Icon(Icons.add, size: 16),
-        label: const Text('BELİRTİ GİR'),
+        label: Text(l10n.logSymptomBtn),
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFFA78BFA),
           foregroundColor: Colors.white,
@@ -254,14 +258,15 @@ class HomeScreen extends StatelessWidget {
 
   /// Regl başlat / bitir butonu.
   Widget _periodButton(BuildContext context, CycleProvider provider) {
+    final l10n = AppLocalizations.of(context)!;
     return ElevatedButton.icon(
       onPressed: () {
         if (provider.isPeriodActive) {
           provider.endPeriod();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Regl bitirildi!'),
-              duration: Duration(seconds: 2),
+            SnackBar(
+              content: Text(l10n.periodEndedSnack),
+              duration: const Duration(seconds: 2),
             ),
           );
         } else {
@@ -270,18 +275,14 @@ class HomeScreen extends StatelessWidget {
           provider.startPeriod(startDate);
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
-                selected != null
-                    ? '${startDate.day}/${startDate.month} tarihinden regl başlatıldı!'
-                    : 'Regl başlatıldı!',
-              ),
+              content: Text(l10n.periodStartedSnack),
               duration: const Duration(seconds: 2),
             ),
           );
         }
       },
       icon: const Icon(Icons.water_drop, size: 16),
-      label: Text(provider.isPeriodActive ? 'REGL BİTİR' : 'REGL BAŞLAT'),
+      label: Text(provider.isPeriodActive ? l10n.endPeriodBtn : l10n.startPeriodBtn),
       style: ElevatedButton.styleFrom(
         backgroundColor: const Color(0xFF7C3AED),
         foregroundColor: Colors.white,
@@ -303,6 +304,7 @@ class HomeScreen extends StatelessWidget {
     final provider = context.watch<CycleProvider>();
     final isPregnancy = provider.appMode == AppMode.hamileTakip;
 
+    final l10n = AppLocalizations.of(context)!;
     return SafeArea(
       child: Column(
       children: [
@@ -314,14 +316,14 @@ class HomeScreen extends StatelessWidget {
               IconButton(
                 icon: const Icon(Icons.palette_outlined,
                     color: Color(0xFF7C3AED)),
-                tooltip: 'Takvim Renkleri',
+                tooltip: l10n.calendarColorsTooltip,
                 onPressed: () => showLegendDialog(context),
               ),
               const Spacer(),
               IconButton(
                 icon: const Icon(Icons.settings_outlined,
                     color: Color(0xFF7C3AED)),
-                tooltip: 'Ayarlar',
+                tooltip: l10n.settingsTitle,
                 onPressed: () => Navigator.of(context).push(
                   MaterialPageRoute(builder: (_) => const SettingsScreen()),
                 ),

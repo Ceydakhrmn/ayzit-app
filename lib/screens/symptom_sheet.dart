@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/theme/app_colors.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/cycle_provider.dart';
 
 Future<void> showSymptomSheet(BuildContext context) {
@@ -32,34 +33,13 @@ class _SymptomSheet extends StatefulWidget {
 class _SymptomSheetState extends State<_SymptomSheet> {
   final Set<String> _selectedSymptoms = {};
 
-  static const _physicalSymptoms = [
-    'Karın Ağrısı',
-    'Baş Ağrısı',
-    'Bel Ağrısı',
-    'Şişkinlik',
-    'Kramp',
-    'Bulantı',
-    'Göğüs Hassasiyeti',
-    'Sivilce',
-    'Yorgunluk',
-    'İştah Artışı',
-  ];
-
-  static const _emotionalSymptoms = [
-    'Sinirlilik',
-    'Kaygı',
-    'Üzüntü',
-    'Duygusal Dalgalanma',
-    'Konsantrasyon Güçlüğü',
-    'Motivasyon Eksikliği',
-  ];
-
   void _save() {
     if (_selectedSymptoms.isEmpty) {
       Navigator.of(context).pop();
       return;
     }
 
+    final l10n = AppLocalizations.of(context)!;
     final provider = context.read<CycleProvider>();
     final selected = provider.selectedDay ?? DateTime.now();
     final existing = provider.noteForDay(selected);
@@ -68,9 +48,9 @@ class _SymptomSheetState extends State<_SymptomSheet> {
     provider.saveNote(selected, newNote);
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Belirtiler kaydedildi!'),
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text(l10n.symptomsSavedSnack),
+        duration: const Duration(seconds: 2),
       ),
     );
     Navigator.of(context).pop();
@@ -81,6 +61,30 @@ class _SymptomSheetState extends State<_SymptomSheet> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black87;
     final subTextColor = isDark ? Colors.white70 : Colors.black54;
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = !l10n.isTurkish;
+
+    final physicalSymptoms = isEn
+        ? const [
+            'Abdominal Pain', 'Headache', 'Back Pain', 'Bloating',
+            'Cramps', 'Nausea', 'Breast Tenderness', 'Acne',
+            'Fatigue', 'Increased Appetite',
+          ]
+        : const [
+            'Karın Ağrısı', 'Baş Ağrısı', 'Bel Ağrısı', 'Şişkinlik',
+            'Kramp', 'Bulantı', 'Göğüs Hassasiyeti', 'Sivilce',
+            'Yorgunluk', 'İştah Artışı',
+          ];
+
+    final emotionalSymptoms = isEn
+        ? const [
+            'Irritability', 'Anxiety', 'Sadness',
+            'Mood Swings', 'Difficulty Concentrating', 'Lack of Motivation',
+          ]
+        : const [
+            'Sinirlilik', 'Kaygı', 'Üzüntü',
+            'Duygusal Dalgalanma', 'Konsantrasyon Güçlüğü', 'Motivasyon Eksikliği',
+          ];
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
@@ -102,7 +106,7 @@ class _SymptomSheetState extends State<_SymptomSheet> {
           Row(
             children: [
               Text(
-                'Belirti Gir',
+                l10n.symptomSheetTitle,
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -118,12 +122,12 @@ class _SymptomSheetState extends State<_SymptomSheet> {
           ),
           const SizedBox(height: 4),
           Text(
-            'Bugün hissettiğin belirtileri seç',
+            l10n.symptomSheetHint,
             style: TextStyle(fontSize: 13, color: subTextColor),
           ),
           const SizedBox(height: 16),
           Text(
-            'Fiziksel',
+            l10n.physicalLabel,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -134,7 +138,7 @@ class _SymptomSheetState extends State<_SymptomSheet> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _physicalSymptoms.map((s) => _SymptomChip(
+            children: physicalSymptoms.map((s) => _SymptomChip(
               label: s,
               selected: _selectedSymptoms.contains(s),
               onTap: () => setState(() {
@@ -148,7 +152,7 @@ class _SymptomSheetState extends State<_SymptomSheet> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Duygusal',
+            l10n.emotionalLabel,
             style: TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
@@ -159,7 +163,7 @@ class _SymptomSheetState extends State<_SymptomSheet> {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: _emotionalSymptoms.map((s) => _SymptomChip(
+            children: emotionalSymptoms.map((s) => _SymptomChip(
               label: s,
               selected: _selectedSymptoms.contains(s),
               onTap: () => setState(() {
@@ -174,7 +178,7 @@ class _SymptomSheetState extends State<_SymptomSheet> {
           const SizedBox(height: 24),
           ElevatedButton(
             onPressed: _save,
-            child: const Text('KAYDET'),
+            child: Text(l10n.saveBtn),
           ),
         ],
       ),

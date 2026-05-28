@@ -12,6 +12,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/pregnancy_data.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/appointment_provider.dart';
 import '../providers/cycle_provider.dart';
 import '../utils/phase_colors.dart';
@@ -41,10 +42,11 @@ class CalendarGrid extends StatelessWidget {
 
     // Hamile mod + SAT yok → yönlendirme banner'ı
     final showSatBanner = isPregnancy && lmp == null;
+    final l10n = AppLocalizations.of(context)!;
 
     return Column(
       children: [
-        if (showSatBanner) _buildSatBanner(context),
+        if (showSatBanner) _buildSatBanner(context, l10n),
         _buildWeekdayHeader(context),
         const SizedBox(height: 8),
         for (int r = 0; r < rowCount; r++) ...[
@@ -59,7 +61,7 @@ class CalendarGrid extends StatelessWidget {
   }
 
   // ── SAT seçim yönlendirme banner'ı ─────────────────────────────────────
-  Widget _buildSatBanner(BuildContext context) {
+  Widget _buildSatBanner(BuildContext context, AppLocalizations l10n) {
     final cs = Theme.of(context).colorScheme;
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
@@ -77,7 +79,7 @@ class CalendarGrid extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'Son adet tarihinizi seçmek için takvimde bir güne dokunun.',
+              l10n.satBanner,
               style: TextStyle(
                 fontSize: 12.5,
                 fontWeight: FontWeight.w600,
@@ -227,10 +229,13 @@ class CalendarGrid extends StatelessWidget {
   // ── SAT seç onay dialogu ────────────────────────────────────────────────
   void _showSetSatDialog(
       BuildContext context, DateTime date, CycleProvider provider) {
-    const months = [
-      'Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
-      'Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık',
-    ];
+    final l10n = AppLocalizations.of(context)!;
+    final isEn = l10n.isTurkish == false;
+    final months = isEn
+        ? ['January','February','March','April','May','June',
+           'July','August','September','October','November','December']
+        : ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
+           'Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
     final label = '${date.day} ${months[date.month - 1]} ${date.year}';
 
     showDialog(
@@ -238,28 +243,27 @@ class CalendarGrid extends StatelessWidget {
       builder: (ctx) => AlertDialog(
         shape:
             RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: const Row(
+        title: Row(
           children: [
-            Text('🌸', style: TextStyle(fontSize: 20)),
-            SizedBox(width: 8),
+            const Text('🌸', style: TextStyle(fontSize: 20)),
+            const SizedBox(width: 8),
             Expanded(
               child: Text(
-                'Son Adet Tarihi',
-                style: TextStyle(
+                l10n.satDialogTitle,
+                style: const TextStyle(
                     fontSize: 16, fontWeight: FontWeight.w700),
               ),
             ),
           ],
         ),
         content: Text(
-          '$label tarihini gebelik başlangıcı (SAT) olarak ayarlamak istiyor musunuz?\n\n'
-          'Tahmini doğum tarihi otomatik hesaplanacak.',
+          '$label ${l10n.satDialogBody}',
           style: const TextStyle(fontSize: 14, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('İptal'),
+            child: Text(l10n.cancelBtn),
           ),
           FilledButton(
             onPressed: () {
@@ -271,7 +275,7 @@ class CalendarGrid extends StatelessWidget {
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Ayarla'),
+            child: Text(l10n.satDialogSetBtn),
           ),
         ],
       ),
@@ -318,6 +322,9 @@ class CalendarGrid extends StatelessWidget {
     int row,
     DateTime? lmp,
   ) {
+    final l10n = AppLocalizations.of(context)!;
+    final isEnglish = !l10n.isTurkish;
+
     final firstDateOfRow =
         firstDay.add(Duration(days: row * 7 - startOffset));
     final midDate = firstDateOfRow.add(const Duration(days: 3));
@@ -342,6 +349,7 @@ class CalendarGrid extends StatelessWidget {
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final weekSuffix = isEnglish ? 'Week $week · ' : '$week. Hafta · ';
 
     // Tüm bantları listele
     final bands = <Widget>[];
@@ -349,7 +357,7 @@ class CalendarGrid extends StatelessWidget {
     if (rowWeekEvent != null) {
       bands.add(_eventBand(
         rowWeekEvent.emoji,
-        '$week. Hafta · ${rowWeekEvent.title}',
+        '$weekSuffix${rowWeekEvent.getTitle(isEnglish)}',
         rowWeekEvent.color,
         isDark,
       ));
@@ -358,11 +366,11 @@ class CalendarGrid extends StatelessWidget {
     for (final m in startingMilestones) {
       // WeekEvent ile başlığı aynıysa tekrar gösterme
       if (rowWeekEvent != null &&
-          m.title.toLowerCase() ==
-              rowWeekEvent.title.toLowerCase()) { continue; }
+          m.getTitle(isEnglish).toLowerCase() ==
+              rowWeekEvent.getTitle(isEnglish).toLowerCase()) { continue; }
       bands.add(_eventBand(
         m.category.emoji,
-        m.title,
+        m.getTitle(isEnglish),
         m.color,
         isDark,
       ));
@@ -417,7 +425,10 @@ class CalendarGrid extends StatelessWidget {
   }
 
   Widget _buildWeekdayHeader(BuildContext context) {
-    const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Pzr'];
+    final l10n = AppLocalizations.of(context)!;
+    final days = l10n.isTurkish
+        ? ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Pzr']
+        : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     return Row(
       children: days
           .map((d) => Expanded(

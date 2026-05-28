@@ -369,4 +369,224 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get tryAgain => 'Réessayer';
+
+  // ── Calendar / Home ─────────────────────────────────────────────────────
+  @override
+  String get calendarColorsTooltip => 'Calendar Colors';
+
+  @override
+  String get legendTitle => "Here's a quick guide.";
+
+  @override
+  String get legendSubtitle => 'Colors indicate cycle phases. I\'ll give you tips based on these. ;)';
+
+  @override
+  String get legendPeriodHeavy => 'Period (heavy).';
+
+  @override
+  String get legendPeriodLight => 'Period (light).';
+
+  @override
+  String get legendOvulation => 'Ovulation day.';
+
+  @override
+  String get legendFertileHigh => 'Fertility — highest.';
+
+  @override
+  String get legendFertileMedium => 'Fertility — moderate.';
+
+  @override
+  String get legendFertileLow => 'Fertility — low.';
+
+  @override
+  String get legendBlend => 'Faded colors are my predictions.';
+
+  @override
+  String get legendDot => 'Indicates data entered for that day.';
+
+  @override
+  String get gotIt => 'GOT IT';
+
+  @override
+  String get logSymptomBtn => 'LOG SYMPTOM';
+
+  @override
+  String get startPeriodBtn => 'START PERIOD';
+
+  @override
+  String get endPeriodBtn => 'END PERIOD';
+
+  @override
+  String get periodStartedSnack => 'Period started!';
+
+  @override
+  String get periodEndedSnack => 'Period ended!';
+
+  @override
+  String get conceptionQuestion => 'How are you planning to conceive?';
+
+  @override
+  String get conceptionNatural => 'Natural';
+
+  @override
+  String get conceptionIUI => 'IUI';
+
+  @override
+  String get conceptionIVF => 'IVF';
+
+  // ── Calendar grid ────────────────────────────────────────────────────────
+  @override
+  String get satBanner => 'Tap a day on the calendar to select your last period date.';
+
+  @override
+  String get satDialogTitle => 'Last Period Date';
+
+  @override
+  String get satDialogBody => 'set as your last menstrual period (LMP)?\n\nYour estimated due date will be calculated automatically.';
+
+  @override
+  String get satDialogSetBtn => 'Set';
+
+  @override
+  String get cancelBtn => 'Cancel';
+
+  // ── Pregnancy day sheet ──────────────────────────────────────────────────
+  @override
+  String get satBadgeLabel => 'Last Menstrual Period (LMP)';
+
+  @override
+  String get dueDateBadgeLabel => 'Estimated Due Date';
+
+  @override
+  String get babyDevTitle => 'Baby Development';
+
+  @override
+  String get babyZodiacTitle => "Baby's Zodiac Sign";
+
+  @override
+  String get satNoteBody => 'This date is set as the start of your pregnancy (Last Menstrual Period). All week calculations are made from this date.';
+
+  @override
+  String get weekLabel => ' Week';
+
+  // ── Pregnancy calculator ─────────────────────────────────────────────────
+  @override
+  String get pregnancyCalcTitle => 'Pregnancy Calculator';
+
+  @override
+  String get satInputLabel => 'Last Menstrual Period (LMP)';
+
+  @override
+  String get cycleLengthInputLabel => 'Average Cycle Length';
+
+  @override
+  String get calculateBtn => 'Calculate';
+
+  @override
+  String get dueDateResult => 'Estimated Due Date';
+
+  @override
+  String get pregnancyWeekResult => 'Pregnancy Week';
+
+  @override
+  String get detailInfoBtn => '📖 Full Article';
+
+  // ── Baby development card ────────────────────────────────────────────────
+  @override
+  String get babyDevCardTitle => "Baby's Development";
+
+  @override
+  String get maternalChangesTitle => 'Maternal Changes';
+
+  @override
+  String get weekPrefix => ' Week';
+
+  // ── Settings ─────────────────────────────────────────────────────────────
+  @override
+  String get languageSection => 'Language';
+
+  @override
+  String get languageTurkish => 'Turkish';
+
+  @override
+  String get languageEnglish => 'English';
+
+  // ── Fertility cards ──────────────────────────────────────────────────────
+  @override
+  String get fertilityPrepTitle => 'Conception Preparation';
+
+  @override
+  String get fertilityPrepSubtitle => 'Start preparing 3 months before trying to conceive';
+
+  @override
+  String get fertilityPrepSummary => 'Get ready for a healthy pregnancy with folic acid, health checks, nutrition, and lifestyle changes.';
+
+  @override
+  String get pregnancySymptomsTitle => 'Pregnancy Symptoms';
+
+  @override
+  String get pregnancySymptomsSubtitle => 'Early signs and diagnostic methods';
+
+  @override
+  String get pregnancySymptomsSummary => 'Missed period, breast tenderness, nausea and more. When to test, when to see a doctor?';
+
+  @override
+  String get iuiCardTitle => 'IUI Treatment';
+
+  @override
+  String get iuiCardSubtitle => 'First-line treatment before IVF';
+
+  @override
+  String get iuiCardSummary => 'A painless assisted reproduction method where sperm is placed directly into the uterus. Success rate 10–30%.';
+
+  @override
+  String get ivfCardTitle => 'IVF Treatment';
+
+  @override
+  String get ivfCardSubtitle => 'High success rate assisted reproduction';
+
+  @override
+  String get ivfCardSummary => 'Eggs and sperm are fertilized in a lab, then placed in the uterus. 35–45% success rate under age 35.';
+
+  @override
+  String get detailInfoBtn2 => 'Full Details';
+
+  // ── Important days card ──────────────────────────────────────────────────
+  @override
+  String get importantDaysTitle => 'Important Days';
+
+  // ── Appointments card ────────────────────────────────────────────────────
+  @override
+  String get appointmentsTitle => 'Appointments';
+
+  @override
+  String get noAppointments => 'No appointments';
+
+  @override
+  String get addAppointment => 'Add Appointment';
+
+  // ── Info card ─────────────────────────────────────────────────────────────
+  @override String get selectDayLabel => 'Select a day';
+  @override String get okBtn => 'OK';
+
+  // ── Cycle summary card ────────────────────────────────────────────────────
+  @override String get cycleSummaryTitle => 'Summary';
+  @override String get historyLabel => 'History';
+  @override String get yourSummaryLabel => 'Your Summary';
+  @override String get currentPeriodLabel => 'Current Period';
+  @override String get daysUnit => 'Days';
+  @override String get periodDurationSuffix => 'Day Period';
+  @override String get periodStartPrefix => 'Start';
+  @override String get lastPeriodLabel => 'Last Period';
+  @override String get normalPeriodDurationLabel => 'Normal Period Duration';
+  @override String get normalCycleLengthLabel => 'Normal Cycle Length';
+  @override String get daysAgoSuffix => 'Days Ago';
+
+  // ── Symptom sheet ─────────────────────────────────────────────────────────
+  @override String get symptomSheetTitle => 'Log Symptoms';
+  @override String get symptomSheetHint => 'Select symptoms you feel today';
+  @override String get physicalLabel => 'Physical';
+  @override String get emotionalLabel => 'Emotional';
+  @override String get saveBtn => 'SAVE';
+  @override String get symptomsSavedSnack => 'Symptoms saved!';
 }

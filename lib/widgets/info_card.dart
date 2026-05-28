@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/cycle_provider.dart';
 import '../utils/phase_colors.dart';
 
@@ -9,16 +10,17 @@ class InfoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CycleProvider>();
+    final l10n = AppLocalizations.of(context)!;
     final selected = provider.selectedDay;
 
-    String label = 'Bir gün seçin';
+    String label = l10n.selectDayLabel;
     Color dotColor = Colors.grey.shade300;
     String phaseDescription = '';
 
     if (selected != null) {
       final phase = provider.phaseOf(selected);
       final style = phaseStyle(phase);
-      label = '${selected.day} ${_turkishMonth(selected.month)}';
+      label = '${selected.day} ${_monthName(selected.month, l10n.isTurkish)}';
       dotColor = style.background;
       phaseDescription = style.label;
     }
@@ -56,7 +58,7 @@ class InfoCard extends StatelessWidget {
           ),
           if (selected != null)
             GestureDetector(
-              onTap: () => _showPhaseInfo(context, dotColor, phaseDescription),
+              onTap: () => _showPhaseInfo(context, dotColor, phaseDescription, l10n),
               child: Container(
                 width: 28,
                 height: 28,
@@ -75,7 +77,7 @@ class InfoCard extends StatelessWidget {
     );
   }
 
-  void _showPhaseInfo(BuildContext context, Color color, String description) {
+  void _showPhaseInfo(BuildContext context, Color color, String description, AppLocalizations l10n) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -100,18 +102,22 @@ class InfoCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Tamam', style: TextStyle(color: Color(0xFF7C3AED))),
+            child: Text(l10n.okBtn, style: const TextStyle(color: Color(0xFF7C3AED))),
           ),
         ],
       ),
     );
   }
 
-  String _turkishMonth(int month) {
-    const months = [
+  String _monthName(int month, bool isTurkish) {
+    const tr = [
       '', 'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran',
       'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık',
     ];
-    return months[month];
+    const en = [
+      '', 'January', 'February', 'March', 'April', 'May', 'June',
+      'July', 'August', 'September', 'October', 'November', 'December',
+    ];
+    return isTurkish ? tr[month] : en[month];
   }
 }

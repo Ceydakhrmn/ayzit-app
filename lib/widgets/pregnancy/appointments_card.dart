@@ -9,13 +9,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/appointment.dart';
+import '../../l10n/app_localizations.dart';
 import '../../providers/appointment_provider.dart';
 
 const _accent = Color(0xFF3F51B5);
 
-const _monthsShort = [
+const _monthsShortTr = [
   '', 'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
   'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
+];
+const _monthsShortEn = [
+  '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 
 String _two(int n) => n.toString().padLeft(2, '0');
@@ -29,6 +34,8 @@ class AppointmentsCard extends StatelessWidget {
     final prov = context.watch<AppointmentProvider>();
     final items = prov.upcoming;
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final isEnglish = !l10n.isTurkish;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -48,9 +55,9 @@ class AppointmentsCard extends StatelessWidget {
                     shape: BoxShape.circle, color: _accent),
               ),
               const SizedBox(width: 6),
-              const Text(
-                'RANDEVULARIM',
-                style: TextStyle(
+              Text(
+                l10n.appointmentsTitle,
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 0.6,
@@ -60,7 +67,9 @@ class AppointmentsCard extends StatelessWidget {
               const Spacer(),
               if (items.isNotEmpty)
                 Text(
-                  '${items.length} yaklaşan',
+                  isEnglish
+                      ? '${items.length} upcoming'
+                      : '${items.length} yaklaşan',
                   style: TextStyle(
                     fontSize: 11,
                     color: cs.onSurface.withValues(alpha: 0.5),
@@ -71,8 +80,7 @@ class AppointmentsCard extends StatelessWidget {
           const SizedBox(height: 12),
           if (items.isEmpty)
             Text(
-              'Henüz randevu yok. Doktor randevunu ekle — '
-              '1 gün önce, randevu sabahı ve 1 saat kala hatırlatayım.',
+              l10n.noAppointments,
               style: TextStyle(
                 fontSize: 12.5,
                 height: 1.4,
@@ -90,7 +98,7 @@ class AppointmentsCard extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: () => _openAddSheet(context),
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('Randevu Ekle'),
+              label: Text(l10n.addAppointment),
               style: OutlinedButton.styleFrom(
                 foregroundColor: _accent,
                 side: const BorderSide(color: _accent),
@@ -129,6 +137,9 @@ class _AppointmentTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final d = appointment.dateTime;
+    final months = (AppLocalizations.of(context)?.isTurkish ?? true)
+        ? _monthsShortTr
+        : _monthsShortEn;
     return Material(
       color: cs.surface.withValues(alpha: 0.6),
       borderRadius: BorderRadius.circular(12),
@@ -158,7 +169,7 @@ class _AppointmentTile extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      _monthsShort[d.month],
+                      months[d.month],
                       style: const TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w600,
@@ -210,6 +221,9 @@ class _AppointmentTile extends StatelessWidget {
   void _showDetail(BuildContext context) {
     final prov = context.read<AppointmentProvider>();
     final d = appointment.dateTime;
+    final months = (AppLocalizations.of(context)?.isTurkish ?? true)
+        ? _monthsShortTr
+        : _monthsShortEn;
     showModalBottomSheet(
       context: context,
       showDragHandle: true,
@@ -230,7 +244,7 @@ class _AppointmentTile extends StatelessWidget {
                 const Icon(Icons.event, size: 16, color: _accent),
                 const SizedBox(width: 8),
                 Text(
-                  '${d.day} ${_monthsShort[d.month]} ${d.year}, ${_clock(d)}',
+                  '${d.day} ${months[d.month]} ${d.year}, ${_clock(d)}',
                   style: const TextStyle(fontSize: 13.5),
                 ),
               ],
@@ -260,7 +274,9 @@ class _AppointmentTile extends StatelessWidget {
                   if (ctx.mounted) Navigator.pop(ctx);
                 },
                 icon: const Icon(Icons.delete_outline, size: 18),
-                label: const Text('Randevuyu sil'),
+                label: Text((AppLocalizations.of(ctx)?.isTurkish ?? true)
+                    ? 'Randevuyu sil'
+                    : 'Delete appointment'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: const Color(0xFFD32F2F),
                   side: const BorderSide(color: Color(0xFFD32F2F)),
@@ -343,6 +359,9 @@ class _AddAppointmentSheetState extends State<_AddAppointmentSheet> {
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final l10n = AppLocalizations.of(context)!;
+    final isEnglish = !l10n.isTurkish;
+    final months = isEnglish ? _monthsShortEn : _monthsShortTr;
     // Klavye açıldığında içerik klavyenin üstünde kalsın.
     final keyboard = MediaQuery.of(context).viewInsets.bottom;
     return SingleChildScrollView(
@@ -351,9 +370,9 @@ class _AddAppointmentSheetState extends State<_AddAppointmentSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Yeni Randevu',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+          Text(
+            isEnglish ? 'New Appointment' : 'Yeni Randevu',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 16),
           TextField(
@@ -361,8 +380,8 @@ class _AddAppointmentSheetState extends State<_AddAppointmentSheet> {
             textCapitalization: TextCapitalization.sentences,
             onChanged: (_) => setState(() {}),
             decoration: InputDecoration(
-              labelText: 'Başlık',
-              hintText: 'Örn. Kadın doğum kontrolü',
+              labelText: isEnglish ? 'Title' : 'Başlık',
+              hintText: isEnglish ? 'e.g. OB-GYN checkup' : 'Örn. Kadın doğum kontrolü',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -375,8 +394,8 @@ class _AddAppointmentSheetState extends State<_AddAppointmentSheet> {
                 child: _PickerField(
                   icon: Icons.event,
                   label: _date == null
-                      ? 'Tarih seç'
-                      : '${_date!.day} ${_monthsShort[_date!.month]} ${_date!.year}',
+                      ? (isEnglish ? 'Select date' : 'Tarih seç')
+                      : '${_date!.day} ${months[_date!.month]} ${_date!.year}',
                   filled: _date != null,
                   onTap: _pickDate,
                 ),
@@ -386,7 +405,7 @@ class _AddAppointmentSheetState extends State<_AddAppointmentSheet> {
                 child: _PickerField(
                   icon: Icons.schedule,
                   label: _time == null
-                      ? 'Saat seç'
+                      ? (isEnglish ? 'Select time' : 'Saat seç')
                       : '${_two(_time!.hour)}:${_two(_time!.minute)}',
                   filled: _time != null,
                   onTap: _pickTime,
@@ -400,8 +419,10 @@ class _AddAppointmentSheetState extends State<_AddAppointmentSheet> {
             textCapitalization: TextCapitalization.sentences,
             maxLines: 2,
             decoration: InputDecoration(
-              labelText: 'Not (isteğe bağlı)',
-              hintText: 'Hastane, doktor adı, hazırlık...',
+              labelText: isEnglish ? 'Note (optional)' : 'Not (isteğe bağlı)',
+              hintText: isEnglish
+                  ? 'Hospital, doctor name, preparation...'
+                  : 'Hastane, doktor adı, hazırlık...',
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
@@ -409,7 +430,9 @@ class _AddAppointmentSheetState extends State<_AddAppointmentSheet> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Hatırlatma: 1 gün önce, randevu sabahı ve 1 saat kala.',
+            isEnglish
+                ? 'Reminders: 1 day before, morning of, and 1 hour before.'
+                : 'Hatırlatma: 1 gün önce, randevu sabahı ve 1 saat kala.',
             style: TextStyle(
               fontSize: 11,
               color: cs.onSurface.withValues(alpha: 0.5),
@@ -443,7 +466,7 @@ class _AddAppointmentSheetState extends State<_AddAppointmentSheet> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text('Kaydet'),
+                  : Text(isEnglish ? 'Save' : 'Kaydet'),
             ),
           ),
         ],

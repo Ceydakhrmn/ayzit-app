@@ -13,6 +13,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/pregnancy_data.dart';
+import '../../l10n/app_localizations.dart';
 
 class PregnancyDaySheet extends StatelessWidget {
   final DateTime date;
@@ -28,12 +29,19 @@ class PregnancyDaySheet extends StatelessWidget {
 
   static const _purple = Color(0xFF7C3AED);
 
-  static String _fmtDate(DateTime d) {
-    const months = [
+  static String _fmtDate(DateTime d, {bool isEnglish = false}) {
+    const monthsTr = [
       'Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
       'Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık',
     ];
-    const days = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+    const monthsEn = [
+      'January','February','March','April','May','June',
+      'July','August','September','October','November','December',
+    ];
+    const daysTr = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+    const daysEn = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    final months = isEnglish ? monthsEn : monthsTr;
+    final days = isEnglish ? daysEn : daysTr;
     return '${days[d.weekday - 1]}, ${d.day} ${months[d.month - 1]} ${d.year}';
   }
 
@@ -44,13 +52,15 @@ class PregnancyDaySheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
+    final isEnglish = !l10n.isTurkish;
 
     final week = pregnancyWeekForDate(date, lmp);
     final isSat = _isSameDay(date, lmp);
     final isDue = _isSameDay(date, dueDate);
     final weekEvent = weekEventForDate(date, lmp);
-    final info = week != null ? pregnancyWeekInfo(week) : null;
-    final zodiac = isDue ? zodiacForDate(dueDate) : null;
+    final info = week != null ? pregnancyWeekInfo(week, isEnglish: isEnglish) : null;
+    final zodiac = isDue ? zodiacForDate(dueDate, isEnglish: isEnglish) : null;
 
     return Container(
       decoration: BoxDecoration(
@@ -76,7 +86,7 @@ class PregnancyDaySheet extends StatelessWidget {
 
             // ── Tarih başlığı ─────────────────────────────────────
             Text(
-              _fmtDate(date),
+              _fmtDate(date, isEnglish: isEnglish),
               style: TextStyle(
                 fontSize: 13,
                 color: cs.onSurface.withValues(alpha: 0.55),
@@ -88,21 +98,21 @@ class PregnancyDaySheet extends StatelessWidget {
             if (isSat)
               _Badge(
                 emoji: '🌸',
-                label: 'Son Adet Tarihi (SAT)',
+                label: l10n.satBadgeLabel,
                 color: const Color(0xFFE11D48),
                 isDark: isDark,
               )
             else if (isDue)
               _Badge(
                 emoji: '🎊',
-                label: 'Tahmini Doğum Tarihi',
+                label: l10n.dueDateBadgeLabel,
                 color: const Color(0xFFDC2626),
                 isDark: isDark,
               )
             else if (week != null)
               _Badge(
                 emoji: '🤰',
-                label: '$week. Hafta',
+                label: isEnglish ? 'Week $week' : '$week. Hafta',
                 color: _purple,
                 isDark: isDark,
               ),
@@ -130,7 +140,7 @@ class PregnancyDaySheet extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            weekEvent.title,
+                            weekEvent.getTitle(isEnglish),
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w800,
@@ -139,7 +149,7 @@ class PregnancyDaySheet extends StatelessWidget {
                           ),
                           const SizedBox(height: 4),
                           Text(
-                            weekEvent.detail,
+                            weekEvent.getDetail(isEnglish),
                             style: TextStyle(
                               fontSize: 13,
                               height: 1.5,
@@ -158,7 +168,9 @@ class PregnancyDaySheet extends StatelessWidget {
             if (info != null) ...[
               const SizedBox(height: 14),
               Text(
-                '👶 ${info.week}. Hafta — Bebek Gelişimi',
+                isEnglish
+                    ? '👶 Week ${info.week} — ${l10n.babyDevTitle}'
+                    : '👶 ${info.week}. Hafta — ${l10n.babyDevTitle}',
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w800,
@@ -226,7 +238,7 @@ class PregnancyDaySheet extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Bebeğinin Burcu',
+                            l10n.babyZodiacTitle,
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w600,
@@ -235,7 +247,7 @@ class PregnancyDaySheet extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            zodiac.name,
+                            zodiac.getName(isEnglish),
                             style: const TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.w900,
@@ -243,7 +255,7 @@ class PregnancyDaySheet extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            zodiac.dateRange,
+                            zodiac.getDateRange(isEnglish),
                             style: TextStyle(
                               fontSize: 12,
                               color: cs.onSurface.withValues(alpha: 0.5),
@@ -261,8 +273,7 @@ class PregnancyDaySheet extends StatelessWidget {
             if (isSat) ...[
               const SizedBox(height: 14),
               Text(
-                'Bu tarih, gebeliğinizin başlangıç noktası (Son Adet Tarihi) '
-                'olarak ayarlanmış. Tüm hafta hesaplamaları bu tarihten itibaren yapılır.',
+                l10n.satNoteBody,
                 style: TextStyle(
                   fontSize: 12.5,
                   height: 1.55,

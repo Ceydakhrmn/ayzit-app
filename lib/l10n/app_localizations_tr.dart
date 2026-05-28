@@ -369,4 +369,224 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get tryAgain => 'Tekrar dene';
+
+  // ── Calendar / Home ─────────────────────────────────────────────────────
+  @override
+  String get calendarColorsTooltip => 'Takvim Renkleri';
+
+  @override
+  String get legendTitle => 'Sanırım yardıma ihtiyacın var.';
+
+  @override
+  String get legendSubtitle => 'Renkler dönemleri gösterir. Ben de sana bu dönemlere göre tavsiyeler veririm ;)';
+
+  @override
+  String get legendPeriodHeavy => 'Regl dönemi (yoğun).';
+
+  @override
+  String get legendPeriodLight => 'Regl dönemi (hafif).';
+
+  @override
+  String get legendOvulation => 'Ovulasyon günü.';
+
+  @override
+  String get legendFertileHigh => 'Doğurganlık — en yüksek.';
+
+  @override
+  String get legendFertileMedium => 'Doğurganlık — orta.';
+
+  @override
+  String get legendFertileLow => 'Doğurganlık — düşük.';
+
+  @override
+  String get legendBlend => 'Soluk renkli olanlar benim tahminimdir.';
+
+  @override
+  String get legendDot => 'Takvime bilgi girdiğini gösterir.';
+
+  @override
+  String get gotIt => 'ANLADIM';
+
+  @override
+  String get logSymptomBtn => 'BELİRTİ GİR';
+
+  @override
+  String get startPeriodBtn => 'REGL BAŞLAT';
+
+  @override
+  String get endPeriodBtn => 'REGL BİTİR';
+
+  @override
+  String get periodStartedSnack => 'Regl başlatıldı!';
+
+  @override
+  String get periodEndedSnack => 'Regl bitirildi!';
+
+  @override
+  String get conceptionQuestion => 'Nasıl hamile kalmayı planlıyorsunuz?';
+
+  @override
+  String get conceptionNatural => 'Doğal';
+
+  @override
+  String get conceptionIUI => 'Aşılama';
+
+  @override
+  String get conceptionIVF => 'Tüp Bebek';
+
+  // ── Calendar grid ────────────────────────────────────────────────────────
+  @override
+  String get satBanner => 'Son adet tarihinizi seçmek için takvimde bir güne dokunun.';
+
+  @override
+  String get satDialogTitle => 'Son Adet Tarihi';
+
+  @override
+  String get satDialogBody => 'tarihini gebelik başlangıcı (SAT) olarak ayarlamak istiyor musunuz?\n\nTahmini doğum tarihi otomatik hesaplanacak.';
+
+  @override
+  String get satDialogSetBtn => 'Ayarla';
+
+  @override
+  String get cancelBtn => 'İptal';
+
+  // ── Pregnancy day sheet ──────────────────────────────────────────────────
+  @override
+  String get satBadgeLabel => 'Son Adet Tarihi (SAT)';
+
+  @override
+  String get dueDateBadgeLabel => 'Tahmini Doğum Tarihi';
+
+  @override
+  String get babyDevTitle => 'Bebek Gelişimi';
+
+  @override
+  String get babyZodiacTitle => 'Bebeğinin Burcu';
+
+  @override
+  String get satNoteBody => 'Bu tarih, gebeliğinizin başlangıç noktası (Son Adet Tarihi) olarak ayarlanmış. Tüm hafta hesaplamaları bu tarihten itibaren yapılır.';
+
+  @override
+  String get weekLabel => '. Hafta';
+
+  // ── Pregnancy calculator ─────────────────────────────────────────────────
+  @override
+  String get pregnancyCalcTitle => 'Gebelik Hesaplayıcı';
+
+  @override
+  String get satInputLabel => 'Son Adet Tarihi (SAT)';
+
+  @override
+  String get cycleLengthInputLabel => 'Ortalama Döngü Uzunluğu';
+
+  @override
+  String get calculateBtn => 'Hesapla';
+
+  @override
+  String get dueDateResult => 'Tahmini Doğum Tarihi';
+
+  @override
+  String get pregnancyWeekResult => 'Gebelik Haftası';
+
+  @override
+  String get detailInfoBtn => '📖 Detaylı Bilgi';
+
+  // ── Baby development card ────────────────────────────────────────────────
+  @override
+  String get babyDevCardTitle => 'Bebeğin Gelişimi';
+
+  @override
+  String get maternalChangesTitle => 'Annedeki Değişimler';
+
+  @override
+  String get weekPrefix => '. Hafta';
+
+  // ── Settings ─────────────────────────────────────────────────────────────
+  @override
+  String get languageSection => 'Dil';
+
+  @override
+  String get languageTurkish => 'Türkçe';
+
+  @override
+  String get languageEnglish => 'İngilizce';
+
+  // ── Fertility cards ──────────────────────────────────────────────────────
+  @override
+  String get fertilityPrepTitle => 'Gebeliğe Hazırlık';
+
+  @override
+  String get fertilityPrepSubtitle => 'Sağlıklı gebelik için 3 ay önceden başlayın';
+
+  @override
+  String get fertilityPrepSummary => 'Folik asit takviyesi, sağlık kontrolü, beslenme ve yaşam tarzı değişiklikleri ile sağlıklı bir gebeliğe hazırlanın.';
+
+  @override
+  String get pregnancySymptomsTitle => 'Hamilelik Belirtileri';
+
+  @override
+  String get pregnancySymptomsSubtitle => 'Erken belirtiler ve tanı yöntemleri';
+
+  @override
+  String get pregnancySymptomsSummary => 'Adet gecikmesi, meme hassasiyeti, bulantı ve daha fazlası. Ne zaman test yapmalı, ne zaman doktora gidilmeli?';
+
+  @override
+  String get iuiCardTitle => 'Aşılama Tedavisi (IUI)';
+
+  @override
+  String get iuiCardSubtitle => 'Tüp bebek öncesi ilk basamak tedavi';
+
+  @override
+  String get iuiCardSummary => 'Spermin rahim içine yerleştirildiği, ağrısız ve anestezi gerektirmeyen yardımcı üreme yöntemi. Başarı oranı %10–30.';
+
+  @override
+  String get ivfCardTitle => 'Tüp Bebek Tedavisi (IVF)';
+
+  @override
+  String get ivfCardSubtitle => 'Yüksek başarı oranlı yardımcı üreme yöntemi';
+
+  @override
+  String get ivfCardSummary => 'Yumurta ve spermin laboratuvarda döllenerek rahme yerleştirilmesi. 35 yaş altında %35–45 başarı oranı.';
+
+  @override
+  String get detailInfoBtn2 => 'Detaylı Bilgi';
+
+  // ── Important days card ──────────────────────────────────────────────────
+  @override
+  String get importantDaysTitle => 'Önemli Günler';
+
+  // ── Appointments card ────────────────────────────────────────────────────
+  @override
+  String get appointmentsTitle => 'Randevular';
+
+  @override
+  String get noAppointments => 'Randevu yok';
+
+  @override
+  String get addAppointment => 'Randevu Ekle';
+
+  // ── Info card ─────────────────────────────────────────────────────────────
+  @override String get selectDayLabel => 'Bir gün seçin';
+  @override String get okBtn => 'Tamam';
+
+  // ── Cycle summary card ────────────────────────────────────────────────────
+  @override String get cycleSummaryTitle => 'Genel Özet';
+  @override String get historyLabel => 'Geçmiş';
+  @override String get yourSummaryLabel => 'Özetin';
+  @override String get currentPeriodLabel => 'Şu Anki Periyot';
+  @override String get daysUnit => 'Gün';
+  @override String get periodDurationSuffix => 'Günlük Süre';
+  @override String get periodStartPrefix => 'Başlangıç';
+  @override String get lastPeriodLabel => 'Son Adet Dönemi';
+  @override String get normalPeriodDurationLabel => 'Normal Adet Süresi';
+  @override String get normalCycleLengthLabel => 'Normal Adet Uzunluğu';
+  @override String get daysAgoSuffix => 'Gün Önce';
+
+  // ── Symptom sheet ─────────────────────────────────────────────────────────
+  @override String get symptomSheetTitle => 'Belirti Gir';
+  @override String get symptomSheetHint => 'Bugün hissettiğin belirtileri seç';
+  @override String get physicalLabel => 'Fiziksel';
+  @override String get emotionalLabel => 'Duygusal';
+  @override String get saveBtn => 'KAYDET';
+  @override String get symptomsSavedSnack => 'Belirtiler kaydedildi!';
 }

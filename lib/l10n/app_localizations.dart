@@ -820,6 +820,115 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Try again'**
   String get tryAgain;
+
+  // ── Calendar / Home ─────────────────────────────────────────────────────
+  String get calendarColorsTooltip;
+  String get legendTitle;
+  String get legendSubtitle;
+  String get legendPeriodHeavy;
+  String get legendPeriodLight;
+  String get legendOvulation;
+  String get legendFertileHigh;
+  String get legendFertileMedium;
+  String get legendFertileLow;
+  String get legendBlend;
+  String get legendDot;
+  String get gotIt;
+  String get logSymptomBtn;
+  String get startPeriodBtn;
+  String get endPeriodBtn;
+  String get periodStartedSnack;
+  String get periodEndedSnack;
+  String get conceptionQuestion;
+  String get conceptionNatural;
+  String get conceptionIUI;
+  String get conceptionIVF;
+
+  // ── Calendar grid ────────────────────────────────────────────────────────
+  String get satBanner;
+  String get satDialogTitle;
+  String get satDialogBody;
+  String get satDialogSetBtn;
+  String get cancelBtn;
+
+  // ── Pregnancy day sheet ──────────────────────────────────────────────────
+  String get satBadgeLabel;
+  String get dueDateBadgeLabel;
+  String get babyDevTitle;
+  String get babyZodiacTitle;
+  String get satNoteBody;
+  String get weekLabel;
+
+  // ── Pregnancy calculator ─────────────────────────────────────────────────
+  String get pregnancyCalcTitle;
+  String get satInputLabel;
+  String get cycleLengthInputLabel;
+  String get calculateBtn;
+  String get dueDateResult;
+  String get pregnancyWeekResult;
+  String get detailInfoBtn;
+
+  // ── Baby development card ────────────────────────────────────────────────
+  String get babyDevCardTitle;
+  String get maternalChangesTitle;
+  String get weekPrefix;
+
+  // ── Settings ─────────────────────────────────────────────────────────────
+  String get languageSection;
+  String get languageTurkish;
+  String get languageEnglish;
+
+  // ── Fertility cards ──────────────────────────────────────────────────────
+  String get fertilityPrepTitle;
+  String get fertilityPrepSubtitle;
+  String get fertilityPrepSummary;
+  String get pregnancySymptomsTitle;
+  String get pregnancySymptomsSubtitle;
+  String get pregnancySymptomsSummary;
+  String get iuiCardTitle;
+  String get iuiCardSubtitle;
+  String get iuiCardSummary;
+  String get ivfCardTitle;
+  String get ivfCardSubtitle;
+  String get ivfCardSummary;
+  String get detailInfoBtn2;
+
+  // ── Important days card ──────────────────────────────────────────────────
+  String get importantDaysTitle;
+
+  // ── Appointments card ────────────────────────────────────────────────────
+  String get appointmentsTitle;
+  String get noAppointments;
+  String get addAppointment;
+
+  // ── Info card ─────────────────────────────────────────────────────────────
+  String get selectDayLabel;
+  String get okBtn;
+
+  // ── Cycle summary card ────────────────────────────────────────────────────
+  String get cycleSummaryTitle;
+  String get historyLabel;
+  String get yourSummaryLabel;
+  String get currentPeriodLabel;
+  String get daysUnit;
+  String get periodDurationSuffix;
+  String get periodStartPrefix;
+  String get lastPeriodLabel;
+  String get normalPeriodDurationLabel;
+  String get normalCycleLengthLabel;
+  String get daysAgoSuffix;
+
+  // ── Symptom sheet ─────────────────────────────────────────────────────────
+  String get symptomSheetTitle;
+  String get symptomSheetHint;
+  String get physicalLabel;
+  String get emotionalLabel;
+  String get saveBtn;
+  String get symptomsSavedSnack;
+}
+
+extension AppLocalizationsX on AppLocalizations {
+  bool get isTurkish => localeName == 'tr';
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

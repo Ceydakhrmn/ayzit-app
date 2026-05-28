@@ -662,10 +662,421 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
   ),
 ];
 
-PregnancyWeekInfo pregnancyWeekInfo(int week) {
+PregnancyWeekInfo pregnancyWeekInfo(int week, {bool isEnglish = false}) {
   final w = week.clamp(1, 40).toInt();
+  if (isEnglish) {
+    try {
+      return kPregnancyWeeksEn.firstWhere((e) => e.week == w);
+    } catch (_) {}
+  }
   return kPregnancyWeeks[w - 1];
 }
+
+// ─────────────────────────────────────────────
+// English pregnancy week data
+// ─────────────────────────────────────────────
+const List<PregnancyWeekInfo> kPregnancyWeeksEn = [
+  PregnancyWeekInfo(
+    week: 1,
+    summary: 'No embryo yet. Pregnancy is counted from the first day of your last period (LMP). The uterus sheds its lining and begins rebuilding to prepare for pregnancy.',
+    sizeText: '',
+    fruit: FruitShape.none,
+    stage: EmbryoStage.fertilization,
+    heightText: '< 0,001 mm',
+    weightText: '< 0,001 gr',
+    motherInfo: 'Folic acid (400–800 mcg/day) is critical — it prevents neural tube defects. Avoid smoking, alcohol, and harmful medications. A balanced diet and regular sleep lay the foundation for a healthy pregnancy.',
+  ),
+  PregnancyWeekInfo(
+    week: 2,
+    summary: 'Ovulation occurs; the egg is released from the follicle into the fallopian tube. If sperm are present, fertilization will begin. This is the optimal window for conception.',
+    sizeText: '',
+    fruit: FruitShape.none,
+    stage: EmbryoStage.fertilization,
+    heightText: '< 0,01 mm',
+    weightText: '< 0,001 gr',
+    motherInfo: 'Signs of ovulation include clear stretchy cervical mucus, mild pelvic pain (mittelschmerz), and increased libido. Limit caffeine to < 200 mg/day.',
+  ),
+  PregnancyWeekInfo(
+    week: 3,
+    summary: 'Sperm and egg unite to form a 46-chromosome zygote! It rapidly divides into a morula, then a blastocyst, traveling from the fallopian tube toward the uterus.',
+    sizeText: '',
+    fruit: FruitShape.none,
+    stage: EmbryoStage.fertilization,
+    heightText: '< 0,1 mm',
+    weightText: '< 0,01 gr',
+    motherInfo: 'No pregnancy symptoms yet. Slight spotting (implantation bleeding) may appear 6–10 days after fertilization. Progesterone rise may cause breast tenderness and mild fatigue.',
+  ),
+  PregnancyWeekInfo(
+    week: 4,
+    summary: 'The blastocyst has implanted in the endometrium — implantation is complete! The foundations of the placenta are being laid. The embryo is ~1 mm and has begun secreting hCG hormone.',
+    sizeText: 'poppy seed sized',
+    fruit: FruitShape.tinySeed,
+    stage: EmbryoStage.cellCluster,
+    heightText: '0,1 mm',
+    weightText: '< 0,1 gr',
+    motherInfo: 'Period delay begins; pregnancy tests turn positive. Breast fullness, morning nausea, and fatigue may appear. All medications must be supervised by a doctor; avoid alcohol and cigarettes.',
+  ),
+  PregnancyWeekInfo(
+    week: 5,
+    summary: 'The embryo is visible on ultrasound (≈1.5–2 mm). The heart tube has begun beating — the first functional organ! The neural tube is developing rapidly; brain, spinal cord, and spine are taking shape.',
+    sizeText: 'rice grain sized',
+    fruit: FruitShape.tinySeed,
+    stage: EmbryoStage.embryoTadpole,
+    heightText: '1 mm',
+    weightText: '< 0,1 gr',
+    motherInfo: 'β-hCG levels rise rapidly; tests are strongly positive. Nausea, breast tenderness, and fatigue may begin. Folic acid is critical as neural tube closure completes in weeks 5–6.',
+  ),
+  PregnancyWeekInfo(
+    week: 6,
+    summary: 'Embryo ≈4–6 mm. Heart rate is 100–120 bpm, detectable on ultrasound! Arm and leg buds have formed; facial feature foundations are being laid.',
+    sizeText: 'pea sized',
+    fruit: FruitShape.smallRound,
+    stage: EmbryoStage.embryoTadpole,
+    heightText: '4 mm',
+    weightText: '0,5 gr',
+    motherInfo: 'Nausea and vomiting are the most common complaints. First prenatal visit planned: blood type, CBC, infection screenings. Doctor confirms heartbeat by ultrasound.',
+  ),
+  PregnancyWeekInfo(
+    week: 7,
+    summary: 'Embryo reaches 8–10 mm. Arms and legs are more defined; finger buds are appearing. Brain development is accelerating; digestive system and lung buds are forming.',
+    sizeText: 'blueberry sized',
+    fruit: FruitShape.smallRound,
+    stage: EmbryoStage.embryoTadpole,
+    heightText: '11 mm',
+    weightText: '1 gr',
+    motherInfo: 'Symptoms may intensify: nausea, heightened smell sensitivity, fatigue. Progesterone may cause constipation. Mood swings are normal; social support is very important.',
+  ),
+  PregnancyWeekInfo(
+    week: 8,
+    summary: 'Embryo ≈14–16 mm. Facial structures (eyelids, nose tip) are becoming defined; ear formation is underway. Basic structures of internal organs (liver, kidneys, stomach) are established.',
+    sizeText: 'cherry sized',
+    fruit: FruitShape.raspberry,
+    stage: EmbryoStage.embryoTadpole,
+    heightText: '16 mm',
+    weightText: '1 gr',
+    motherInfo: 'Symptoms continue. Uterus reaches the size of an orange. Balanced diet rich in iron, calcium, and omega-3 is essential.',
+  ),
+  PregnancyWeekInfo(
+    week: 9,
+    summary: 'The embryo is now officially a fetus at ≈22–25 mm! Fingers and toes are distinguishable. Eyes, ears, and a tiny mouth are visible. Muscles and nerves are developing.',
+    sizeText: 'olive sized',
+    fruit: FruitShape.smallRound,
+    stage: EmbryoStage.fetus,
+    heightText: '23 mm',
+    weightText: '2 gr',
+    motherInfo: 'Morning sickness may begin to ease. Fatigue continues. The uterus can now be felt on abdominal exam. Regular prenatal care is important.',
+  ),
+  PregnancyWeekInfo(
+    week: 10,
+    summary: 'Fetus is ≈30–35 mm. All vital organs are present; growth and maturation begins. External genitalia start developing but sex is not yet visible on ultrasound.',
+    sizeText: 'strawberry sized',
+    fruit: FruitShape.smallRound,
+    stage: EmbryoStage.fetus,
+    heightText: '3 cm',
+    weightText: '4 gr',
+    motherInfo: 'First trimester screening (NT measurement, blood tests) should be scheduled. Hair, nails, and taste buds are beginning to form.',
+  ),
+  PregnancyWeekInfo(
+    week: 11,
+    summary: 'Fetus is ≈40–45 mm. Bones begin to harden; fingers and toes are fully separated. Diaphragm has formed; baby can make swallowing movements.',
+    sizeText: 'ginger root sized',
+    fruit: FruitShape.citrus,
+    stage: EmbryoStage.plumpFetus,
+    heightText: '4 cm',
+    weightText: '7 gr',
+    motherInfo: 'Nausea and fatigue often begin to ease. Waistline may visibly expand. Good time to discuss genetic screening with your doctor.',
+  ),
+  PregnancyWeekInfo(
+    week: 12,
+    summary: 'Fetus is ≈55–60 mm. All major organ systems are formed. Miscarriage risk drops significantly. This marks the end of the first trimester.',
+    sizeText: 'lime sized',
+    fruit: FruitShape.smallRound,
+    stage: EmbryoStage.plumpFetus,
+    heightText: '6 cm',
+    weightText: '14 gr',
+    motherInfo: 'First trimester screening should be completed. Many women feel much better as nausea subsides. You may start sharing your pregnancy news!',
+  ),
+  PregnancyWeekInfo(
+    week: 13,
+    summary: 'Fetus is ≈65–70 mm, weighing ≈14 g. Face is fully formed; eyes and ears are in their final positions. Fingerprints are forming.',
+    sizeText: 'green apple sized',
+    fruit: FruitShape.citrus,
+    stage: EmbryoStage.matureFetus,
+    heightText: '8 cm',
+    weightText: '23 gr',
+    motherInfo: 'Second trimester begins — energy often returns. Round ligament pain may appear as the uterus grows. A visible baby bump starts to show.',
+  ),
+  PregnancyWeekInfo(
+    week: 14,
+    summary: 'Fetus is ≈80–85 mm. Facial expressions are possible; the baby can frown and squint. External genitalia are distinguishable on ultrasound.',
+    sizeText: 'peach sized',
+    fruit: FruitShape.citrus,
+    stage: EmbryoStage.matureFetus,
+    heightText: '9 cm',
+    weightText: '43 gr',
+    motherInfo: "Baby's sex may be revealed! Second trimester is usually the most comfortable period. Increasing blood volume makes iron-rich foods important.",
+  ),
+  PregnancyWeekInfo(
+    week: 15,
+    summary: 'Fetus is ≈95–100 mm. The skeleton is hardening; muscles are strengthening. Hearing begins to develop — baby can detect low-frequency sounds.',
+    sizeText: 'apple sized',
+    fruit: FruitShape.citrus,
+    stage: EmbryoStage.matureFetus,
+    heightText: '10 cm',
+    weightText: '70 gr',
+    motherInfo: 'Triple/quad screening may be done this week. Back pain may begin as center of gravity shifts. Gentle prenatal exercise is beneficial.',
+  ),
+  PregnancyWeekInfo(
+    week: 16,
+    summary: 'Fetus is ≈110–115 mm. Facial muscles are fully formed; the baby can make expressions. Eyes are closed but can move. The thyroid gland is functioning.',
+    sizeText: 'avocado sized',
+    fruit: FruitShape.avocado,
+    stage: EmbryoStage.matureFetus,
+    heightText: '11 cm',
+    weightText: '100 gr',
+    motherInfo: 'You may start feeling the first baby movements (flutters). Uterus is midway between pubic bone and navel. Detailed ultrasound may be scheduled.',
+  ),
+  PregnancyWeekInfo(
+    week: 17,
+    summary: 'Fetus weighs ≈120 g. Vernix caseosa (protective coating) begins to form on the skin. The skeleton is mostly cartilage but gradually hardening.',
+    sizeText: 'pear sized',
+    fruit: FruitShape.apple,
+    stage: EmbryoStage.matureFetus,
+    heightText: '13 cm',
+    weightText: '140 gr',
+    motherInfo: 'Appetite may increase significantly. Heartburn and leg cramps may begin. Sleeping on your side (especially left) is recommended.',
+  ),
+  PregnancyWeekInfo(
+    week: 18,
+    summary: 'Fetus is ≈13–14 cm, weighing ≈170 g. Hearing is fully developed — baby responds to sounds. Movements are becoming more defined.',
+    sizeText: 'onion sized',
+    fruit: FruitShape.pear,
+    stage: EmbryoStage.matureFetus,
+    heightText: '14 cm',
+    weightText: '195 gr',
+    motherInfo: 'The detailed anomaly scan is typically performed this week. Movements may start to be felt more clearly.',
+  ),
+  PregnancyWeekInfo(
+    week: 19,
+    summary: 'Fetus weighs ≈210 g. The vernix coating thickens. All five senses — taste, smell, sight, hearing, and touch — are developing simultaneously.',
+    sizeText: 'mango sized',
+    fruit: FruitShape.pear,
+    stage: EmbryoStage.matureFetus,
+    heightText: '15 cm',
+    weightText: '240 gr',
+    motherInfo: 'Uterus is now at the level of the navel. Back pain and round ligament pain are common. A pregnancy pillow between the knees helps.',
+  ),
+  PregnancyWeekInfo(
+    week: 20,
+    summary: "Fetus is ≈16–17 cm, weighing ≈300 g. Halfway point! Detailed ultrasound checks all organ systems. The baby's movements are clearly felt.",
+    sizeText: 'banana sized',
+    fruit: FruitShape.banana,
+    stage: EmbryoStage.matureFetus,
+    heightText: '16 cm',
+    weightText: '300 gr',
+    motherInfo: 'Halfway there! The detailed anomaly scan this week checks all organ systems. Blood pressure monitoring is important.',
+  ),
+  PregnancyWeekInfo(
+    week: 21,
+    summary: 'Fetus weighs ≈350 g. The digestive system practices by swallowing amniotic fluid. Eyebrows and lanugo (fine body hair) are present.',
+    sizeText: 'carrot sized',
+    fruit: FruitShape.apple,
+    stage: EmbryoStage.matureFetus,
+    heightText: '27 cm',
+    weightText: '360 gr',
+    motherInfo: 'Uterus extends above the navel. Leg cramps at night are common. Kegel exercises help prepare the pelvic floor.',
+  ),
+  PregnancyWeekInfo(
+    week: 22,
+    summary: 'Fetus is ≈19 cm, weighing ≈430 g. Grip reflex is developing; the baby can grasp the umbilical cord. Lips and eyes are well defined.',
+    sizeText: 'potato sized',
+    fruit: FruitShape.pear,
+    stage: EmbryoStage.matureFetus,
+    heightText: '28 cm',
+    weightText: '430 gr',
+    motherInfo: 'Braxton Hicks contractions (painless practice contractions) may begin. Iron supplementation is especially important.',
+  ),
+  PregnancyWeekInfo(
+    week: 23,
+    summary: 'Fetus weighs ≈500 g. Hearing is sharp — baby recognizes familiar voices. Lung development is progressing; breathing movements begin.',
+    sizeText: 'tomato sized',
+    fruit: FruitShape.citrus,
+    stage: EmbryoStage.matureFetus,
+    heightText: '29 cm',
+    weightText: '500 gr',
+    motherInfo: 'The linea nigra (dark vertical line) may appear on the abdomen. Swelling in feet and ankles can occur; elevating legs helps. Prenatal classes may be started.',
+  ),
+  PregnancyWeekInfo(
+    week: 24,
+    summary: 'Fetus is ≈21 cm, weighing ≈600 g. Viability threshold — with intensive care support, the baby could survive outside the womb. Lung surfactant production begins.',
+    sizeText: 'corn cob sized',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.matureFetus,
+    heightText: '30 cm',
+    weightText: '600 gr',
+    motherInfo: 'Glucose tolerance test (OGTT) should be done between weeks 24–28 to screen for gestational diabetes. Regular monitoring is important.',
+  ),
+  PregnancyWeekInfo(
+    week: 25,
+    summary: 'Fetus weighs ≈680 g. The brain is growing rapidly; folds and grooves are forming. The baby has a regular sleep-wake cycle.',
+    sizeText: 'broccoli sized',
+    fruit: FruitShape.leafy,
+    stage: EmbryoStage.matureFetus,
+    heightText: '35 cm',
+    weightText: '660 gr',
+    motherInfo: 'Uterus is above the navel. Heartburn and constipation are common. Deep breathing exercises and prenatal yoga can help.',
+  ),
+  PregnancyWeekInfo(
+    week: 26,
+    summary: 'Fetus weighs ≈760 g. Eyes can open and close; the baby can blink. The immune system is beginning to develop.',
+    sizeText: 'lettuce sized',
+    fruit: FruitShape.leafy,
+    stage: EmbryoStage.matureFetus,
+    heightText: '36 cm',
+    weightText: '760 gr',
+    motherInfo: 'Swelling in hands and feet may increase. Sleeping on the left side improves blood flow. Start planning for the birth.',
+  ),
+  PregnancyWeekInfo(
+    week: 27,
+    summary: 'Fetus weighs ≈900 g. All body systems are functioning but still maturing. The baby regularly practices breathing motions.',
+    sizeText: 'bell pepper sized',
+    fruit: FruitShape.smallRound,
+    stage: EmbryoStage.matureFetus,
+    heightText: '37 cm',
+    weightText: '875 gr',
+    motherInfo: 'Shortness of breath may begin as the uterus presses upward. Sleep difficulties are common. Discuss your birth plan with your doctor.',
+  ),
+  PregnancyWeekInfo(
+    week: 28,
+    summary: 'Fetus weighs ≈1,000–1,100 g and is ≈25 cm long. Third trimester begins! Brain is developing rapidly; eyes can detect light.',
+    sizeText: 'eggplant sized',
+    fruit: FruitShape.eggplant,
+    stage: EmbryoStage.matureFetus,
+    heightText: '38 cm',
+    weightText: '1.000 gr',
+    motherInfo: 'Third trimester begins! Prenatal visits become more frequent. Anti-D injection for Rh-negative mothers. Leg cramps, back pain, and insomnia are common.',
+  ),
+  PregnancyWeekInfo(
+    week: 29,
+    summary: 'Fetus weighs ≈1,200 g. Bones are fully formed though still soft. The brain is expanding and developing complex functions.',
+    sizeText: 'coconut sized',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.fullTerm,
+    heightText: '39 cm',
+    weightText: '1.150 gr',
+    motherInfo: 'Frequent urination returns as the uterus grows. Pelvic pressure increases. Monitor for signs of preterm labor.',
+  ),
+  PregnancyWeekInfo(
+    week: 30,
+    summary: 'Fetus weighs ≈1,350 g. Skin becomes smoother as fat deposits build up. The head is proportional to the body.',
+    sizeText: 'cucumber sized',
+    fruit: FruitShape.longGreen,
+    stage: EmbryoStage.fullTerm,
+    heightText: '40 cm',
+    weightText: '1.320 gr',
+    motherInfo: 'Nesting instinct may begin. Braxton Hicks contractions become more noticeable. Start preparing your hospital bag.',
+  ),
+  PregnancyWeekInfo(
+    week: 31,
+    summary: 'Fetus weighs ≈1,500 g. Brain development continues rapidly. Most organ systems are fully functional; lungs and digestive system are completing development.',
+    sizeText: 'pineapple sized',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.fullTerm,
+    heightText: '41 cm',
+    weightText: '1.500 gr',
+    motherInfo: 'Shortness of breath is common as the uterus presses on the diaphragm. Prenatal visits every 2 weeks. Complete birth classes.',
+  ),
+  PregnancyWeekInfo(
+    week: 32,
+    summary: 'Fetus weighs ≈1,700 g. Baby usually settles into head-down position. Regular sleep-wake cycles are well established.',
+    sizeText: 'orange sized',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.fullTerm,
+    heightText: '42 cm',
+    weightText: '1.700 gr',
+    motherInfo: 'Third trimester ultrasound checks fetal growth. Swelling, back pain, and pelvic pressure are common. Rest often.',
+  ),
+  PregnancyWeekInfo(
+    week: 33,
+    summary: 'Fetus weighs ≈1,900–2,000 g. Skull bones are soft and flexible for passage through the birth canal. Lanugo (fine body hair) is disappearing.',
+    sizeText: 'melon sized',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.fullTerm,
+    heightText: '44 cm',
+    weightText: '1.920 gr',
+    motherInfo: 'Nesting instinct intensifies. Make sure hospital bag is ready. Monitor fetal movements daily.',
+  ),
+  PregnancyWeekInfo(
+    week: 34,
+    summary: 'Fetus weighs ≈2,100–2,200 g. Immune system has strengthened. Brain continues to develop rapidly; fingernails reach the fingertips.',
+    sizeText: 'grape bunch sized',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.fullTerm,
+    heightText: '45 cm',
+    weightText: '2.145 gr',
+    motherInfo: "Weekly prenatal visits. Watch for signs of preeclampsia (sudden swelling, headache, visual changes). Baby's position is confirmed.",
+  ),
+  PregnancyWeekInfo(
+    week: 35,
+    summary: 'Fetus weighs ≈2,300–2,400 g. Lungs are almost fully mature. Kidneys are fully functional; they excrete urine into amniotic fluid.',
+    sizeText: 'large potato sized',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.fullTerm,
+    heightText: '46 cm',
+    weightText: '2.380 gr',
+    motherInfo: "Baby's head may engage in the pelvis (lightening). This eases breathing but increases pelvic pressure. Braxton Hicks contractions become stronger.",
+  ),
+  PregnancyWeekInfo(
+    week: 36,
+    summary: "Fetus weighs ≈2,600–2,700 g. Baby is 'early term.' Most body systems are fully mature. Baby gains about 30 g of fat per day.",
+    sizeText: 'large cabbage sized',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.fullTerm,
+    heightText: '48 cm',
+    weightText: '2.650 gr',
+    motherInfo: 'Weekly prenatal visits. Nonstress tests (NST) begin. Hospital bag should be fully packed and ready.',
+  ),
+  PregnancyWeekInfo(
+    week: 37,
+    summary: "Fetus weighs ≈2,900–3,000 g. 'Full term' — baby is fully ready for birth! Lung maturity is complete; baby is gaining weight daily.",
+    sizeText: 'long corn cob sized',
+    fruit: FruitShape.longGreen,
+    stage: EmbryoStage.fullTerm,
+    heightText: '49 cm',
+    weightText: '2.850 gr',
+    motherInfo: 'Birth can happen at any time! Know the signs of labor: regular contractions, water breaking, bloody show. Rest as much as possible.',
+  ),
+  PregnancyWeekInfo(
+    week: 38,
+    summary: 'Fetus weighs ≈3,100–3,200 g. Lanugo has disappeared; vernix is still present. The placenta is aging but still functioning well.',
+    sizeText: 'butternut squash sized',
+    fruit: FruitShape.melon,
+    stage: EmbryoStage.fullTerm,
+    heightText: '50 cm',
+    weightText: '3.100 gr',
+    motherInfo: 'Cervical changes (effacement and dilation) may begin. Some women feel the baby drop lower. Contractions are becoming more regular and stronger.',
+  ),
+  PregnancyWeekInfo(
+    week: 39,
+    summary: 'Fetus weighs ≈3,300–3,400 g. Skull bones are firm and mobile. Baby continues to gain weight. Everything is in final preparation for birth.',
+    sizeText: 'watermelon slice sized',
+    fruit: FruitShape.watermelon,
+    stage: EmbryoStage.fullTerm,
+    heightText: '51 cm',
+    weightText: '3.300 gr',
+    motherInfo: 'Body is preparing for labor. Mucus plug may be discharged. If water breaks or contractions are 5 minutes apart, go to the hospital.',
+  ),
+  PregnancyWeekInfo(
+    week: 40,
+    summary: 'Fetus weighs ≈3,300–3,500 g. Estimated due date! Only about 4–5% of babies are born on this date. Baby is fully developed and ready to meet you!',
+    sizeText: 'watermelon sized',
+    fruit: FruitShape.watermelon,
+    stage: EmbryoStage.fullTerm,
+    heightText: '52 cm',
+    weightText: '3.500 gr',
+    motherInfo: 'If labor has not started, your doctor may discuss induction. Trust your body and your medical team. Your baby is ready to come into the world!',
+  ),
+];
 
 // ─────────────────────────────────────────────
 // Kilometre taşları
@@ -708,6 +1119,7 @@ extension MilestoneCategoryX on MilestoneCategory {
 
 class PregnancyMilestone {
   final String title;
+  final String titleEn;
   final String description;
   final MilestoneCategory category;
   final int startDayOffset;
@@ -715,6 +1127,7 @@ class PregnancyMilestone {
 
   const PregnancyMilestone({
     required this.title,
+    required this.titleEn,
     required this.description,
     required this.category,
     required this.startDayOffset,
@@ -722,11 +1135,14 @@ class PregnancyMilestone {
   });
 
   Color get color => category.color;
+
+  String getTitle(bool isEnglish) => isEnglish ? titleEn : title;
 }
 
 const List<PregnancyMilestone> kMilestones = [
   PregnancyMilestone(
     title: 'Folik asit kullanımı',
+    titleEn: 'Folic acid use',
     description:
         'Bebeğin nöral tüpünün sağlıklı gelişimi için folik asit almak '
         'bu dönemde çok kritik. Doktorunun önerdiği dozu aksatma.',
@@ -736,6 +1152,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'Döllenme',
+    titleEn: 'Fertilization',
     description: 'Sperm ve yumurta buluştu — yolculuk başladı!',
     category: MilestoneCategory.fertilization,
     startDayOffset: 13,
@@ -743,6 +1160,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'Rahme tutunma',
+    titleEn: 'Implantation',
     description: 'Döllenmiş yumurta rahim duvarına tutundu. Gebelik resmen başladı!',
     category: MilestoneCategory.implantation,
     startDayOffset: 20,
@@ -750,6 +1168,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'Gebelik testi pozitif',
+    titleEn: 'Positive pregnancy test',
     description: 'hCG hormonu testte görünecek kadar yükseldi.',
     category: MilestoneCategory.test,
     startDayOffset: 27,
@@ -757,6 +1176,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'Organ gelişim dönemi',
+    titleEn: 'Organ development period',
     description:
         'Bebeğin hayati organlarının temeli bu haftalarda atılıyor. '
         'İlaç ve beslenmene en çok dikkat etmen gereken dönem.',
@@ -766,6 +1186,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'İlk kalp atışı',
+    titleEn: 'First heartbeat',
     description: 'Minik kalp atmaya başladı! Ultrasonda duyulabilir.',
     category: MilestoneCategory.heartbeat,
     startDayOffset: 38,
@@ -775,6 +1196,7 @@ const List<PregnancyMilestone> kMilestones = [
   // ── Prenatal tarama testleri ─────────────────────────────────────────
   PregnancyMilestone(
     title: 'İlk trimester ultrason',
+    titleEn: '1st trimester ultrasound',
     description:
         'Bebeğin canlılığı, kalp atışı ve gebelik haftası doğrulanır. '
         'Baş-popo mesafesi (CRL) ölçülür. 6–10. hafta.',
@@ -784,6 +1206,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'Kan testleri (1. grup)',
+    titleEn: 'Blood tests (Group 1)',
     description:
         'Tam kan sayımı (CBC), kan grubu & Rh, indirekt Coombs, '
         'rubella IgG, toksoplazmoz, CMV, HIV, HBsAg, HCV, VDRL, '
@@ -794,6 +1217,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'İkili tarama testi',
+    titleEn: 'First trimester screening',
     description:
         'PAPP-A, serbest β-hCG ve ense saydamlığı (NT) ölçümü. '
         'Down sendromu ve diğer kromozom anomalileri taranır. 11–14. hafta.',
@@ -803,6 +1227,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'NIPT (Hücre dışı DNA)',
+    titleEn: 'NIPT (Cell-free DNA)',
     description:
         'Anneden alınan kandan Down sendromu ve diğer trizomiler taranır. '
         'En ideal dönem 10–13. hafta.',
@@ -812,6 +1237,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'Üçlü / Dörtlü tarama',
+    titleEn: 'Triple / Quad screening',
     description:
         'AFP, hCG, estriol (ve inhibin A) ölçülür. '
         'Nöral tüp defektleri ve kromozom anomalileri taranır. 15–18. hafta.',
@@ -821,6 +1247,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'Detaylı ultrason (Anomali taraması)',
+    titleEn: 'Detailed ultrasound (Anomaly scan)',
     description:
         'Bebeğin tüm organları, yapısal anomaliler ve cinsiyet incelenir. '
         '18–22. hafta.',
@@ -830,6 +1257,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'Şeker yükleme testi (OGTT)',
+    titleEn: 'Glucose tolerance test (OGTT)',
     description:
         '75 g oral glikoz tolerans testi. Gestasyonel diyabet taranır. '
         '24–28. hafta.',
@@ -839,6 +1267,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'Anti-D & 2. Rh taraması',
+    titleEn: 'Anti-D & 2nd Rh screening',
     description:
         'Rh(-) annelere Anti-D immünoglobulin uygulanır. '
         'İkinci Rh antikor taraması yapılır. 28. hafta.',
@@ -848,6 +1277,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: '3. Trimester ultrason',
+    titleEn: '3rd trimester ultrasound',
     description:
         'Fetal biyometri, amniyon sıvı miktarı ve bebeğin büyümesi '
         'değerlendirilir. 32–38. hafta.',
@@ -857,6 +1287,7 @@ const List<PregnancyMilestone> kMilestones = [
   ),
   PregnancyMilestone(
     title: 'NST (Non-stres test)',
+    titleEn: 'NST (Non-stress test)',
     description:
         'Bebeğin kalp atış hızı ve hareketleri izlenir. '
         '36. haftadan itibaren rutin uygulanır.',
@@ -910,6 +1341,8 @@ class WeekEvent {
   final String emoji;
   final String title;
   final String detail;
+  final String titleEn;
+  final String detailEn;
   final Color color;
 
   const WeekEvent({
@@ -917,30 +1350,35 @@ class WeekEvent {
     required this.emoji,
     required this.title,
     required this.detail,
+    required this.titleEn,
+    required this.detailEn,
     required this.color,
   });
+
+  String getTitle(bool isEnglish) => isEnglish ? titleEn : title;
+  String getDetail(bool isEnglish) => isEnglish ? detailEn : detail;
 }
 
 const List<WeekEvent> kWeekEvents = [
   // ── Erken gebelik ─────────────────────────────────────────────────────
-  WeekEvent(week: 2,  emoji: '🌸', title: 'Yumurtlama dönemi',      detail: 'Yumurtalık yumurtayı serbest bırakmaya hazırlanıyor. Döllenme için en uygun dönem yaklaşıyor.',           color: Color(0xFFDB2777)),
-  WeekEvent(week: 3,  emoji: '🥚', title: 'Yumurtlama & Döllenme', detail: 'Yumurtlama gerçekleşiyor (SAT\'tan ~14 gün sonra). Sperm ile buluşursa döllenme başlar — yeni bir hayat!', color: Color(0xFFEA580C)),
-  WeekEvent(week: 4,  emoji: '🌱', title: 'Rahme tutunma',          detail: 'Döllenmiş yumurta rahim duvarına tutunuyor. hCG hormonu salgılanmaya başladı.',                            color: Color(0xFFE11D48)),
-  WeekEvent(week: 5,  emoji: '🔬', title: 'Test pozitif!',          detail: 'İlk adet gecikmesi bu hafta. Ev gebelik testi artık pozitif sonuç verebilir!',                             color: Color(0xFF7C3AED)),
-  WeekEvent(week: 6,  emoji: '💓', title: 'İlk kalp atışı',         detail: 'Bebeğin minik kalbi atmaya başlıyor — ultrasonda duyulabilir!',                                            color: Color(0xFFF97316)),
-  WeekEvent(week: 8,  emoji: '🫀', title: 'Tüm organlar başladı',   detail: 'Tüm hayati organların temeli bu haftada atılıyor.',                                                         color: Color(0xFF14B8A6)),
-  WeekEvent(week: 10, emoji: '👶', title: 'Fetüs dönemi',           detail: 'Artık embriyo değil, fetüs! Yüz hatları belirginleşiyor.',                                                  color: Color(0xFF9333EA)),
-  WeekEvent(week: 12, emoji: '🎉', title: '1. Trimester sonu',      detail: 'Düşük riski önemli ölçüde azaldı. İkili tarama testi zamanı.',                                             color: Color(0xFF7C3AED)),
-  WeekEvent(week: 14, emoji: '🌟', title: '2. Trimester başladı',   detail: 'En rahat dönem başlıyor. Mide bulantısı genellikle geçer.',                                                 color: Color(0xFF0891B2)),
-  WeekEvent(week: 16, emoji: '👂', title: 'Bebek duyuyor',          detail: 'Bebek sesleri duyabilir — ona şarkı söyle!',                                                                color: Color(0xFF059669)),
-  WeekEvent(week: 18, emoji: '🤸', title: 'İlk hareketler',         detail: 'İlk kez hamile annelerde bebek hareketleri bu hafta hissedilebilir.',                                       color: Color(0xFFD97706)),
-  WeekEvent(week: 20, emoji: '🩺', title: 'Detaylı ultrason',       detail: 'Cinsiyet öğrenilebilir! Anomali taraması ve detaylı ultrason zamanı.',                                      color: Color(0xFF3B82F6)),
-  WeekEvent(week: 24, emoji: '🏥', title: 'Yaşayabilirlik eşiği',  detail: 'Bu haftadan itibaren bebek yoğun bakım desteğiyle hayatta kalabilir.',                                      color: Color(0xFF6366F1)),
-  WeekEvent(week: 28, emoji: '📅', title: '3. Trimester başladı',   detail: 'Son dönem! Doğum hazırlıklarına başlama zamanı.',                                                           color: Color(0xFFEC4899)),
-  WeekEvent(week: 32, emoji: '😴', title: 'Uyku-uyanıklık döngüsü',detail: 'Bebek düzenli uyku ve uyanıklık döngüleri oluşturdu.',                   color: Color(0xFF8B5CF6)),
-  WeekEvent(week: 36, emoji: '🔜', title: 'Erken term',             detail: 'Bebek "erken term" kabul edilir. Doğum çantası hazır olmalı!',           color: Color(0xFF0D9488)),
-  WeekEvent(week: 37, emoji: '✅', title: 'Tam term',               detail: 'Bebek "tam term" — doğum her an başlayabilir!',                          color: Color(0xFF16A34A)),
-  WeekEvent(week: 40, emoji: '🎊', title: 'Tahmini doğum günü',     detail: 'Tahmini doğum tarihi! Bebeklerin %4–5\'i bu tarihte doğar.',             color: Color(0xFFDC2626)),
+  WeekEvent(week: 2,  emoji: '🌸', title: 'Yumurtlama dönemi',      detail: 'Yumurtalık yumurtayı serbest bırakmaya hazırlanıyor. Döllenme için en uygun dönem yaklaşıyor.',           titleEn: 'Ovulation period',           detailEn: 'The ovary is preparing to release an egg. The optimal time for conception is approaching.',           color: Color(0xFFDB2777)),
+  WeekEvent(week: 3,  emoji: '🥚', title: 'Yumurtlama & Döllenme', detail: 'Yumurtlama gerçekleşiyor (SAT\'tan ~14 gün sonra). Sperm ile buluşursa döllenme başlar — yeni bir hayat!', titleEn: 'Ovulation & Fertilization', detailEn: 'Ovulation occurs (~14 days after LMP). If sperm are present, fertilization begins — a new life!', color: Color(0xFFEA580C)),
+  WeekEvent(week: 4,  emoji: '🌱', title: 'Rahme tutunma',          detail: 'Döllenmiş yumurta rahim duvarına tutunuyor. hCG hormonu salgılanmaya başladı.',                            titleEn: 'Implantation',               detailEn: 'The fertilized egg is attaching to the uterine wall. hCG hormone secretion has begun.',            color: Color(0xFFE11D48)),
+  WeekEvent(week: 5,  emoji: '🔬', title: 'Test pozitif!',          detail: 'İlk adet gecikmesi bu hafta. Ev gebelik testi artık pozitif sonuç verebilir!',                             titleEn: 'Positive test!',             detailEn: 'First missed period this week. A home pregnancy test may now show a positive result!',             color: Color(0xFF7C3AED)),
+  WeekEvent(week: 6,  emoji: '💓', title: 'İlk kalp atışı',         detail: 'Bebeğin minik kalbi atmaya başlıyor — ultrasonda duyulabilir!',                                            titleEn: 'First heartbeat',            detailEn: "Baby's tiny heart is starting to beat — detectable on ultrasound!",                               color: Color(0xFFF97316)),
+  WeekEvent(week: 8,  emoji: '🫀', title: 'Tüm organlar başladı',   detail: 'Tüm hayati organların temeli bu haftada atılıyor.',                                                         titleEn: 'All organs begun',           detailEn: 'The foundation of all vital organs is being laid this week.',                                     color: Color(0xFF14B8A6)),
+  WeekEvent(week: 10, emoji: '👶', title: 'Fetüs dönemi',           detail: 'Artık embriyo değil, fetüs! Yüz hatları belirginleşiyor.',                                                  titleEn: 'Fetus stage',                detailEn: "No longer an embryo, now a fetus! Facial features are becoming more defined.",                    color: Color(0xFF9333EA)),
+  WeekEvent(week: 12, emoji: '🎉', title: '1. Trimester sonu',      detail: 'Düşük riski önemli ölçüde azaldı. İkili tarama testi zamanı.',                                             titleEn: 'End of 1st trimester',       detailEn: 'Miscarriage risk has dropped significantly. Time for the first trimester screening.',             color: Color(0xFF7C3AED)),
+  WeekEvent(week: 14, emoji: '🌟', title: '2. Trimester başladı',   detail: 'En rahat dönem başlıyor. Mide bulantısı genellikle geçer.',                                                 titleEn: '2nd trimester begins',       detailEn: 'The most comfortable period begins. Morning sickness usually fades.',                             color: Color(0xFF0891B2)),
+  WeekEvent(week: 16, emoji: '👂', title: 'Bebek duyuyor',          detail: 'Bebek sesleri duyabilir — ona şarkı söyle!',                                                                titleEn: 'Baby can hear',              detailEn: 'Baby can hear sounds — sing to them!',                                                            color: Color(0xFF059669)),
+  WeekEvent(week: 18, emoji: '🤸', title: 'İlk hareketler',         detail: 'İlk kez hamile annelerde bebek hareketleri bu hafta hissedilebilir.',                                       titleEn: 'First movements',            detailEn: 'First-time mothers may feel baby movements for the first time this week.',                        color: Color(0xFFD97706)),
+  WeekEvent(week: 20, emoji: '🩺', title: 'Detaylı ultrason',       detail: 'Cinsiyet öğrenilebilir! Anomali taraması ve detaylı ultrason zamanı.',                                      titleEn: 'Detailed ultrasound',        detailEn: "Gender can be revealed! Anomaly scan and detailed ultrasound time.",                              color: Color(0xFF3B82F6)),
+  WeekEvent(week: 24, emoji: '🏥', title: 'Yaşayabilirlik eşiği',  detail: 'Bu haftadan itibaren bebek yoğun bakım desteğiyle hayatta kalabilir.',                                      titleEn: 'Viability threshold',       detailEn: 'From this week, the baby could survive outside the womb with intensive care support.',            color: Color(0xFF6366F1)),
+  WeekEvent(week: 28, emoji: '📅', title: '3. Trimester başladı',   detail: 'Son dönem! Doğum hazırlıklarına başlama zamanı.',                                                           titleEn: '3rd trimester begins',       detailEn: 'Final stretch! Time to start birth preparations.',                                                color: Color(0xFFEC4899)),
+  WeekEvent(week: 32, emoji: '😴', title: 'Uyku-uyanıklık döngüsü',detail: 'Bebek düzenli uyku ve uyanıklık döngüleri oluşturdu.',                   titleEn: 'Sleep-wake cycles',          detailEn: 'Baby has established regular sleep and wake cycles.',                   color: Color(0xFF8B5CF6)),
+  WeekEvent(week: 36, emoji: '🔜', title: 'Erken term',             detail: 'Bebek "erken term" kabul edilir. Doğum çantası hazır olmalı!',           titleEn: 'Early term',                 detailEn: 'Baby is considered "early term". Hospital bag should be ready!',        color: Color(0xFF0D9488)),
+  WeekEvent(week: 37, emoji: '✅', title: 'Tam term',               detail: 'Bebek "tam term" — doğum her an başlayabilir!',                          titleEn: 'Full term',                  detailEn: 'Baby is "full term" — birth can begin at any time!',                   color: Color(0xFF16A34A)),
+  WeekEvent(week: 40, emoji: '🎊', title: 'Tahmini doğum günü',     detail: 'Tahmini doğum tarihi! Bebeklerin %4–5\'i bu tarihte doğar.',             titleEn: 'Estimated due date',         detailEn: "Estimated due date! Only about 4–5% of babies are born on this exact day.",                    color: Color(0xFFDC2626)),
 ];
 
 /// Verilen tarih bir hafta olayının ilk günüyse o WeekEvent'i döndürür.
@@ -964,48 +1402,53 @@ WeekEvent? weekEventForDate(DateTime date, DateTime? lmp) {
 
 class ZodiacInfo {
   final String name;
+  final String nameEn;
   final String emoji;
   final String dateRange;
+  final String dateRangeEn;
 
-  const ZodiacInfo(this.name, this.emoji, this.dateRange);
+  const ZodiacInfo(this.name, this.nameEn, this.emoji, this.dateRange, this.dateRangeEn);
+
+  String getName(bool isEnglish) => isEnglish ? nameEn : name;
+  String getDateRange(bool isEnglish) => isEnglish ? dateRangeEn : dateRange;
 }
 
-ZodiacInfo zodiacForDate(DateTime date) {
+ZodiacInfo zodiacForDate(DateTime date, {bool isEnglish = false}) {
   final m = date.month;
   final d = date.day;
 
   if ((m == 3 && d >= 21) || (m == 4 && d <= 19)) {
-    return const ZodiacInfo('Koç',      '♈', '21 Mar – 19 Nis');
+    return const ZodiacInfo('Koç',      'Aries',       '♈', '21 Mar – 19 Nis', 'Mar 21 – Apr 19');
   }
   if ((m == 4 && d >= 20) || (m == 5 && d <= 20)) {
-    return const ZodiacInfo('Boğa',     '♉', '20 Nis – 20 May');
+    return const ZodiacInfo('Boğa',     'Taurus',      '♉', '20 Nis – 20 May', 'Apr 20 – May 20');
   }
   if ((m == 5 && d >= 21) || (m == 6 && d <= 20)) {
-    return const ZodiacInfo('İkizler',  '♊', '21 May – 20 Haz');
+    return const ZodiacInfo('İkizler',  'Gemini',      '♊', '21 May – 20 Haz', 'May 21 – Jun 20');
   }
   if ((m == 6 && d >= 21) || (m == 7 && d <= 22)) {
-    return const ZodiacInfo('Yengeç',   '♋', '21 Haz – 22 Tem');
+    return const ZodiacInfo('Yengeç',   'Cancer',      '♋', '21 Haz – 22 Tem', 'Jun 21 – Jul 22');
   }
   if ((m == 7 && d >= 23) || (m == 8 && d <= 22)) {
-    return const ZodiacInfo('Aslan',    '♌', '23 Tem – 22 Ağu');
+    return const ZodiacInfo('Aslan',    'Leo',         '♌', '23 Tem – 22 Ağu', 'Jul 23 – Aug 22');
   }
   if ((m == 8 && d >= 23) || (m == 9 && d <= 22)) {
-    return const ZodiacInfo('Başak',    '♍', '23 Ağu – 22 Eyl');
+    return const ZodiacInfo('Başak',    'Virgo',       '♍', '23 Ağu – 22 Eyl', 'Aug 23 – Sep 22');
   }
   if ((m == 9 && d >= 23) || (m == 10 && d <= 22)) {
-    return const ZodiacInfo('Terazi',   '♎', '23 Eyl – 22 Eki');
+    return const ZodiacInfo('Terazi',   'Libra',       '♎', '23 Eyl – 22 Eki', 'Sep 23 – Oct 22');
   }
   if ((m == 10 && d >= 23) || (m == 11 && d <= 21)) {
-    return const ZodiacInfo('Akrep',    '♏', '23 Eki – 21 Kas');
+    return const ZodiacInfo('Akrep',    'Scorpio',     '♏', '23 Eki – 21 Kas', 'Oct 23 – Nov 21');
   }
   if ((m == 11 && d >= 22) || (m == 12 && d <= 21)) {
-    return const ZodiacInfo('Yay',      '♐', '22 Kas – 21 Ara');
+    return const ZodiacInfo('Yay',      'Sagittarius', '♐', '22 Kas – 21 Ara', 'Nov 22 – Dec 21');
   }
   if ((m == 12 && d >= 22) || (m == 1 && d <= 19)) {
-    return const ZodiacInfo('Oğlak',   '♑', '22 Ara – 19 Oca');
+    return const ZodiacInfo('Oğlak',    'Capricorn',   '♑', '22 Ara – 19 Oca', 'Dec 22 – Jan 19');
   }
   if ((m == 1 && d >= 20) || (m == 2 && d <= 18)) {
-    return const ZodiacInfo('Kova',     '♒', '20 Oca – 18 Şub');
+    return const ZodiacInfo('Kova',     'Aquarius',    '♒', '20 Oca – 18 Şub', 'Jan 20 – Feb 18');
   }
-  return const ZodiacInfo('Balık',     '♓', '19 Şub – 20 Mar');
+  return const ZodiacInfo('Balık',     'Pisces',      '♓', '19 Şub – 20 Mar', 'Feb 19 – Mar 20');
 }

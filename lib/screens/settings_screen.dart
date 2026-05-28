@@ -15,24 +15,28 @@ import 'package:provider/provider.dart';
 import '../core/theme/app_background.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/theme_provider.dart';
+import '../l10n/app_localizations.dart';
 import '../models/app_user.dart';
 import '../models/notification_prefs.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cycle_provider.dart';
+import '../providers/language_provider.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AppBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('Ayarlar'),
+          title: Text(l10n.settingsTitle),
         ),
       body: ListView(
         children: const [
+          _LanguageSection(),
           _GeneralSettingsSection(),
           _NotificationsSection(),
           _ThemeSection(),
@@ -41,6 +45,44 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
       ),
+    );
+  }
+}
+
+// ────────────────────────────────────────────
+// Dil Seçimi
+// ────────────────────────────────────────────
+class _LanguageSection extends StatelessWidget {
+  const _LanguageSection();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final langProvider = context.watch<LanguageProvider>();
+
+    return _Section(
+      title: l10n.languageSection,
+      icon: Icons.language,
+      children: [
+        RadioListTile<String>(
+          contentPadding: EdgeInsets.zero,
+          value: 'tr',
+          groupValue: langProvider.locale.languageCode,
+          title: Text(l10n.languageTurkish),
+          onChanged: (v) {
+            if (v != null) langProvider.setLocale(v);
+          },
+        ),
+        RadioListTile<String>(
+          contentPadding: EdgeInsets.zero,
+          value: 'en',
+          groupValue: langProvider.locale.languageCode,
+          title: Text(l10n.languageEnglish),
+          onChanged: (v) {
+            if (v != null) langProvider.setLocale(v);
+          },
+        ),
+      ],
     );
   }
 }
