@@ -19,6 +19,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 import 'core/auth/auth_gate.dart';
+import 'screens/splash_wrapper.dart';
 import 'core/theme/app_theme.dart';
 import 'core/theme/theme_provider.dart';
 import 'firebase_options.dart';
@@ -85,7 +86,7 @@ class LunoraApp extends StatelessWidget {
           locale: languageProvider.locale,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
-          home: const AuthGate(),
+          home: const SplashWrapper(child: AuthGate()),
         ),
       ),
     );
