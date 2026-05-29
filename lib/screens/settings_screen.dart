@@ -66,23 +66,25 @@ class _LanguageSection extends StatelessWidget {
       title: l10n.languageSection,
       icon: Icons.language,
       children: [
-        RadioListTile<String>(
-          contentPadding: EdgeInsets.zero,
-          value: 'tr',
+        RadioGroup<String>(
           groupValue: langProvider.locale.languageCode,
-          title: Text(l10n.languageTurkish),
           onChanged: (v) {
             if (v != null) langProvider.setLocale(v);
           },
-        ),
-        RadioListTile<String>(
-          contentPadding: EdgeInsets.zero,
-          value: 'en',
-          groupValue: langProvider.locale.languageCode,
-          title: Text(l10n.languageEnglish),
-          onChanged: (v) {
-            if (v != null) langProvider.setLocale(v);
-          },
+          child: Column(
+            children: [
+              RadioListTile<String>(
+                contentPadding: EdgeInsets.zero,
+                value: 'tr',
+                title: Text(l10n.languageTurkish),
+              ),
+              RadioListTile<String>(
+                contentPadding: EdgeInsets.zero,
+                value: 'en',
+                title: Text(l10n.languageEnglish),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -278,23 +280,30 @@ class _ThemeSection extends StatelessWidget {
       title: isEn ? 'Theme' : 'Tema',
       icon: Icons.palette_outlined,
       children: [
-        _ThemeRadio(
-          label: isEn ? 'Follow system' : 'Sistemi takip et',
-          value: AppThemeMode.system,
+        RadioGroup<AppThemeMode>(
           groupValue: current,
-          onChanged: setMode,
-        ),
-        _ThemeRadio(
-          label: isEn ? 'Light' : 'Açık',
-          value: AppThemeMode.light,
-          groupValue: current,
-          onChanged: setMode,
-        ),
-        _ThemeRadio(
-          label: isEn ? 'Dark' : 'Koyu',
-          value: AppThemeMode.dark,
-          groupValue: current,
-          onChanged: setMode,
+          onChanged: (v) {
+            if (v != null) setMode(v);
+          },
+          child: Column(
+            children: [
+              RadioListTile<AppThemeMode>(
+                contentPadding: EdgeInsets.zero,
+                value: AppThemeMode.system,
+                title: Text(isEn ? 'Follow system' : 'Sistemi takip et'),
+              ),
+              RadioListTile<AppThemeMode>(
+                contentPadding: EdgeInsets.zero,
+                value: AppThemeMode.light,
+                title: Text(isEn ? 'Light' : 'Açık'),
+              ),
+              RadioListTile<AppThemeMode>(
+                contentPadding: EdgeInsets.zero,
+                value: AppThemeMode.dark,
+                title: Text(isEn ? 'Dark' : 'Koyu'),
+              ),
+            ],
+          ),
         ),
       ],
     );
@@ -611,32 +620,6 @@ class _SwitchRow extends StatelessWidget {
   }
 }
 
-class _ThemeRadio extends StatelessWidget {
-  final String label;
-  final AppThemeMode value;
-  final AppThemeMode groupValue;
-  final ValueChanged<AppThemeMode> onChanged;
-
-  const _ThemeRadio({
-    required this.label,
-    required this.value,
-    required this.groupValue,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return RadioListTile<AppThemeMode>(
-      contentPadding: EdgeInsets.zero,
-      value: value,
-      groupValue: groupValue,
-      title: Text(label),
-      onChanged: (v) {
-        if (v != null) onChanged(v);
-      },
-    );
-  }
-}
 
 class _SliderTile extends StatelessWidget {
   final double value;
