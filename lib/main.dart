@@ -1,6 +1,6 @@
 // =============================================
 // main.dart
-// Lunora entry point:
+// Ayzit entry point:
 //   1) Firebase.initializeApp
 //   2) Crashlytics (disabled in debug)
 //   3) MultiProvider (Auth, Cycle, Theme)
@@ -57,14 +57,14 @@ Future<void> main() async {
       return true;
     };
 
-    runApp(const LunoraApp());
+    runApp(const AyzitApp());
   }, (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
   });
 }
 
-class LunoraApp extends StatelessWidget {
-  const LunoraApp({super.key});
+class AyzitApp extends StatelessWidget {
+  const AyzitApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +78,7 @@ class LunoraApp extends StatelessWidget {
       ],
       child: Consumer2<ThemeProvider, LanguageProvider>(
         builder: (context, themeProvider, languageProvider, _) => MaterialApp(
-          title: 'Lunora',
+          title: 'Ayzit',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light,
           darkTheme: AppTheme.dark,

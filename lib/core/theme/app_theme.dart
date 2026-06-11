@@ -1,6 +1,6 @@
 // =============================================
 // core/theme/app_theme.dart
-// Material 3 light + dark themes for Lunora
+// Material 3 light + dark themes for Ayzit
 // =============================================
 
 import 'package:flutter/material.dart';

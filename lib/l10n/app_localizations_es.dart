@@ -9,7 +9,7 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
-  String get appTitle => 'Lunora';
+  String get appTitle => 'Ayzit';
 
   @override
   String get appSubtitle => 'Sigue tu ciclo, comparte y conecta';

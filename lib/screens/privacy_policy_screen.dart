@@ -56,8 +56,8 @@ class _PrivacyContent extends StatelessWidget {
         _h1(isEn ? 'Privacy Policy' : 'Gizlilik Politikası', cs),
         _p(
           isEn
-              ? 'Lunora ("we", "us", "our") is committed to protecting your personal information. This Privacy Policy explains what data we collect, how we use it, and your rights regarding your information.'
-              : 'Lunora olarak kişisel bilgilerinizi korumayı taahhüt ediyoruz. Bu Gizlilik Politikası, hangi verileri topladığımızı, nasıl kullandığımızı ve haklarınızı açıklar.',
+              ? 'Ayzit ("we", "us", "our") is committed to protecting your personal information. This Privacy Policy explains what data we collect, how we use it, and your rights regarding your information.'
+              : 'Ayzit olarak kişisel bilgilerinizi korumayı taahhüt ediyoruz. Bu Gizlilik Politikası, hangi verileri topladığımızı, nasıl kullandığımızı ve haklarınızı açıklar.',
           cs,
         ),
 
@@ -86,8 +86,8 @@ class _PrivacyContent extends StatelessWidget {
 
         _h2(isEn ? '2. How We Use Your Data' : '2. Verilerinizi Nasıl Kullanıyoruz', cs),
         _bullet(isEn
-            ? 'To provide and improve the Lunora app features'
-            : 'Lunora uygulama özelliklerini sunmak ve geliştirmek için', cs),
+            ? 'To provide and improve the Ayzit app features'
+            : 'Ayzit uygulama özelliklerini sunmak ve geliştirmek için', cs),
         _bullet(isEn
             ? 'To calculate cycle predictions and pregnancy tracking'
             : 'Döngü tahminleri ve hamilelik takibini hesaplamak için', cs),
@@ -104,8 +104,8 @@ class _PrivacyContent extends StatelessWidget {
         _h2(isEn ? '3. Third-Party Services' : '3. Üçüncü Taraf Hizmetler', cs),
         _p(
           isEn
-              ? 'Lunora uses the following third-party services, each governed by their own privacy policies:'
-              : 'Lunora aşağıdaki üçüncü taraf hizmetleri kullanmaktadır; her biri kendi gizlilik politikasına tabidir:',
+              ? 'Ayzit uses the following third-party services, each governed by their own privacy policies:'
+              : 'Ayzit aşağıdaki üçüncü taraf hizmetleri kullanmaktadır; her biri kendi gizlilik politikasına tabidir:',
           cs,
         ),
         _bullet('Firebase (Google) — Authentication, Firestore, Analytics, Crashlytics', cs),
@@ -127,8 +127,8 @@ class _PrivacyContent extends StatelessWidget {
         _h2(isEn ? '6. Children\'s Privacy' : '6. Çocukların Gizliliği', cs),
         _p(
           isEn
-              ? 'Lunora is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.'
-              : 'Lunora, 13 yaşın altındaki çocuklar için tasarlanmamıştır. 13 yaşın altındaki çocuklardan bilerek kişisel bilgi toplamıyoruz.',
+              ? 'Ayzit is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13.'
+              : 'Ayzit, 13 yaşın altındaki çocuklar için tasarlanmamıştır. 13 yaşın altındaki çocuklardan bilerek kişisel bilgi toplamıyoruz.',
           cs,
         ),
 
@@ -162,21 +162,21 @@ class _TermsContent extends StatelessWidget {
         _h1(isEn ? 'Terms of Use' : 'Kullanım Koşulları', cs),
         _p(
           isEn
-              ? 'By downloading or using Lunora, you agree to these Terms of Use. Please read them carefully.'
-              : 'Lunora\'yı indirerek veya kullanarak bu Kullanım Koşulları\'nı kabul etmiş sayılırsınız. Lütfen dikkatlice okuyun.',
+              ? 'By downloading or using Ayzit, you agree to these Terms of Use. Please read them carefully.'
+              : 'Ayzit\'yı indirerek veya kullanarak bu Kullanım Koşulları\'nı kabul etmiş sayılırsınız. Lütfen dikkatlice okuyun.',
           cs,
         ),
 
         _h2(isEn ? '1. Use of the App' : '1. Uygulamanın Kullanımı', cs),
-        _bullet(isEn ? 'You must be at least 13 years old to use Lunora' : 'Lunora\'yı kullanmak için en az 13 yaşında olmanız gerekir', cs),
+        _bullet(isEn ? 'You must be at least 13 years old to use Ayzit' : 'Ayzit\'yı kullanmak için en az 13 yaşında olmanız gerekir', cs),
         _bullet(isEn ? 'You are responsible for maintaining the security of your account' : 'Hesabınızın güvenliğini korumak sizin sorumluluğunuzdadır', cs),
         _bullet(isEn ? 'You agree not to use the app for any illegal or harmful purpose' : 'Uygulamayı yasadışı veya zararlı amaçlarla kullanmamayı kabul ediyorsunuz', cs),
 
         _h2(isEn ? '2. Health Information Disclaimer' : '2. Sağlık Bilgisi Sorumluluk Reddi', cs),
         _p(
           isEn
-              ? 'Lunora provides general health tracking and informational content only. The app is NOT a medical device and does NOT provide medical advice. Always consult a qualified healthcare professional for medical decisions.'
-              : 'Lunora yalnızca genel sağlık takibi ve bilgilendirici içerik sunar. Uygulama tıbbi bir cihaz DEĞİLDİR ve tıbbi tavsiye VERMEZ. Tıbbi kararlar için her zaman nitelikli bir sağlık uzmanına danışın.',
+              ? 'Ayzit provides general health tracking and informational content only. The app is NOT a medical device and does NOT provide medical advice. Always consult a qualified healthcare professional for medical decisions.'
+              : 'Ayzit yalnızca genel sağlık takibi ve bilgilendirici içerik sunar. Uygulama tıbbi bir cihaz DEĞİLDİR ve tıbbi tavsiye VERMEZ. Tıbbi kararlar için her zaman nitelikli bir sağlık uzmanına danışın.',
           cs,
         ),
 
@@ -190,16 +190,16 @@ class _TermsContent extends StatelessWidget {
         _h2(isEn ? '4. Intellectual Property' : '4. Fikri Mülkiyet', cs),
         _p(
           isEn
-              ? 'All content, design, and code in Lunora is owned by or licensed to us. You may not copy, modify, or distribute the app without permission.'
-              : 'Lunora\'daki tüm içerik, tasarım ve kod bize aittir veya lisanslıdır. İzin almadan uygulamayı kopyalayamaz, değiştiremez veya dağıtamazsınız.',
+              ? 'All content, design, and code in Ayzit is owned by or licensed to us. You may not copy, modify, or distribute the app without permission.'
+              : 'Ayzit\'daki tüm içerik, tasarım ve kod bize aittir veya lisanslıdır. İzin almadan uygulamayı kopyalayamaz, değiştiremez veya dağıtamazsınız.',
           cs,
         ),
 
         _h2(isEn ? '5. Limitation of Liability' : '5. Sorumluluk Sınırlaması', cs),
         _p(
           isEn
-              ? 'Lunora is provided "as is". We are not liable for any damages arising from your use of the app, including any health decisions made based on app content.'
-              : 'Lunora "olduğu gibi" sunulmaktadır. Sağlık kararları da dahil olmak üzere uygulamanın kullanımından doğan zararlardan sorumlu değiliz.',
+              ? 'Ayzit is provided "as is". We are not liable for any damages arising from your use of the app, including any health decisions made based on app content.'
+              : 'Ayzit "olduğu gibi" sunulmaktadır. Sağlık kararları da dahil olmak üzere uygulamanın kullanımından doğan zararlardan sorumlu değiliz.',
           cs,
         ),
 

@@ -6,10 +6,11 @@ class DonguSplash extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SizedBox.expand(
+      body: Center(
         child: Image.asset(
-          'assets/splash_bg.png',
-          fit: BoxFit.cover,
+          'assets/logo_new.png',
+          width: 160,
+          height: 160,
         ),
       ),
     );

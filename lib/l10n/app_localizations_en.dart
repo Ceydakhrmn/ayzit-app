@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Lunora';
+  String get appTitle => 'Ayzit';
 
   @override
   String get appSubtitle => 'Track your cycle, share and connect';
@@ -311,10 +311,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modePregnancyDesc => 'Track your pregnancy';
 
   @override
-  String get modeTryConceive => 'Trying to Conceive';
+  String get modeTryConceive => 'Ovulation & Conceive';
 
   @override
-  String get modeTryConceiveDesc => 'Track fertility windows';
+  String get modeTryConceiveDesc => 'Ovulation tracking & fertility windows';
 
   @override
   String get notificationsSection => 'Notifications';

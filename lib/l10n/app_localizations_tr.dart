@@ -9,7 +9,7 @@ class AppLocalizationsTr extends AppLocalizations {
   AppLocalizationsTr([String locale = 'tr']) : super(locale);
 
   @override
-  String get appTitle => 'Lunora';
+  String get appTitle => 'Ayzit';
 
   @override
   String get appSubtitle => 'Takip et, paylaş ve bağlan';
@@ -311,10 +311,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get modePregnancyDesc => 'Hamilelik sürecinizi takip edin';
 
   @override
-  String get modeTryConceive => 'Hamile Kalma';
+  String get modeTryConceive => 'Ovülasyon & Hamile Kalma';
 
   @override
-  String get modeTryConceiveDesc => 'Doğurganlık pencerelerinizi takip edin';
+  String get modeTryConceiveDesc => 'Ovülasyon takibi ve doğurganlık penceresi';
 
   @override
   String get notificationsSection => 'Bildirimler';

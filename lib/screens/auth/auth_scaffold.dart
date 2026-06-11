@@ -62,12 +62,13 @@ class AuthScaffold extends StatelessWidget {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'Lunora',
+                          'Ayzit',
                           textAlign: TextAlign.center,
                           style: GoogleFonts.montserrat(
                             fontSize: 28,
-                            fontWeight: FontWeight.w300,
-                            letterSpacing: 8,
+                            fontWeight: FontWeight.w800,
+                            fontStyle: FontStyle.italic,
+                            letterSpacing: 2,
                             color: isDark ? Colors.white : const Color(0xFF5D5461),
                           ),
                         ),
