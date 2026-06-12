@@ -7,6 +7,45 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:198781995461:android:987a0841dfcf99243963ac",
+        "android_client_info": {
+          "package_name": "com.ayzit.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "198781995461-3osr73onghmb7bmleqcji7r8l70i6228.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC1PAbwMyhV1miFsPUIxyd91sQWy6fN_GQ"
+        },
+        {
+          "current_key": "AIzaSyB9OJ0S9M7D_jTBq_RpQluMQIiO-Z7Mm7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "198781995461-3osr73onghmb7bmleqcji7r8l70i6228.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "198781995461-6pc1ka1avqqej02cbsp86goblhnpbhd7.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.yeniUygulama"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:198781995461:android:3c6fb2c6e5f84a753963ac",
         "android_client_info": {
           "package_name": "com.lunora.app"
@@ -29,6 +68,9 @@
       "api_key": [
         {
           "current_key": "AIzaSyC1PAbwMyhV1miFsPUIxyd91sQWy6fN_GQ"
+        },
+        {
+          "current_key": "AIzaSyB9OJ0S9M7D_jTBq_RpQluMQIiO-Z7Mm7Q"
         }
       ],
       "services": {

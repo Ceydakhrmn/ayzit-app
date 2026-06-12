@@ -57,7 +57,7 @@ class DefaultFirebaseOptions {
     projectId: 'lunora-app',
     storageBucket: 'lunora-app.firebasestorage.app',
     iosClientId: '198781995461-u32dapcnh4v7ipbcd77ab0kpsu3j3sjb.apps.googleusercontent.com',
-    iosBundleId: 'com.lunora.app',
+    iosBundleId: 'com.ayzit.app',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(

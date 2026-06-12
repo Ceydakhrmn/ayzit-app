@@ -40,9 +40,13 @@ Future<void> main() async {
     ));
     await initializeDateFormatting('tr');
     await AppointmentNotificationService.instance.init();
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    try {
+      await Firebase.initializeApp(
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    } catch (_) {
+      // Already initialized
+    }
     // Crashlytics is disabled automatically in debug builds to keep
     // dev noise out of the dashboard.
     await FirebaseCrashlytics.instance

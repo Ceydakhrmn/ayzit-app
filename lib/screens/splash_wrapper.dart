@@ -18,7 +18,7 @@ class _SplashWrapperState extends State<SplashWrapper> {
   void initState() {
     super.initState();
     // 3 saniye sonra splash screen'i gizle
-    Timer(const Duration(seconds: 2), () {
+    Timer(const Duration(seconds: 1), () {
       if (mounted) {
         setState(() {
           _showSplash = false;

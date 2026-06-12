@@ -5,12 +5,13 @@ class DonguSplash extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
+      backgroundColor: Color(0xFFF5EEF8),
       body: Center(
-        child: Image.asset(
-          'assets/logo_new.png',
-          width: 160,
-          height: 160,
+        child: Image(
+          image: AssetImage('assets/logo_new.png'),
+          width: 200,
+          height: 200,
         ),
       ),
     );
