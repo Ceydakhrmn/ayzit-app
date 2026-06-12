@@ -73,7 +73,7 @@ String exerciseImagePath(ExerciseType type) {
     case ExerciseType.alcakHamle:               return 'assets/exercises/alcak_hamle.png';
     case ExerciseType.ucgenDurusuDegistirilmis: return 'assets/exercises/ucgen_durusu_degistirilmis.png';
     case ExerciseType.oturarakOneKatlanmaGenis: return 'assets/exercises/oturarak_one_katlanma_genis_bacakli.png';
-    case ExerciseType.tersSavasci:              return 'assets/exercises/ters_savascı.jpeg';
+    case ExerciseType.tersSavasci:              return 'assets/exercises/savasci_2_ters_savasciya.png';
     case ExerciseType.dagDurusuKolCevirme:      return 'assets/exercises/dag_durusu_kol_cevirme.png';
     case ExerciseType.sandakyeDurusu:           return 'assets/exercises/sandalye_durusu.png';
     case ExerciseType.savasci1:                 return 'assets/exercises/savasci_1.png';
