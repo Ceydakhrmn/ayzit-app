@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "198781995461",
+    "project_id": "lunora-app",
+    "storage_bucket": "lunora-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:198781995461:android:94b290ba385589343963ac",
+        "android_client_info": {
+          "package_name": "com.example.lunora"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB9OJ0S9M7D_jTBq_RpQluMQIiO-Z7Mm7Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

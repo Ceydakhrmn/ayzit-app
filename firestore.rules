@@ -1,0 +1,135 @@
+rules_version = '2';
+
+// ============================================================
+// Lunora Firestore security rules
+// ============================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ─────────────────────────────────────────────
+    function isAuth() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuth() && request.auth.uid == uid;
+    }
+
+    function isVerified() {
+      return isAuth() && request.auth.token.email_verified == true;
+    }
+
+    function nonEmptyString(val) {
+      return val is string && val.size() > 0 && val.size() <= 5000;
+    }
+
+    // ── Users ──────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if isAuth();
+      allow create: if isOwner(uid);
+      allow update: if isOwner(uid);
+      allow delete: if isOwner(uid);
+
+      match /fcmTokens/{deviceId} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /cycleNotes/{dateKey} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /cycleHistory/{id} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /waterIntake/{dateKey} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /cycleMoods/{dateKey} {
+        allow read, write: if isOwner(uid);
+      }
+
+      match /appointments/{id} {
+        allow read, write: if isOwner(uid);
+      }
+    }
+
+    // ── Usernames (unique reservation) ─────────────────────
+    match /usernames/{username} {
+      allow read: if true;
+      allow create: if isAuth()
+                    && request.resource.data.uid == request.auth.uid;
+      allow delete: if isAuth()
+                    && resource.data.uid == request.auth.uid;
+      allow update: if false;
+    }
+
+    // ── Posts ──────────────────────────────────────────────
+    match /posts/{postId} {
+      allow read: if isAuth();
+
+      allow create: if isVerified()
+        && request.resource.data.authorId == request.auth.uid
+        && nonEmptyString(request.resource.data.content)
+        && request.resource.data.likeCount == 0
+        && request.resource.data.commentCount == 0
+        && request.resource.data.hidden == false;
+
+      // Author can edit content; any auth user can update like/comment counts.
+      allow update: if isAuth()
+        && request.resource.data.authorId == resource.data.authorId
+        && request.resource.data.createdAt == resource.data.createdAt
+        && request.resource.data.hidden == resource.data.hidden
+        && (
+          // Case A: author editing content
+          (isOwner(resource.data.authorId)
+            && nonEmptyString(request.resource.data.content)
+            && request.resource.data.likeCount == resource.data.likeCount
+            && request.resource.data.commentCount == resource.data.commentCount)
+          // Case B: like/comment count update by any auth user
+          || (request.resource.data.content == resource.data.content)
+        );
+
+      allow delete: if isOwner(resource.data.authorId);
+
+      // ── Post likes (one doc per liking user) ─────────────
+      match /likes/{uid} {
+        allow read: if isAuth();
+        allow create: if isOwner(uid);
+        allow delete: if isOwner(uid);
+        allow update: if false;
+      }
+
+      // ── Post comments (max 2 levels, enforced client-side) ─
+      match /comments/{commentId} {
+        allow read: if isAuth();
+
+        allow create: if isAuth()
+          && request.resource.data.authorId == request.auth.uid
+          && nonEmptyString(request.resource.data.content);
+
+        allow delete: if isOwner(resource.data.authorId);
+
+        allow update: if false;
+      }
+    }
+
+    // ── Reports (write-only for authed users; read is admin-only) ──
+    match /reports/{reportId} {
+      allow create: if isAuth()
+        && request.resource.data.reporterId == request.auth.uid
+        && request.resource.data.targetType in ['post', 'comment']
+        && request.resource.data.reason in [
+             'spam', 'harassment', 'inappropriate', 'hate', 'other'
+           ];
+      allow read, update, delete: if false;
+    }
+
+    // ── Config (profanity list etc.) ───────────────────────
+    match /config/{doc} {
+      allow read: if isAuth();
+      allow write: if false;
+    }
+  }
+}

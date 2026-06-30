@@ -1,0 +1,24 @@
+{
+	"folders": [
+		{
+			"path": "backend"
+		},
+		{
+			"path": "my_app"
+		},
+		{
+			"path": "yeni_uygulama"
+		}
+	],
+	"settings": {
+		"dart.analysisExcludedFolders": [
+			"${workspaceFolder}/flutter"
+		],
+		"search.exclude": {
+			"flutter/**": true
+		},
+		"files.watcherExclude": {
+			"**/flutter/**": true
+		}
+	}
+}

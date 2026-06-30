@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(flutter run:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(flutter build:*)",
+      "Bash(flutter devices:*)",
+      "Bash(flutter install:*)",
+      "Bash(adb devices:*)",
+      "Read(//proc/1/**)",
+      "Bash(python -c \"import json; d=open\\('c:/Users/ceyda/ajanda-app/src/app/flutter/android/app/google-services.json'\\).read\\(\\); import re; print\\(re.findall\\('package_name.*', d\\)[:5]\\)\")",
+      "Read(//c/Users/ceyda/ajanda-app/**)",
+      "Bash(dart pub:*)",
+      "Bash(./gradlew signingReport)",
+      "Bash(dart run:*)",
+      "Bash(npm run:*)",
+      "Bash(firebase deploy:*)",
+      "Bash(dart analyze:*)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\ceyda\\ajanda-app\\src\\app\\flutter\\android\\app\\src\\main\\kotlin\\com\\example"
+    ]
+  }
+}
