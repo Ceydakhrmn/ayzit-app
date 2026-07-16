@@ -58,10 +58,6 @@ class AuthProvider extends ChangeNotifier {
   fb.User? _firebaseUser;
   AppUser? _appUser;
 
-  /// Resets on each sign-in. The ModeSelectionScreen appears every session,
-  /// even for returning users, until they confirm their mode for the session.
-  bool _sessionModeConfirmed = false;
-
   // ── Getters ──
   AuthStatus get status => _status;
   fb.User? get firebaseUser => _firebaseUser;
@@ -79,7 +75,6 @@ class AuthProvider extends ChangeNotifier {
 
     if (user == null) {
       _appUser = null;
-      _sessionModeConfirmed = false;
       _status = AuthStatus.loggedOut;
       notifyListeners();
       return;
@@ -111,12 +106,11 @@ class AuthProvider extends ChangeNotifier {
     // Live-subscribe to user doc for preference updates.
     _userDocSub = _userService.userStream(user.uid).listen((appUser) {
       _appUser = appUser;
-      // Show ModeSelectionScreen every session until the user confirms
-      // their mode for this session, even if they already have an appMode saved.
+      // Only show ModeSelectionScreen when no mode has been picked yet.
+      // Once set, it persists across sessions until changed in Settings.
       final hasNoMode = appUser?.appMode.isEmpty ?? true;
-      _status = (hasNoMode || !_sessionModeConfirmed)
-          ? AuthStatus.needsOnboarding
-          : AuthStatus.authenticated;
+      _status =
+          hasNoMode ? AuthStatus.needsOnboarding : AuthStatus.authenticated;
       notifyListeners();
     });
 
@@ -137,11 +131,10 @@ class AuthProvider extends ChangeNotifier {
     await _authService.signOut();
   }
 
-  /// Called by ModeSelectionScreen after the user picks a mode for this
-  /// session. Transitions the app to `authenticated` so AuthGate shows MainShell.
+  /// Called by ModeSelectionScreen right after it writes the chosen mode,
+  /// so the UI doesn't wait on the Firestore stream round-trip to advance.
   void confirmModeForSession() {
-    _sessionModeConfirmed = true;
-    if (_appUser != null && !(_appUser!.appMode.isEmpty)) {
+    if (_appUser != null && _appUser!.appMode.isNotEmpty) {
       _status = AuthStatus.authenticated;
       notifyListeners();
     }
