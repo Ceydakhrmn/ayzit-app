@@ -1,7 +1,7 @@
 name: ayzit_app
 description: "Ayzit - Period & Cycle Tracker"
 publish_to: "none"
-version: 1.0.0+5
+version: 1.0.1+6
 
 environment:
   sdk: ^3.10.8
