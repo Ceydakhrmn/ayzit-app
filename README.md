@@ -1,9 +1,9 @@
 samples, guidance on mobile development, and a full API reference.
-# lunora-app
+# ayzit-app
 
-Lunora, temel olarak kadın sağlığına odaklanan; adet döngüsü, yumurtlama günleri ve genel wellness verilerini takip etmeyi sağlayan modern bir mobil asistan uygulamasıdır.
+Ayzit, temel olarak kadın sağlığına odaklanan; adet döngüsü, yumurtlama günleri ve genel wellness verilerini takip etmeyi sağlayan modern bir mobil asistan uygulamasıdır.
 
-Lunora is a modern period, fertility, and wellness tracking app built with Flutter. It helps users track their cycle, monitor mood, stay hydrated, and get AI-powered support.
+Ayzit is a modern period, fertility, and wellness tracking app built with Flutter. It helps users track their cycle, monitor mood, stay hydrated, and get AI-powered support.
 
 ## Getting Started
 
