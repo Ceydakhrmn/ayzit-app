@@ -14,13 +14,13 @@
 //   week_3.png           (hft 3)
 //   week_4.png           (hft 4)
 //   week_5.png           (hft 5)
-//   week_6:7.png         (hft 6-7)
-//   week_8:9.png         (hft 8-9)
+//   week_6_7.png         (hft 6-7)
+//   week_8_9.png         (hft 8-9)
 //   week_10.png          (hft 10)
-//   week_11:16.png       (hft 11-16)
-//   week_17:28.png       (hft 17-28)
-//   week_29:36.png       (hft 29-36)
-//   week_37:40.png       (hft 37-40)
+//   week_11_16.png       (hft 11-16)
+//   week_17_28.png       (hft 17-28)
+//   week_29_36.png       (hft 29-36)
+//   week_37_40.png       (hft 37-40)
 // =============================================
 
 import 'dart:math';
@@ -36,13 +36,13 @@ String _pathForWeek(int week) {
   if (week == 3)  return 'assets/images/baby_stages/week_3.png';
   if (week == 4)  return 'assets/images/baby_stages/week_4.png';
   if (week == 5)  return 'assets/images/baby_stages/week_5.png';
-  if (week <= 7)  return 'assets/images/baby_stages/week_6:7.png';
-  if (week <= 9)  return 'assets/images/baby_stages/week_8:9.png';
+  if (week <= 7)  return 'assets/images/baby_stages/week_6_7.png';
+  if (week <= 9)  return 'assets/images/baby_stages/week_8_9.png';
   if (week == 10) return 'assets/images/baby_stages/week_10.png';
-  if (week <= 16) return 'assets/images/baby_stages/week_11:16.png';
-  if (week <= 28) return 'assets/images/baby_stages/week_17:28.png';
-  if (week <= 36) return 'assets/images/baby_stages/week_29:36.png';
-  return              'assets/images/baby_stages/week_37:40.png';
+  if (week <= 16) return 'assets/images/baby_stages/week_11_16.png';
+  if (week <= 28) return 'assets/images/baby_stages/week_17_28.png';
+  if (week <= 36) return 'assets/images/baby_stages/week_29_36.png';
+  return              'assets/images/baby_stages/week_37_40.png';
 }
 
 // Animasyonsuz statik bebek gelişim görseli.

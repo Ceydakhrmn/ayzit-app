@@ -42,7 +42,13 @@ Future<void> main() async {
     ));
     await initializeDateFormatting('tr');
     await AppointmentNotificationService.instance.init();
-    await PurchaseService.instance.init();
+    try {
+      await PurchaseService.instance.init();
+    } catch (e) {
+      // RevenueCat must never block app startup; premium checks degrade
+      // gracefully when uninitialized.
+      debugPrint('main: PurchaseService init failed: $e');
+    }
     try {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,

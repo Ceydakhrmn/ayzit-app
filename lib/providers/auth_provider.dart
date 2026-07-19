@@ -120,14 +120,29 @@ class AuthProvider extends ChangeNotifier {
       _fcmService.init();
     }
 
-    // Sync RevenueCat with the signed-in user.
-    await PurchaseService.instance.loginUser(user.uid);
+    // Sync RevenueCat with the signed-in user (best-effort; a purchase
+    // service failure must never break authentication).
+    try {
+      await PurchaseService.instance.loginUser(user.uid);
+    } catch (e) {
+      debugPrint('AuthProvider: purchases login failed: $e');
+    }
   }
 
   // ── Actions ──
   Future<void> signOut() async {
-    await _fcmService.deleteCurrentDeviceToken();
-    await PurchaseService.instance.logoutUser();
+    // Cleanup steps are best-effort: a RevenueCat or FCM failure must
+    // never block the actual Firebase sign-out below.
+    try {
+      await _fcmService.deleteCurrentDeviceToken();
+    } catch (e) {
+      debugPrint('AuthProvider.signOut: fcm cleanup failed: $e');
+    }
+    try {
+      await PurchaseService.instance.logoutUser();
+    } catch (e) {
+      debugPrint('AuthProvider.signOut: purchases logout failed: $e');
+    }
     await _authService.signOut();
   }
 

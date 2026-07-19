@@ -135,7 +135,9 @@ class ExerciseCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '${data.name} nelere iyi gelir?',
+                  isEn
+                      ? 'What is ${data.name} good for?'
+                      : '${data.name} nelere iyi gelir?',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
