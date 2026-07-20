@@ -2,12 +2,10 @@
   "@@locale": "en",
   "appTitle": "Ayzit",
   "appSubtitle": "Track your cycle, share and connect",
-
   "calendarTab": "Calendar",
   "exerciseTab": "Exercise",
   "socialTab": "Social",
   "profileTab": "Profile",
-
   "loginTitle": "Welcome",
   "loginSubtitle": "Sign in to continue",
   "registerTitle": "Create account",
@@ -32,7 +30,6 @@
   "passwordRequired": "Password is required",
   "usernameTaken": "That username is taken",
   "usernameInvalid": "Invalid username",
-
   "verifyEmailTitle": "Verify email",
   "verifyEmailSubtitle": "Almost there",
   "verifyEmailBody": "We sent a verification link to your email. Please check your inbox.",
@@ -40,13 +37,11 @@
   "verifyEmailSent": "Verification email sent",
   "verifiedButton": "I'VE VERIFIED",
   "resendVerification": "Resend email",
-
   "forgotPasswordTitle": "Forgot password",
   "forgotPasswordSubtitle": "We'll send you a reset link",
   "sendResetLink": "SEND RESET LINK",
   "resetLinkSent": "Reset link sent",
   "backToLogin": "BACK TO SIGN IN",
-
   "socialLatest": "Latest",
   "socialPopular": "Popular",
   "newPost": "New Post",
@@ -63,18 +58,20 @@
   "editedLabel": "edited",
   "deletePostTitle": "Delete Post",
   "deletePostConfirm": "Are you sure you want to delete this post?",
-
   "commentsTitle": "Comments",
   "writeComment": "Write a comment...",
   "reply": "Reply",
   "replyingTo": "Replying to {username}",
   "@replyingTo": {
-    "placeholders": { "username": { "type": "String" } }
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
   },
   "noComments": "No comments yet. Be the first!",
   "deleteCommentTitle": "Delete Comment",
   "deleteCommentConfirm": "Are you sure you want to delete this comment?",
-
   "reportPost": "Report",
   "reportTitle": "Report",
   "reportReasonHint": "Please select a reason",
@@ -86,7 +83,6 @@
   "reportDescription": "Description (optional)",
   "reportThanks": "Report received, thank you",
   "reportAlreadyExists": "You already reported this",
-
   "profileEdit": "Edit Profile",
   "profileSettings": "Settings",
   "profileLogout": "Log Out",
@@ -104,7 +100,6 @@
   "currentPasswordLabel": "Current password",
   "newPasswordLabel": "New password",
   "changesSaved": "Changes saved",
-
   "settingsTitle": "Settings",
   "generalSettings": "General",
   "appPurpose": "App purpose",
@@ -114,7 +109,6 @@
   "modePregnancyDesc": "Track your pregnancy",
   "modeTryConceive": "Trying to Conceive",
   "modeTryConceiveDesc": "Track fertility windows",
-
   "notificationsSection": "Notifications",
   "notifCommentOnPost": "Comment on my post",
   "notifCommentOnPostDesc": "Notify me when someone comments on my post",
@@ -124,16 +118,14 @@
   "notifPeriodEndDesc": "Remind me when my period ends",
   "notifExerciseReminder": "Exercise reminder",
   "notifExerciseReminderDesc": "Twice a week",
-
   "themeSection": "Theme",
   "themeLight": "Light",
   "themeDark": "Dark",
   "themeSystem": "Follow system",
-
   "cycleSection": "Cycle",
   "cycleLengthLabel": "Average cycle length",
   "periodLengthLabel": "Period length",
-
   "errorGeneric": "Something went wrong",
-  "tryAgain": "Try again"
+  "tryAgain": "Try again",
+  "btnContinue": "CONTINUE"
 }

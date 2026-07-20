@@ -107,6 +107,8 @@ abstract class AppLocalizations {
   /// **'Ayzit'**
   String get appTitle;
 
+  String get btnContinue;
+
   /// No description provided for @appSubtitle.
   ///
   /// In en, this message translates to:

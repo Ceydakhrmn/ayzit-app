@@ -2,12 +2,10 @@
   "@@locale": "es",
   "appTitle": "Ayzit",
   "appSubtitle": "Sigue tu ciclo, comparte y conecta",
-
   "calendarTab": "Calendario",
   "exerciseTab": "Ejercicio",
   "socialTab": "Social",
   "profileTab": "Perfil",
-
   "loginTitle": "Bienvenida",
   "loginSubtitle": "Inicia sesión para continuar",
   "registerTitle": "Crear cuenta",
@@ -32,7 +30,6 @@
   "passwordRequired": "Contraseña requerida",
   "usernameTaken": "Ese usuario ya existe",
   "usernameInvalid": "Usuario no válido",
-
   "verifyEmailTitle": "Verifica tu email",
   "verifyEmailSubtitle": "Casi listo",
   "verifyEmailBody": "Te enviamos un enlace de verificación. Revisa tu bandeja.",
@@ -40,13 +37,11 @@
   "verifyEmailSent": "Email de verificación enviado",
   "verifiedButton": "YA VERIFIQUÉ",
   "resendVerification": "Reenviar email",
-
   "forgotPasswordTitle": "Olvidé mi contraseña",
   "forgotPasswordSubtitle": "Te enviaremos un enlace de recuperación",
   "sendResetLink": "ENVIAR ENLACE",
   "resetLinkSent": "Enlace enviado",
   "backToLogin": "VOLVER A INICIAR SESIÓN",
-
   "socialLatest": "Recientes",
   "socialPopular": "Populares",
   "newPost": "Nueva publicación",
@@ -63,18 +58,20 @@
   "editedLabel": "editado",
   "deletePostTitle": "Eliminar publicación",
   "deletePostConfirm": "¿Seguro que quieres eliminar esta publicación?",
-
   "commentsTitle": "Comentarios",
   "writeComment": "Escribe un comentario...",
   "reply": "Responder",
   "replyingTo": "Respondiendo a {username}",
   "@replyingTo": {
-    "placeholders": { "username": { "type": "String" } }
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
   },
   "noComments": "Sin comentarios. ¡Sé la primera!",
   "deleteCommentTitle": "Eliminar comentario",
   "deleteCommentConfirm": "¿Eliminar este comentario?",
-
   "reportPost": "Reportar",
   "reportTitle": "Reportar",
   "reportReasonHint": "Selecciona un motivo",
@@ -86,7 +83,6 @@
   "reportDescription": "Descripción (opcional)",
   "reportThanks": "Reporte recibido, gracias",
   "reportAlreadyExists": "Ya has reportado esto",
-
   "profileEdit": "Editar perfil",
   "profileSettings": "Ajustes",
   "profileLogout": "Cerrar sesión",
@@ -104,7 +100,6 @@
   "currentPasswordLabel": "Contraseña actual",
   "newPasswordLabel": "Nueva contraseña",
   "changesSaved": "Cambios guardados",
-
   "settingsTitle": "Ajustes",
   "generalSettings": "General",
   "appPurpose": "Propósito de la app",
@@ -114,7 +109,6 @@
   "modePregnancyDesc": "Sigue tu embarazo",
   "modeTryConceive": "Buscando embarazo",
   "modeTryConceiveDesc": "Sigue tus días fértiles",
-
   "notificationsSection": "Notificaciones",
   "notifCommentOnPost": "Comentario en mi publicación",
   "notifCommentOnPostDesc": "Avísame cuando comenten mi publicación",
@@ -124,16 +118,14 @@
   "notifPeriodEndDesc": "Recuérdame el último día",
   "notifExerciseReminder": "Recordatorio de ejercicio",
   "notifExerciseReminderDesc": "Dos veces por semana",
-
   "themeSection": "Tema",
   "themeLight": "Claro",
   "themeDark": "Oscuro",
   "themeSystem": "Sistema",
-
   "cycleSection": "Ciclo",
   "cycleLengthLabel": "Duración media del ciclo",
   "periodLengthLabel": "Duración del período",
-
   "errorGeneric": "Algo salió mal",
-  "tryAgain": "Reintentar"
+  "tryAgain": "Reintentar",
+  "btnContinue": "CONTINUAR"
 }

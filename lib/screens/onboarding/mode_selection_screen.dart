@@ -175,7 +175,7 @@ class _ModeSelectionScreenState extends State<ModeSelectionScreen> {
                             ),
                           )
                         : Text(
-                            'DEVAM ET',
+                            l10n.btnContinue,
                             style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 15,

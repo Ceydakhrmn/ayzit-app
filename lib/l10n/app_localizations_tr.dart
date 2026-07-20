@@ -12,6 +12,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appTitle => 'Ayzit';
 
   @override
+  String get btnContinue => 'DEVAM ET';
+
+  @override
   String get appSubtitle => 'Takip et, paylaş ve bağlan';
 
   @override

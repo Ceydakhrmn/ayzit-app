@@ -2,12 +2,10 @@
   "@@locale": "tr",
   "appTitle": "Ayzit",
   "appSubtitle": "Döngünü takip et, paylaş ve bağlan",
-
   "calendarTab": "Takvim",
   "exerciseTab": "Egzersiz",
   "socialTab": "Sosyal",
   "profileTab": "Profil",
-
   "loginTitle": "Hoş geldin",
   "loginSubtitle": "Devam etmek için giriş yap",
   "registerTitle": "Hesap oluştur",
@@ -32,7 +30,6 @@
   "passwordRequired": "Şifre gerekli",
   "usernameTaken": "Bu kullanıcı adı alınmış",
   "usernameInvalid": "Geçersiz kullanıcı adı",
-
   "verifyEmailTitle": "Email doğrulama",
   "verifyEmailSubtitle": "Kayıt tamamlandı, sadece bir adım kaldı",
   "verifyEmailBody": "Sana bir doğrulama linki gönderdik. Email kutunu kontrol et ve linke tıkla.",
@@ -40,13 +37,11 @@
   "verifyEmailSent": "Doğrulama e-postası gönderildi",
   "verifiedButton": "DOĞRULADIM",
   "resendVerification": "Maili tekrar gönder",
-
   "forgotPasswordTitle": "Şifremi unuttum",
   "forgotPasswordSubtitle": "Sana sıfırlama linki gönderelim",
   "sendResetLink": "SIFIRLAMA LİNKİ GÖNDER",
   "resetLinkSent": "Sıfırlama linki gönderildi",
   "backToLogin": "GİRİŞE DÖN",
-
   "socialLatest": "En Yeni",
   "socialPopular": "Popüler",
   "newPost": "Yeni Paylaşım",
@@ -63,18 +58,20 @@
   "editedLabel": "düzenlendi",
   "deletePostTitle": "Postu Sil",
   "deletePostConfirm": "Bu paylaşımı silmek istediğine emin misin?",
-
   "commentsTitle": "Yorumlar",
   "writeComment": "Yorum yaz...",
   "reply": "Yanıtla",
   "replyingTo": "Yanıt: {username}",
   "@replyingTo": {
-    "placeholders": { "username": { "type": "String" } }
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
   },
   "noComments": "Henüz yorum yok. İlk sen yaz!",
   "deleteCommentTitle": "Yorumu Sil",
   "deleteCommentConfirm": "Bu yorumu silmek istediğine emin misin?",
-
   "reportPost": "Şikayet Et",
   "reportTitle": "Şikayet Et",
   "reportReasonHint": "Lütfen sebebi seç",
@@ -86,7 +83,6 @@
   "reportDescription": "Açıklama (opsiyonel)",
   "reportThanks": "Şikayetin alındı, teşekkürler",
   "reportAlreadyExists": "Bunu zaten şikayet etmişsin",
-
   "profileEdit": "Profili Düzenle",
   "profileSettings": "Ayarlar",
   "profileLogout": "Çıkış Yap",
@@ -104,7 +100,6 @@
   "currentPasswordLabel": "Mevcut şifre",
   "newPasswordLabel": "Yeni şifre",
   "changesSaved": "Değişiklikler kaydedildi",
-
   "settingsTitle": "Ayarlar",
   "generalSettings": "Genel Ayarlar",
   "appPurpose": "Uygulama amacı",
@@ -114,7 +109,6 @@
   "modePregnancyDesc": "Hamilelik sürecinizi takip edin",
   "modeTryConceive": "Hamile Kalma",
   "modeTryConceiveDesc": "Doğurganlık pencerelerinizi takip edin",
-
   "notificationsSection": "Bildirimler",
   "notifCommentOnPost": "Postuma yorum geldiğinde",
   "notifCommentOnPostDesc": "Paylaşımlarına yorum geldiğinde bildirim al",
@@ -124,16 +118,14 @@
   "notifPeriodEndDesc": "Regl bitiş günü hatırlat",
   "notifExerciseReminder": "Egzersiz hatırlatıcısı",
   "notifExerciseReminderDesc": "Haftada 2 kez egzersiz zamanı",
-
   "themeSection": "Tema",
   "themeLight": "Açık",
   "themeDark": "Koyu",
   "themeSystem": "Sistemi takip et",
-
   "cycleSection": "Döngü",
   "cycleLengthLabel": "Ortalama döngü uzunluğu",
   "periodLengthLabel": "Regl süresi",
-
   "errorGeneric": "Bir hata oluştu",
-  "tryAgain": "Tekrar dene"
+  "tryAgain": "Tekrar dene",
+  "btnContinue": "DEVAM ET"
 }

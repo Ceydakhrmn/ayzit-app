@@ -12,6 +12,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get appTitle => 'Ayzit';
 
   @override
+  String get btnContinue => 'CONTINUAR';
+
+  @override
   String get appSubtitle => 'Sigue tu ciclo, comparte y conecta';
 
   @override

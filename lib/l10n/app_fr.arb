@@ -2,12 +2,10 @@
   "@@locale": "fr",
   "appTitle": "Ayzit",
   "appSubtitle": "Suis ton cycle, partage et connecte-toi",
-
   "calendarTab": "Calendrier",
   "exerciseTab": "Exercice",
   "socialTab": "Social",
   "profileTab": "Profil",
-
   "loginTitle": "Bienvenue",
   "loginSubtitle": "Connecte-toi pour continuer",
   "registerTitle": "Créer un compte",
@@ -32,7 +30,6 @@
   "passwordRequired": "Mot de passe requis",
   "usernameTaken": "Ce nom est déjà pris",
   "usernameInvalid": "Nom invalide",
-
   "verifyEmailTitle": "Vérifie ton email",
   "verifyEmailSubtitle": "Presque terminé",
   "verifyEmailBody": "Nous avons envoyé un lien de vérification à ton email.",
@@ -40,13 +37,11 @@
   "verifyEmailSent": "Email de vérification envoyé",
   "verifiedButton": "J'AI VÉRIFIÉ",
   "resendVerification": "Renvoyer l'email",
-
   "forgotPasswordTitle": "Mot de passe oublié",
   "forgotPasswordSubtitle": "On t'envoie un lien de réinitialisation",
   "sendResetLink": "ENVOYER LE LIEN",
   "resetLinkSent": "Lien envoyé",
   "backToLogin": "RETOUR À LA CONNEXION",
-
   "socialLatest": "Récents",
   "socialPopular": "Populaires",
   "newPost": "Nouveau post",
@@ -63,18 +58,20 @@
   "editedLabel": "modifié",
   "deletePostTitle": "Supprimer le post",
   "deletePostConfirm": "Es-tu sûr de vouloir supprimer ce post ?",
-
   "commentsTitle": "Commentaires",
   "writeComment": "Écris un commentaire...",
   "reply": "Répondre",
   "replyingTo": "Réponse à {username}",
   "@replyingTo": {
-    "placeholders": { "username": { "type": "String" } }
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
   },
   "noComments": "Aucun commentaire. Sois le premier !",
   "deleteCommentTitle": "Supprimer le commentaire",
   "deleteCommentConfirm": "Supprimer ce commentaire ?",
-
   "reportPost": "Signaler",
   "reportTitle": "Signaler",
   "reportReasonHint": "Choisis un motif",
@@ -86,7 +83,6 @@
   "reportDescription": "Description (optionnel)",
   "reportThanks": "Signalement reçu, merci",
   "reportAlreadyExists": "Tu l'as déjà signalé",
-
   "profileEdit": "Modifier le profil",
   "profileSettings": "Paramètres",
   "profileLogout": "Déconnexion",
@@ -104,7 +100,6 @@
   "currentPasswordLabel": "Mot de passe actuel",
   "newPasswordLabel": "Nouveau mot de passe",
   "changesSaved": "Modifications enregistrées",
-
   "settingsTitle": "Paramètres",
   "generalSettings": "Général",
   "appPurpose": "Objectif de l'app",
@@ -114,7 +109,6 @@
   "modePregnancyDesc": "Suis ta grossesse",
   "modeTryConceive": "Concevoir",
   "modeTryConceiveDesc": "Suis ta fenêtre de fertilité",
-
   "notificationsSection": "Notifications",
   "notifCommentOnPost": "Commentaire sur mon post",
   "notifCommentOnPostDesc": "Me notifier quand quelqu'un commente",
@@ -124,16 +118,14 @@
   "notifPeriodEndDesc": "Me rappeler la fin",
   "notifExerciseReminder": "Rappel d'exercice",
   "notifExerciseReminderDesc": "Deux fois par semaine",
-
   "themeSection": "Thème",
   "themeLight": "Clair",
   "themeDark": "Sombre",
   "themeSystem": "Système",
-
   "cycleSection": "Cycle",
   "cycleLengthLabel": "Durée moyenne du cycle",
   "periodLengthLabel": "Durée des règles",
-
   "errorGeneric": "Une erreur est survenue",
-  "tryAgain": "Réessayer"
+  "tryAgain": "Réessayer",
+  "btnContinue": "CONTINUER"
 }

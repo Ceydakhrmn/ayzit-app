@@ -12,6 +12,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get appTitle => 'Ayzit';
 
   @override
+  String get btnContinue => 'WEITER';
+
+  @override
   String get appSubtitle => 'Verfolge deinen Zyklus, teile und vernetze dich';
 
   @override
