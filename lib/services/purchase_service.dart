@@ -32,6 +32,11 @@ class PurchaseService {
 
   bool _initialized = false;
 
+  /// True only when Purchases.configure() actually ran. While the API keys
+  /// are placeholders the SDK is never configured, and calling any
+  /// Purchases.* method would throw a PlatformException.
+  bool _configured = false;
+
   Future<void> init({String? userId}) async {
     if (_initialized) return;
     // Skip init if placeholder keys are still in place
@@ -44,6 +49,7 @@ class PurchaseService {
     final apiKey = Platform.isIOS ? _iosKey : _androidKey;
     final config = PurchasesConfiguration(apiKey);
     await Purchases.configure(config);
+    _configured = true;
 
     if (userId != null) {
       await Purchases.logIn(userId);
@@ -53,18 +59,18 @@ class PurchaseService {
   }
 
   Future<void> loginUser(String uid) async {
-    if (!_initialized) return;
+    if (!_configured) return;
     await Purchases.logIn(uid);
   }
 
   Future<void> logoutUser() async {
-    if (!_initialized) return;
+    if (!_configured) return;
     await Purchases.logOut();
   }
 
   /// Returns true if the current user has an active "premium" entitlement.
   Future<bool> isPremium() async {
-    if (!_initialized) return false;
+    if (!_configured) return false;
     try {
       final info = await Purchases.getCustomerInfo();
       return info.entitlements.active.containsKey(entitlementId);
@@ -75,7 +81,7 @@ class PurchaseService {
 
   /// Fetches the available offerings from RevenueCat.
   Future<Offerings?> getOfferings() async {
-    if (!_initialized) return null;
+    if (!_configured) return null;
     try {
       return await Purchases.getOfferings();
     } catch (e) {
@@ -86,7 +92,7 @@ class PurchaseService {
 
   /// Purchases a [package]. Returns updated CustomerInfo on success.
   Future<CustomerInfo?> purchase(Package package) async {
-    if (!_initialized) return null;
+    if (!_configured) return null;
     try {
       return await Purchases.purchasePackage(package);
     } on PurchasesErrorCode catch (e) {
@@ -97,7 +103,7 @@ class PurchaseService {
 
   /// Restores previous purchases (e.g. after reinstall).
   Future<CustomerInfo?> restore() async {
-    if (!_initialized) return null;
+    if (!_configured) return null;
     try {
       return await Purchases.restorePurchases();
     } catch (e) {
