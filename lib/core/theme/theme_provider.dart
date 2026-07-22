@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 
 import '../../models/app_user.dart';
 import '../utils/firestore_paths.dart';
+import '../utils/firestore_stream_error.dart';
 
 class ThemeProvider extends ChangeNotifier {
   ThemeProvider({FirebaseAuth? auth, FirebaseFirestore? firestore})
@@ -82,6 +83,8 @@ class ThemeProvider extends ChangeNotifier {
         _mode = mode;
         notifyListeners();
       }
+    }, onError: (Object e, StackTrace s) {
+      handleFirestoreStreamError('ThemeProvider.userDoc', e, s);
     });
   }
 

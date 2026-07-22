@@ -21,6 +21,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../core/utils/firestore_paths.dart';
+import '../core/utils/firestore_stream_error.dart';
 import '../models/cycle_model.dart';
 
 enum AppMode { reglTakip, hamileTakip, hamilleKalma }
@@ -84,6 +85,7 @@ class CycleProvider extends ChangeNotifier {
   StreamSubscription<User?>? _authSub;
   StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _userDocSub;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _notesSub;
+  StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _moodsSub;
   StreamSubscription<QuerySnapshot<Map<String, dynamic>>>? _historySub;
 
   String? _uid;
@@ -224,9 +226,11 @@ class CycleProvider extends ChangeNotifier {
   void _handleAuthChange(User? user) {
     _userDocSub?.cancel();
     _notesSub?.cancel();
+    _moodsSub?.cancel();
     _historySub?.cancel();
     _userDocSub = null;
     _notesSub = null;
+    _moodsSub = null;
     _historySub = null;
 
     if (user == null || !user.emailVerified) {
@@ -298,6 +302,8 @@ class CycleProvider extends ChangeNotifier {
       _reminderFertile = reminders['fertile'] as bool? ?? false;
 
       notifyListeners();
+    }, onError: (Object e, StackTrace s) {
+      handleFirestoreStreamError('CycleProvider.userDoc', e, s);
     });
   }
 
@@ -314,11 +320,13 @@ class CycleProvider extends ChangeNotifier {
         }
       }
       notifyListeners();
+    }, onError: (Object e, StackTrace s) {
+      handleFirestoreStreamError('CycleProvider.notes', e, s);
     });
   }
 
   void _subscribeMoods(String uid) {
-    _userRef(uid)
+    _moodsSub = _userRef(uid)
         .collection(FirestorePaths.cycleMoods)
         .snapshots()
         .listen((snap) {
@@ -330,6 +338,8 @@ class CycleProvider extends ChangeNotifier {
         }
       }
       notifyListeners();
+    }, onError: (Object e, StackTrace s) {
+      handleFirestoreStreamError('CycleProvider.moods', e, s);
     });
   }
 
@@ -347,6 +357,8 @@ class CycleProvider extends ChangeNotifier {
         _cycleHistory.removeRange(0, _cycleHistory.length - 12);
       }
       notifyListeners();
+    }, onError: (Object e, StackTrace s) {
+      handleFirestoreStreamError('CycleProvider.history', e, s);
     });
   }
 
@@ -626,6 +638,7 @@ class CycleProvider extends ChangeNotifier {
     _authSub?.cancel();
     _userDocSub?.cancel();
     _notesSub?.cancel();
+    _moodsSub?.cancel();
     _historySub?.cancel();
     super.dispose();
   }

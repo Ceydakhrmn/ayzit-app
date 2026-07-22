@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 
 import '../core/utils/firestore_paths.dart';
+import '../core/utils/firestore_stream_error.dart';
 import '../models/appointment.dart';
 import '../services/appointment_notification_service.dart';
 
@@ -84,6 +85,8 @@ class AppointmentProvider extends ChangeNotifier {
           AppointmentNotificationService.instance.scheduleForAppointment(a);
         }
       }
+    }, onError: (Object e, StackTrace s) {
+      handleFirestoreStreamError('AppointmentProvider.appointments', e, s);
     });
   }
 
