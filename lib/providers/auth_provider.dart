@@ -13,6 +13,7 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/foundation.dart';
 
+import '../core/utils/firestore_stream_error.dart';
 import '../models/app_user.dart';
 import '../services/auth_service.dart';
 import '../services/fcm_service.dart';
@@ -112,6 +113,8 @@ class AuthProvider extends ChangeNotifier {
       _status =
           hasNoMode ? AuthStatus.needsOnboarding : AuthStatus.authenticated;
       notifyListeners();
+    }, onError: (Object e, StackTrace s) {
+      handleFirestoreStreamError('AuthProvider.userDoc', e, s);
     });
 
     // Kick off FCM once per app lifecycle, after first successful auth.
