@@ -75,6 +75,29 @@ PhaseStyle? trimesterStyle(int? week, {required bool isDark}) {
   );
 }
 
+/// Faz için lokalize edilmiş etiket döndürür (İngilizce varsayılan, Türkçe seçenek).
+/// `_monthName` ile aynı EN/TR kalıbını izler.
+String phaseLabel(DayPhase phase, {required bool isTurkish}) {
+  switch (phase) {
+    case DayPhase.periodLight:
+      return isTurkish ? 'Regl — hafif' : 'Period — light';
+    case DayPhase.periodMid:
+      return isTurkish ? 'Regl — orta yoğunluk' : 'Period — medium';
+    case DayPhase.periodPeak:
+      return isTurkish ? 'Regl — yoğun' : 'Period — heavy';
+    case DayPhase.fertilelow:
+      return isTurkish ? 'Doğurganlık — düşük' : 'Fertility — low';
+    case DayPhase.fertileMid:
+      return isTurkish ? 'Doğurganlık — orta' : 'Fertility — medium';
+    case DayPhase.fertilePeak:
+      return isTurkish ? 'Doğurganlık — en yüksek' : 'Fertility — peak';
+    case DayPhase.ovulation:
+      return isTurkish ? 'Ovulasyon günü' : 'Ovulation day';
+    case DayPhase.none:
+      return isTurkish ? 'Normal gün' : 'Normal day';
+  }
+}
+
 PhaseStyle phaseStyle(DayPhase phase) {
   switch (phase) {
     case DayPhase.periodLight:

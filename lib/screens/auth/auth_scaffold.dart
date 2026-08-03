@@ -26,16 +26,6 @@ class AuthScaffold extends StatelessWidget {
         child: SafeArea(
           child: Stack(
             children: [
-              if (showBack)
-                Positioned(
-                  top: 8,
-                  left: 8,
-                  child: IconButton(
-                    icon: Icon(Icons.arrow_back,
-                        color: isDark ? Colors.white70 : Colors.black54),
-                    onPressed: () => Navigator.of(context).maybePop(),
-                  ),
-                ),
               SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
                 child: ConstrainedBox(
@@ -102,6 +92,18 @@ class AuthScaffold extends StatelessWidget {
                   ),
                 ),
               ),
+              // Back button LAST so it paints on top of the scroll view and
+              // stays tappable (otherwise the scroll view swallows the taps).
+              if (showBack)
+                Positioned(
+                  top: 8,
+                  left: 8,
+                  child: IconButton(
+                    icon: Icon(Icons.arrow_back,
+                        color: isDark ? Colors.white70 : Colors.black54),
+                    onPressed: () => Navigator.of(context).maybePop(),
+                  ),
+                ),
             ],
           ),
         ),

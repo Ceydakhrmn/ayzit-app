@@ -61,7 +61,7 @@ class _NoteCardState extends State<NoteCard> {
               Icon(Icons.edit_note, size: 16, color: cs.primary),
               const SizedBox(width: 6),
               Text(
-                'Not',
+                isEn ? 'Note' : 'Not',
                 style: TextStyle(
                   fontSize: 12,
                   color: cs.primary,

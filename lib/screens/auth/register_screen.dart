@@ -8,6 +8,7 @@
 
 import 'package:firebase_auth/firebase_auth.dart' hide AuthProvider;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
@@ -144,12 +145,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
       await context.read<AuthProvider>().authService.signInWithGoogle();
     } on FirebaseAuthException catch (e) {
       setState(() => _error = _mapError(e, isEn: isEn));
+    } on PlatformException catch (e) {
+      // User dismissed the Google sheet — not an error worth showing.
+      if (!_isGoogleCancel(e.code)) {
+        setState(() => _error = isEn ? 'Google sign-up failed' : 'Google kaydı başarısız');
+      }
     } catch (e) {
       setState(() => _error = isEn ? 'Google sign-up failed' : 'Google kaydı başarısız');
     } finally {
       if (mounted) setState(() => _loading = false);
     }
   }
+
+  bool _isGoogleCancel(String code) =>
+      code == 'sign_in_canceled' ||
+      code == 'sign_in_cancelled' ||
+      code == 'canceled' ||
+      code == 'cancelled';
 
   String _mapError(FirebaseAuthException e, {bool isEn = false}) {
     switch (e.code) {

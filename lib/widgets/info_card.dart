@@ -22,7 +22,7 @@ class InfoCard extends StatelessWidget {
       final style = phaseStyle(phase);
       label = '${selected.day} ${_monthName(selected.month, l10n.isTurkish)}';
       dotColor = style.background;
-      phaseDescription = style.label;
+      phaseDescription = phaseLabel(phase, isTurkish: l10n.isTurkish);
     }
 
     final cs = Theme.of(context).colorScheme;
