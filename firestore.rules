@@ -24,8 +24,12 @@ service cloud.firestore {
     }
 
     // ── Users ──────────────────────────────────────────────
+    // Kullanıcı dokümanı e-posta + appMode (sağlık durumu) gibi hassas
+    // veri içerir. Feed yazar bilgisini post'larda denormalize ettiği için
+    // (authorUsername / authorAvatarSeed) başka kullanıcının bu dokümanı
+    // okumasına gerek yoktur → sadece sahibi okuyabilir/yazabilir.
     match /users/{uid} {
-      allow read: if isAuth();
+      allow read: if isOwner(uid);
       allow create: if isOwner(uid);
       allow update: if isOwner(uid);
       allow delete: if isOwner(uid);
@@ -57,7 +61,11 @@ service cloud.firestore {
 
     // ── Usernames (unique reservation) ─────────────────────
     match /usernames/{username} {
-      allow read: if true;
+      // Kayıt sırasında (giriş yapılmadan) tek bir kullanıcı adının
+      // müsaitliği kontrol edildiği için `get` herkese açık. Ancak `list`
+      // kapalı — kimse tüm username→uid tablosunu topluca dökemez.
+      allow get: if true;
+      allow list: if false;
       allow create: if isAuth()
                     && request.resource.data.uid == request.auth.uid;
       allow delete: if isAuth()
@@ -76,19 +84,29 @@ service cloud.firestore {
         && request.resource.data.commentCount == 0
         && request.resource.data.hidden == false;
 
-      // Author can edit content; any auth user can update like/comment counts.
+      // Author can edit content; any auth user can bump like/comment counts.
       allow update: if isAuth()
         && request.resource.data.authorId == resource.data.authorId
         && request.resource.data.createdAt == resource.data.createdAt
         && request.resource.data.hidden == resource.data.hidden
         && (
-          // Case A: author editing content
+          // Case A: author editing own content (counts must stay the same)
           (isOwner(resource.data.authorId)
             && nonEmptyString(request.resource.data.content)
             && request.resource.data.likeCount == resource.data.likeCount
             && request.resource.data.commentCount == resource.data.commentCount)
-          // Case B: like/comment count update by any auth user
-          || (request.resource.data.content == resource.data.content)
+          // Case B: any auth user may change ONLY the counters, and only by
+          // ±1 at a time (matches the client's FieldValue.increment(±1)).
+          // hasOnly() guarantees content, authorUsername, authorAvatarSeed,
+          // edited, updatedAt etc. cannot be tampered with here.
+          || (
+            request.resource.data.diff(resource.data).affectedKeys()
+              .hasOnly(['likeCount', 'commentCount'])
+            && request.resource.data.likeCount >= resource.data.likeCount - 1
+            && request.resource.data.likeCount <= resource.data.likeCount + 1
+            && request.resource.data.commentCount >= resource.data.commentCount - 1
+            && request.resource.data.commentCount <= resource.data.commentCount + 1
+          )
         );
 
       allow delete: if isOwner(resource.data.authorId);

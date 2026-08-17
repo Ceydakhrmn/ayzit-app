@@ -10,6 +10,7 @@
 
 import 'dart:async';
 
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -55,6 +56,24 @@ Future<void> main() async {
       );
     } catch (_) {
       // Already initialized
+    }
+
+    // App Check: yalnızca gerçek Ayzit uygulamasından gelen isteklerin
+    // Firebase'e (Firestore/Auth) ulaşmasını sağlar; çalınmış config ile
+    // dışarıdan yapılan script erişimini engeller.
+    // Debug build'lerde 'debug' provider kullanılır (geliştirmeyi bozmaz);
+    // release'de Android→Play Integrity, iOS→App Attest devreye girer.
+    try {
+      await FirebaseAppCheck.instance.activate(
+        providerAndroid: kDebugMode
+            ? AndroidDebugProvider()
+            : AndroidPlayIntegrityProvider(),
+        providerApple:
+            kDebugMode ? AppleDebugProvider() : AppleAppAttestProvider(),
+      );
+    } catch (e) {
+      // App Check hiçbir zaman uygulama açılışını engellememeli.
+      debugPrint('main: AppCheck activate failed: $e');
     }
     // Crashlytics is disabled automatically in debug builds to keep
     // dev noise out of the dashboard.

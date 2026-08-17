@@ -1,0 +1,15 @@
+{
+  "name": "ayzit-firestore-rules-test",
+  "version": "1.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Firestore güvenlik kuralları sızma testi (emülatöre karşı çalışır)",
+  "scripts": {
+    "pretest": "cp ../firestore.rules firestore.rules",
+    "test": "firebase emulators:exec --only firestore --project ayzit-test 'node test.mjs'"
+  },
+  "dependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.0.0"
+  }
+}

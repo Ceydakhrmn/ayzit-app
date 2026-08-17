@@ -8,6 +8,7 @@
 // =============================================
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 
 import '../core/utils/firestore_paths.dart';
 import '../models/app_user.dart';
@@ -233,10 +234,58 @@ class UserService {
       }
     }
 
+    // NOT: Buradaki tüm alt koleksiyonlar kullanıcının kişisel/sağlık
+    // verisidir ve KVKK "silme hakkı" gereği hesap silinince tamamı
+    // temizlenmelidir. Owner-only kurallar nedeniyle, hesap silindikten
+    // sonra bu belgeler kimse tarafından silinemez → burada eksiksiz olmalı.
     await wipeSub(FirestorePaths.fcmTokens);
     await wipeSub(FirestorePaths.cycleNotes);
     await wipeSub(FirestorePaths.cycleHistory);
     await wipeSub(FirestorePaths.waterIntake);
+    await wipeSub(FirestorePaths.cycleMoods);
+    await wipeSub(FirestorePaths.appointments);
+
+    // ── Sosyal içerik (KVKK: kullanıcının kendi ürettiği içerik) ──
+    // Best-effort: buradaki bir hata, aşağıdaki hesap/veri silmeyi
+    // engellememeli. Beğeniler ve silinen gönderi altında kalan yetim alt
+    // koleksiyonların tam kademeli temizliği için bir Cloud Function önerilir
+    // (like dokümanı uid'yi alan olarak tutmadığından client'tan güvenilir
+    // biçimde bulunamaz).
+    try {
+      // Kullanıcının BAŞKA gönderilere yazdığı yorumları sil ve o gönderinin
+      // commentCount sayacını düşür (gönderi hâlâ mevcutsa).
+      final myComments = await _firestore
+          .collectionGroup(FirestorePaths.comments)
+          .where(FirestorePaths.fAuthorId, isEqualTo: uid)
+          .get();
+      for (final c in myComments.docs) {
+        final postRef = c.reference.parent.parent;
+        await _firestore.runTransaction((tx) async {
+          if (postRef == null) {
+            tx.delete(c.reference);
+            return;
+          }
+          final postSnap = await tx.get(postRef);
+          tx.delete(c.reference);
+          if (postSnap.exists) {
+            tx.update(postRef, {
+              FirestorePaths.fCommentCount: FieldValue.increment(-1),
+            });
+          }
+        });
+      }
+
+      // Kullanıcının KENDİ gönderilerini sil.
+      final myPosts = await _firestore
+          .collection(FirestorePaths.posts)
+          .where(FirestorePaths.fAuthorId, isEqualTo: uid)
+          .get();
+      for (final p in myPosts.docs) {
+        await p.reference.delete();
+      }
+    } catch (e) {
+      debugPrint('deleteUserProfile: social content cleanup failed: $e');
+    }
 
     await _firestore.runTransaction((tx) async {
       tx.delete(usernameRef);
