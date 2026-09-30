@@ -347,8 +347,8 @@ class _CycleSettingsSection extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           isEn
-              ? 'Once you mark your period days, predictions use your real cycles. These values are used only until there is enough data.'
-              : 'Regl günlerini işaretledikçe tahminler gerçek döngülerinden hesaplanır. Bu değerler yalnızca yeterli kayıt olana kadar kullanılır.',
+              ? 'Upcoming periods and fertile days are predicted with these values. The period days you mark are shown on the calendar exactly as you entered them.'
+              : 'Sonraki regl ve doğurganlık günleri bu değerlere göre tahmin edilir. İşaretlediğin regl günleri takvimde girdiğin gibi gösterilir.',
           style: TextStyle(
             fontSize: 12,
             color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),

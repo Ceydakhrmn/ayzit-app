@@ -50,14 +50,18 @@ class StatsScreen extends StatelessWidget {
             Row(children: [
               _StatChip(
                 label: isEn ? 'Avg. Cycle' : 'Ort. Süre',
-                value: isEn ? '${_avg(cycleLens)} days' : '${_avg(cycleLens)} gün',
+                value: cycleLens.isEmpty
+                    ? '—'
+                    : (isEn ? '${_avg(cycleLens)} days' : '${_avg(cycleLens)} gün'),
                 icon: Icons.loop,
                 color: kPurple,
               ),
               const SizedBox(width: 10),
               _StatChip(
                 label: isEn ? 'Avg. Period' : 'Ort. Regl',
-                value: isEn ? '${_avg(periodLens)} days' : '${_avg(periodLens)} gün',
+                value: periodLens.isEmpty
+                    ? '—'
+                    : (isEn ? '${_avg(periodLens)} days' : '${_avg(periodLens)} gün'),
                 icon: Icons.water_drop,
                 color: kBlue,
               ),

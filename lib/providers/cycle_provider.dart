@@ -14,9 +14,10 @@
 //   users/{uid}/cycleHistory/{autoId}   → legacy cycles (read-only, migrated
 //                                         into periodDays on first edit)
 //
-// Regl günleri `periodDays` listesinde ('yyyy-MM-dd') tutulur; döngü ve regl
-// süreleri bu gerçek kayıtlardan hesaplanır, böylece düzensiz döngüler de
-// doğru gösterilir. Ayarlardaki süreler yalnızca veri yetersizken kullanılır.
+// Regl günleri `periodDays` listesinde ('yyyy-MM-dd') tutulur ve takvimde
+// olduğu gibi gösterilir; iki kayıt arasındaki döngü gerçek aralıkla
+// hesaplanır. İleriye dönük tahminler ayarlardaki döngü / regl süresini
+// kullanır. Hiç kaydı olmayan kullanıcıya tahmin gösterilmez.
 // =============================================
 
 import 'dart:async';
@@ -238,17 +239,21 @@ class CycleProvider extends ChangeNotifier {
       ? PeriodLog.fromKeys(_periodDayKeys)
       : PeriodLog(_legacyPeriodDays());
 
-  /// Tahminlerde kullanılan döngü uzunluğu: gerçek döngülerin ortalaması,
-  /// yeterli kayıt yoksa ayarlardaki değer.
-  int get predictedCycleLength =>
-      periodLog.averageCycleLength() ?? _cycleLength;
+  /// Kullanıcının hiç regl kaydı var mı? Yoksa takvimde tahmin gösterilmez.
+  bool get hasPeriodRecords => !periodLog.isEmpty;
 
-  /// Tahminlerde kullanılan regl süresi (devam eden regl hariç ortalama).
-  int get predictedPeriodLength =>
-      periodLog.averagePeriodLength(
-        excludeOngoingFrom: _isPeriodActive ? _periodActualStart : null,
-      ) ??
-      _periodLength;
+  /// Son kaydedilen reglin başlangıcı; hiç kayıt yoksa null.
+  DateTime? get lastPeriodStart =>
+      periodLog.isEmpty ? null : periodLog.spans.last.start;
+
+  /// Son kayıtlı regl + ayarlardaki sürelerle sonraki regl, ovulasyon ve
+  /// doğurganlık penceresi (takvim renkleriyle aynı hesap). Kayıt yoksa null.
+  CycleForecast? get forecast => forecastCycle(
+        log: periodLog,
+        cycleLength: _cycleLength,
+        periodLength: _periodLength,
+        today: DateTime.now(),
+      );
 
   /// Dönem kayıtlarından türetilen geçmiş (eskiden yeniye).
   List<CycleRecord> get cycleHistory {
@@ -266,22 +271,6 @@ class CycleProvider extends ChangeNotifier {
           ongoing: i + 1 == spans.length,
         ),
     ]);
-  }
-
-  CycleModel get cycle {
-    final spans = periodLog.spans;
-    if (spans.isEmpty) {
-      return CycleModel(
-        cycleStart: _cycleStart,
-        cycleLength: _cycleLength,
-        periodLength: _periodLength,
-      );
-    }
-    return CycleModel(
-      cycleStart: spans.last.start,
-      cycleLength: predictedCycleLength,
-      periodLength: predictedPeriodLength,
-    );
   }
 
   String _dateKey(DateTime d) =>
@@ -749,21 +738,19 @@ class CycleProvider extends ChangeNotifier {
   DayPhase phaseOf(DateTime date) => phaseForDay(
         date: date,
         log: periodLog,
-        cycleLength: predictedCycleLength,
-        periodLength: predictedPeriodLength,
-        fallback: cycle,
+        cycleLength: _cycleLength,
+        periodLength: _periodLength,
         activePeriodStart: _isPeriodActive ? _periodActualStart : null,
       );
 
   // ── Statistics helpers ──
-  /// Son [n] tamamlanmış döngünün gerçek uzunlukları.
+  /// Son [n] tamamlanmış döngünün gerçek uzunlukları (kayıt yoksa boş).
   List<int> lastCycleLengths({int n = 6}) {
     final lengths = periodLog.cycleLengths();
-    if (lengths.isEmpty) return List.filled(n, predictedCycleLength);
     return lengths.length <= n ? lengths : lengths.sublist(lengths.length - n);
   }
 
-  /// Son [n] regl döneminin süreleri (devam eden regl hariç).
+  /// Son [n] regl döneminin süreleri (devam eden regl hariç, kayıt yoksa boş).
   List<int> lastPeriodLengths({int n = 6}) {
     final activeStart = _isPeriodActive ? _periodActualStart : null;
     final lengths = [
@@ -771,7 +758,6 @@ class CycleProvider extends ChangeNotifier {
         if (activeStart == null || PeriodLog.daysBetween(s.start, activeStart) != 0)
           s.length,
     ];
-    if (lengths.isEmpty) return List.filled(n, predictedPeriodLength);
     return lengths.length <= n ? lengths : lengths.sublist(lengths.length - n);
   }
 

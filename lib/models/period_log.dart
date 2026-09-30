@@ -2,8 +2,11 @@
 // models/period_log.dart
 // Kullanıcının işaretlediği regl günlerinden dönemleri ve gerçek döngü
 // uzunluklarını çıkaran saf (Firebase'siz) mantık. Düzensiz döngüleri
-// desteklemek için tahminler sabit bir ayar yerine bu kayıtlardan yapılır.
+// desteklemek için geçmiş dönemler gerçek kayıtlarla gösterilir; son kayıttan
+// sonrası ayarlardaki sürelerle tahmin edilir.
 // =============================================
+
+import 'dart:math' as math;
 
 import 'cycle_model.dart';
 
@@ -14,16 +17,16 @@ import 'cycle_model.dart';
 ///    tahmini [periodLength] boyunca regl rengi
 /// 3. Diğer günler → bu günden önceki son döneme göre ovulasyon/doğurganlık.
 ///    İki kayıtlı dönem arasındaysa gerçek döngü uzunluğu, son dönemden
-///    sonrasıysa [cycleLength] ile ileriye doğru tahmin. Tahmini regl
+///    sonrasıysa ayarlardaki [cycleLength] ile ileriye doğru tahmin. Tahmini regl
 ///    günleri boyanmaz; yalnızca gerçek kayıtlar regl rengi alır.
 ///
-/// Hiç kayıt yoksa [fallback] (ayarlardaki sabit döngü) kullanılır.
+/// Hiç kayıt yoksa tüm günler boş kalır; uygulama kimseye varsayılan bir
+/// regl tarihi atamaz.
 DayPhase phaseForDay({
   required DateTime date,
   required PeriodLog log,
   required int cycleLength,
   required int periodLength,
-  required CycleModel fallback,
   DateTime? activePeriodStart,
 }) {
   final d = PeriodLog.dateOnly(date);
@@ -40,8 +43,6 @@ DayPhase phaseForDay({
     }
   }
 
-  if (log.isEmpty) return fallback.phaseOf(d);
-
   final anchor = log.lastSpanStartingOnOrBefore(d);
   if (anchor == null) return DayPhase.none; // ilk kayıttan önce
   final next = log.firstSpanStartingAfter(anchor.start);
@@ -57,6 +58,78 @@ DayPhase phaseForDay({
   }
   if (dayInCycle <= periodLength) return DayPhase.none;
   return CycleModel.fertilePhaseFor(dayInCycle, cycleLen);
+}
+
+/// Son kayıtlı regle ve ayarlardaki sürelere göre yaklaşan tarihler.
+class CycleForecast {
+  /// Sonraki regl (bugün ya da sonrası).
+  final DateTime nextPeriod;
+
+  /// Bugünü kapsayan ya da sıradaki doğurganlık penceresi ve ovulasyon günü.
+  /// Döngü, regl süresine göre çok kısaysa (pencere regle denk gelir) null.
+  final DateTime? ovulation;
+  final DateTime? fertileStart;
+  final DateTime? fertileEnd;
+
+  const CycleForecast({
+    required this.nextPeriod,
+    this.ovulation,
+    this.fertileStart,
+    this.fertileEnd,
+  });
+}
+
+/// [phaseForDay] ile aynı kurallarla, son kayıtlı dönemden [cycleLength]
+/// günlük döngüler varsayarak yaklaşan regl / ovulasyon / doğurganlık
+/// tarihlerini hesaplar. Hiç kayıt yoksa null.
+CycleForecast? forecastCycle({
+  required PeriodLog log,
+  required int cycleLength,
+  required int periodLength,
+  required DateTime today,
+}) {
+  if (log.isEmpty || cycleLength < 1) return null;
+  final anchor = log.spans.last.start;
+  final t = PeriodLog.dateOnly(today);
+  DateTime at(int offset) =>
+      DateTime(anchor.year, anchor.month, anchor.day + offset);
+
+  // Sonraki regl: son kayıttan itibaren bugüne denk gelen ya da ilk gelecek
+  // döngü başlangıcı (kayıtlı dönemin kendisi sayılmaz).
+  var k = 1;
+  while (at(k * cycleLength).isBefore(t)) {
+    k++;
+  }
+  final nextPeriod = at(k * cycleLength);
+
+  // Döngünün kaçıncı günleri (1'den başlar); takvimde regl günlerinin
+  // üstüne boyanmayan kısımlar pencereye katılmaz.
+  final ovDay = cycleLength - 14;
+  if (ovDay <= periodLength) {
+    return CycleForecast(nextPeriod: nextPeriod);
+  }
+  final firstDay = math.max(ovDay - 5, periodLength + 1);
+  final lastDay = ovDay + 1;
+
+  // Bitiş günü bugünden önce olmayan ve ovulasyon günü regl olarak
+  // işaretlenmemiş ilk pencere. İşaretli regl günleri takvimde regl rengi
+  // aldığından pencerenin başından kırpılır.
+  for (var c = 0;; c++) {
+    final base = c * cycleLength;
+    final end = at(base + lastDay - 1);
+    final ovulation = at(base + ovDay - 1);
+    if (end.isBefore(t) || log.contains(ovulation)) continue;
+    var start = at(base + firstDay - 1);
+    while (log.contains(start)) {
+      start = DateTime(start.year, start.month, start.day + 1);
+    }
+    return CycleForecast(
+      nextPeriod: nextPeriod,
+      ovulation: ovulation,
+      fertileStart: start,
+      fertileEnd: end,
+    );
+  }
 }
 
 /// Art arda işaretlenmiş regl günlerinden oluşan tek bir dönem.

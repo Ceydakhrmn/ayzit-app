@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
+import '../models/period_log.dart';
 import '../providers/cycle_provider.dart';
 import '../screens/stats_screen.dart';
 
@@ -19,27 +22,15 @@ class CycleSummaryCard extends StatelessWidget {
     final l10n     = AppLocalizations.of(context)!;
     final isEn     = !l10n.isTurkish;
     final now      = DateTime.now();
-    final start    = provider.cycle.cycleStart;
-    final cLen     = provider.predictedCycleLength;
-    final pLen     = provider.predictedPeriodLength;
-    final elapsed  = now.difference(start).inDays + 1;
+    final start    = provider.lastPeriodStart;
+    final forecast = provider.forecast;
+    // "Normal" süreler kullanıcının ayarlarda seçtiği değerlerdir.
+    final cLen     = provider.cycleLength;
+    final pLen     = provider.periodLength;
 
-    // Son 3 döngü (en yenisi önce). Kayıt varsa gerçek süreler gösterilir;
-    // hiç kayıt yoksa ayarlardaki sürelerle tahmini döngüler gösterilir.
-    final history = provider.cycleHistory;
-    final List<CycleRecord> entries = history.isEmpty
-        ? [
-            for (var i = 0; i < 3; i++)
-              CycleRecord(
-                start: start.subtract(Duration(days: cLen * i)),
-                periodDays: pLen,
-                cycleDays: i == 0 ? elapsed : cLen,
-                ongoing: i == 0,
-              ),
-          ]
-        : history.reversed.take(3).toList();
-
-    final daysAgo = now.difference(start).inDays;
+    // Son 3 döngü (en yenisi önce), yalnızca gerçek kayıtlardan.
+    final List<CycleRecord> entries =
+        provider.cycleHistory.reversed.take(3).toList();
 
     return Container(
       decoration: BoxDecoration(
@@ -106,6 +97,19 @@ class CycleSummaryCard extends StatelessWidget {
           ),
 
           // ── Döngü listesi ──
+          if (entries.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+              child: Text(
+                isEn
+                    ? 'No records yet. Tap "Start period" or "Edit period days" to add one.'
+                    : 'Henüz kayıt yok. "Regl başlat" ya da "Regl günlerini düzenle" ile ekleyebilirsin.',
+                style: TextStyle(
+                  fontSize: 12.5,
+                  color: cs.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
           ...entries.asMap().entries.map((e) {
             final idx            = e.key;
             final record         = e.value;
@@ -191,11 +195,51 @@ class CycleSummaryCard extends StatelessWidget {
           // ── Özet satırları ──
           _SummaryRow(
             label: l10n.lastPeriodLabel,
-            value: '${l10n.periodStartPrefix}: ${_fmtFull(start, isEn)}',
-            sub: '${daysAgo > 0 ? daysAgo : 0} ${l10n.daysAgoSuffix}',
+            value: start == null
+                ? (isEn ? 'Not recorded yet' : 'Henüz girilmedi')
+                : '${l10n.periodStartPrefix}: ${_fmtFull(start, isEn)}',
+            sub: start == null
+                ? null
+                : '${math.max(0, now.difference(start).inDays)} ${l10n.daysAgoSuffix}',
           ),
           Divider(height: 1, indent: 16, endIndent: 16,
               color: cs.onSurface.withValues(alpha: 0.1)),
+          if (forecast != null) ...[
+            _SummaryRow(
+              label: isEn ? 'Next period (estimated)' : 'Sonraki regl (tahmini)',
+              value: _fmtFull(forecast.nextPeriod, isEn),
+              sub: _relative(forecast.nextPeriod, now, isEn),
+            ),
+            Divider(height: 1, indent: 16, endIndent: 16,
+                color: cs.onSurface.withValues(alpha: 0.1)),
+            if (forecast.ovulation != null) ...[
+              _SummaryRow(
+                label: isEn ? 'Ovulation day (estimated)' : 'Ovulasyon günü (tahmini)',
+                value: _fmtFull(forecast.ovulation!, isEn),
+                sub: _relative(forecast.ovulation!, now, isEn),
+              ),
+              Divider(height: 1, indent: 16, endIndent: 16,
+                  color: cs.onSurface.withValues(alpha: 0.1)),
+              _SummaryRow(
+                label: isEn ? 'Fertile window' : 'Doğurganlık penceresi',
+                value: '${_fmt(forecast.fertileStart!, isEn)} – ${_fmt(forecast.fertileEnd!, isEn)}',
+                sub: PeriodLog.daysBetween(forecast.fertileStart!, now) >= 0
+                    ? (isEn ? 'You are in your fertile window' : 'Şu an doğurganlık dönemindesin')
+                    : (isEn
+                        ? 'Starts ${_relative(forecast.fertileStart!, now, isEn).toLowerCase()}'
+                        : '${_relative(forecast.fertileStart!, now, isEn)} başlıyor'),
+              ),
+            ] else
+              _SummaryRow(
+                label: isEn ? 'Ovulation day' : 'Ovulasyon günü',
+                value: isEn ? 'Cannot be estimated' : 'Hesaplanamıyor',
+                sub: isEn
+                    ? 'Your cycle length is too short for your period length. Check Settings.'
+                    : 'Döngü süren, regl süresine göre çok kısa. Ayarları kontrol et.',
+              ),
+            Divider(height: 1, indent: 16, endIndent: 16,
+                color: cs.onSurface.withValues(alpha: 0.1)),
+          ],
           _SummaryRow(
             label: l10n.normalPeriodDurationLabel,
             value: '$pLen ${l10n.daysUnit}',
@@ -220,6 +264,15 @@ class CycleSummaryCard extends StatelessWidget {
                       'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     final months = isEn ? enMonths : trMonths;
     return '${d.day} ${months[d.month]}';
+  }
+
+  /// Bugüne göre: "Bugün", "Yarın", "5 gün sonra" (geçmişse "3 gün önce").
+  String _relative(DateTime d, DateTime now, bool isEn) {
+    final days = PeriodLog.daysBetween(now, d);
+    if (days == 0) return isEn ? 'Today' : 'Bugün';
+    if (days == 1) return isEn ? 'Tomorrow' : 'Yarın';
+    if (days < 0) return isEn ? '${-days} days ago' : '${-days} gün önce';
+    return isEn ? 'In $days days' : '$days gün sonra';
   }
 
   String _fmtFull(DateTime d, bool isEn) {

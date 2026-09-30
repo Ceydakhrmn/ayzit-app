@@ -165,19 +165,19 @@ void main() {
   });
 
   group('phaseForDay (takvim renkleri)', () {
-    final fallback = CycleModel(cycleStart: DateTime(2026, 1, 1));
-
+    // cycleLength / periodLength: kullanıcının ayarlardaki değerleri.
     DayPhase phase(
       PeriodLog log,
       DateTime date, {
       DateTime? active,
+      int cycleLength = 28,
+      int periodLength = 5,
     }) =>
         phaseForDay(
           date: date,
           log: log,
-          cycleLength: log.averageCycleLength() ?? 28,
-          periodLength: log.averagePeriodLength(excludeOngoingFrom: active) ?? 5,
-          fallback: fallback,
+          cycleLength: cycleLength,
+          periodLength: periodLength,
           activePeriodStart: active,
         );
 
@@ -205,7 +205,7 @@ void main() {
       expect(phase(log, DateTime(2026, 1, 14)), DayPhase.none);
     });
 
-    test('son kayıttan sonrası ortalama döngüyle tahmin edilir', () {
+    test('son kayıttan sonrası ayarlardaki döngüyle tahmin edilir', () {
       // 28 günlük düzenli döngü: 1 Ocak, 29 Ocak
       final log = PeriodLog([
         ...range(DateTime(2026, 1, 1), 5),
@@ -218,18 +218,30 @@ void main() {
       expect(phase(log, DateTime(2026, 3, 11)), DayPhase.ovulation);
     });
 
-    test('devam eden reglin gelecek günleri tahmini süre kadar boyanır', () {
-      // Önceki dönem 6 gün; yeni regl bugün (1 Ekim) başladı.
+    test('ayarlardaki döngü uzunluğu değişince tahmin de değişir', () {
+      // Tek kayıt: 1 Ocak. Ayar 32 gün → ovulasyon 18. gün (18 Ocak).
+      final log = PeriodLog(range(DateTime(2026, 1, 1), 5));
+      expect(phase(log, DateTime(2026, 1, 18), cycleLength: 32),
+          DayPhase.ovulation);
+      expect(phase(log, DateTime(2026, 1, 14), cycleLength: 32),
+          isNot(DayPhase.ovulation));
+    });
+
+    test('devam eden reglin gelecek günleri ayardaki süre kadar boyanır', () {
+      // Yeni regl 1 Ekim'de başladı; ayarda regl süresi 6 gün.
       final log = PeriodLog([
-        ...range(DateTime(2026, 9, 1), 6),
+        ...range(DateTime(2026, 9, 1), 4),
         DateTime(2026, 10, 1),
       ]);
       final active = DateTime(2026, 10, 1);
-      expect(phase(log, DateTime(2026, 10, 3), active: active),
+      expect(phase(log, DateTime(2026, 10, 3), active: active, periodLength: 6),
           DayPhase.periodMid);
-      expect(phase(log, DateTime(2026, 10, 6), active: active),
+      expect(phase(log, DateTime(2026, 10, 6), active: active, periodLength: 6),
           DayPhase.periodLight);
-      expect(phase(log, DateTime(2026, 10, 7), active: active), DayPhase.none);
+      expect(phase(log, DateTime(2026, 10, 7), active: active, periodLength: 6),
+          DayPhase.none);
+      // Ayar 5 gün olsaydı 6 Ekim boyanmazdı.
+      expect(phase(log, DateTime(2026, 10, 6), active: active), DayPhase.none);
     });
 
     test('ilk kayıttan önceki günler boş kalır', () {
@@ -237,10 +249,103 @@ void main() {
       expect(phase(log, DateTime(2026, 8, 20)), DayPhase.none);
     });
 
-    test('hiç kayıt yoksa ayarlardaki sabit döngü kullanılır', () {
+    test('hiç kaydı olmayan (yeni) kullanıcıya hiçbir gün atanmaz', () {
       final log = PeriodLog(const []);
-      expect(phase(log, DateTime(2026, 1, 2)), fallback.phaseOf(DateTime(2026, 1, 2)));
-      expect(phase(log, DateTime(2026, 1, 14)), DayPhase.ovulation);
+      for (final d in range(DateTime(2026, 8, 1), 90)) {
+        expect(phase(log, d), DayPhase.none, reason: '$d');
+      }
+    });
+  });
+
+  group('forecastCycle (sonraki regl / ovulasyon / doğurganlık)', () {
+    CycleForecast? fc(PeriodLog log, DateTime today,
+            {int cycleLength = 28, int periodLength = 5}) =>
+        forecastCycle(
+          log: log,
+          cycleLength: cycleLength,
+          periodLength: periodLength,
+          today: today,
+        );
+
+    test('kayıt yoksa tahmin yok', () {
+      expect(fc(PeriodLog(const []), DateTime(2026, 9, 30)), isNull);
+    });
+
+    test('28 günlük döngü: 1 Eylül regl → 14 Eylül ovulasyon', () {
+      final log = PeriodLog(range(DateTime(2026, 9, 1), 5));
+      final f = fc(log, DateTime(2026, 9, 3))!;
+      expect(f.nextPeriod, DateTime(2026, 9, 29));
+      expect(f.ovulation, DateTime(2026, 9, 14));
+      expect(f.fertileStart, DateTime(2026, 9, 9));
+      expect(f.fertileEnd, DateTime(2026, 9, 15));
+    });
+
+    test('pencere geçtiyse bir sonraki döngünün penceresi gösterilir', () {
+      final log = PeriodLog(range(DateTime(2026, 9, 1), 5));
+      final f = fc(log, DateTime(2026, 9, 20))!;
+      expect(f.nextPeriod, DateTime(2026, 9, 29));
+      expect(f.ovulation, DateTime(2026, 10, 12));
+      // Pencerenin içindeyken aynı pencere kalır.
+      expect(fc(log, DateTime(2026, 9, 15))!.ovulation, DateTime(2026, 9, 14));
+    });
+
+    test('regl olarak işaretli günler doğurganlık penceresine girmez', () {
+      // 18–30 Eylül işaretli (uzun regl). Ovulasyon 1 Ekim.
+      final log = PeriodLog(range(DateTime(2026, 9, 18), 13));
+      final f = fc(log, DateTime(2026, 9, 30))!;
+      expect(f.ovulation, DateTime(2026, 10, 1));
+      expect(f.fertileStart, DateTime(2026, 10, 1));
+      expect(f.fertileEnd, DateTime(2026, 10, 2));
+
+      // Ovulasyon günü de işaretliyse sonraki döngünün penceresi gösterilir.
+      final longer = PeriodLog(range(DateTime(2026, 9, 18), 15));
+      expect(fc(longer, DateTime(2026, 9, 30))!.ovulation,
+          DateTime(2026, 10, 29));
+    });
+
+    test('ayardaki döngü uzunluğuna göre kayar', () {
+      final log = PeriodLog(range(DateTime(2026, 9, 1), 5));
+      final f = fc(log, DateTime(2026, 9, 3), cycleLength: 35)!;
+      expect(f.nextPeriod, DateTime(2026, 10, 6));
+      expect(f.ovulation, DateTime(2026, 9, 21));
+    });
+
+    test('regl süresine çok yakın kısa döngüde ovulasyon hesaplanmaz', () {
+      final log = PeriodLog(range(DateTime(2026, 9, 1), 5));
+      final f = fc(log, DateTime(2026, 9, 3), cycleLength: 21, periodLength: 8)!;
+      expect(f.ovulation, isNull);
+      expect(f.nextPeriod, DateTime(2026, 9, 22));
+    });
+
+    test('tahmin takvim renkleriyle birebir aynı', () {
+      final log = PeriodLog([
+        ...range(DateTime(2026, 8, 3), 6),
+        ...range(DateTime(2026, 9, 1), 5),
+      ]);
+      for (final len in [24, 28, 32, 40]) {
+        final f = fc(log, DateTime(2026, 9, 2), cycleLength: len)!;
+        DayPhase p(DateTime d) => phaseForDay(
+            date: d, log: log, cycleLength: len, periodLength: 5);
+        const fertile = {
+          DayPhase.fertilelow,
+          DayPhase.fertileMid,
+          DayPhase.fertilePeak,
+          DayPhase.ovulation,
+        };
+        expect(p(f.ovulation!), DayPhase.ovulation, reason: 'döngü $len');
+        for (var d = f.fertileStart!;
+            !d.isAfter(f.fertileEnd!);
+            d = DateTime(d.year, d.month, d.day + 1)) {
+          expect(fertile, contains(p(d)), reason: 'döngü $len, $d');
+        }
+        // Pencerenin hemen dışı doğurganlık rengi almaz (regl günü olabilir).
+        final before = DateTime(f.fertileStart!.year, f.fertileStart!.month,
+            f.fertileStart!.day - 1);
+        final after = DateTime(
+            f.fertileEnd!.year, f.fertileEnd!.month, f.fertileEnd!.day + 1);
+        expect(fertile, isNot(contains(p(before))), reason: 'döngü $len');
+        expect(fertile, isNot(contains(p(after))), reason: 'döngü $len');
+      }
     });
   });
 

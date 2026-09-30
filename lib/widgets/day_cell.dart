@@ -49,12 +49,11 @@ class DayCell extends StatelessWidget {
           shape: BoxShape.circle,
           // Diğer aylara ait günler renksiz ve şeffaf
           color: isOtherMonth ? Colors.transparent : bg,
-          // Bugün için dış çizgi (outline)
-          border: isToday && !isSelected
-              ? Border.all(color: isDark ? Colors.white70 : Colors.black87, width: 2)
-              : isSelected
-                  ? Border.all(color: isDark ? Colors.white : Colors.black, width: 2.5)
-                  : null,
+          // Halka yalnızca kullanıcının seçtiği gün için; "bugün" halkasız
+          // gösterilir ki açılışta bir gün seçilmiş gibi görünmesin.
+          border: isSelected
+              ? Border.all(color: isDark ? Colors.white : Colors.black, width: 2.5)
+              : null,
         ),
         child: Stack(
           alignment: Alignment.center,
@@ -66,13 +65,28 @@ class DayCell extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: isToday && !isOtherMonth
+                      ? FontWeight.w800
+                      : FontWeight.w500,
                   color: isOtherMonth
                       ? (isDark ? Colors.white24 : Colors.grey.withValues(alpha: 0.4))
                       : fg,
                 ),
               ),
             ),
+            // Bugün: rakamın altında küçük çizgi (nokta varsa yalnızca kalın rakam).
+            if (isToday && !isOtherMonth && !hasDots)
+              Positioned(
+                bottom: 7,
+                child: Container(
+                  width: 12,
+                  height: 3,
+                  decoration: BoxDecoration(
+                    color: fg,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
             if (hasDots)
               Positioned(
                 bottom: 5,
