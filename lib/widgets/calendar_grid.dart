@@ -212,6 +212,19 @@ class CalendarGrid extends StatelessWidget {
       );
     }
 
+    // ── Regl günlerini düzenleme modu ─────────────────────────────────
+    if (provider.isEditingPeriodDays) {
+      final isFuture = date.isAfter(DateTime.now());
+      final style = phaseStyle(provider.draftPhaseOf(date));
+      return DayCell(
+        label: '${date.day}',
+        backgroundColor: style.background,
+        textColor: isFuture ? Colors.grey.withValues(alpha: 0.4) : style.textColor,
+        isToday: isToday,
+        onTap: isFuture ? null : () => provider.togglePeriodDraftDay(date),
+      );
+    }
+
     // ── Normal mod ───────────────────────────────────────────────────
     final style = phaseStyle(provider.phaseOf(date));
     return DayCell(

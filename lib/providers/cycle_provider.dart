@@ -9,12 +9,18 @@
 // On auth state change: unsubscribes from old user's snapshots, resets
 // local state, and (if signed in + verified) subscribes to the new
 // user's Firestore docs:
-//   users/{uid}                         → cycleData, appMode, reminders
+//   users/{uid}                         → cycleData, periodDays, appMode, reminders
 //   users/{uid}/cycleNotes/{yyyy-MM-dd} → notes
-//   users/{uid}/cycleHistory/{autoId}   → previous cycles
+//   users/{uid}/cycleHistory/{autoId}   → legacy cycles (read-only, migrated
+//                                         into periodDays on first edit)
+//
+// Regl günleri `periodDays` listesinde ('yyyy-MM-dd') tutulur; döngü ve regl
+// süreleri bu gerçek kayıtlardan hesaplanır, böylece düzensiz döngüler de
+// doğru gösterilir. Ayarlardaki süreler yalnızca veri yetersizken kullanılır.
 // =============================================
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,6 +29,7 @@ import 'package:flutter/material.dart';
 import '../core/utils/firestore_paths.dart';
 import '../core/utils/firestore_stream_error.dart';
 import '../models/cycle_model.dart';
+import '../models/period_log.dart';
 
 enum AppMode { reglTakip, hamileTakip, hamilleKalma }
 
@@ -43,10 +50,14 @@ class CycleRecord {
   final int periodDays;
   final int cycleDays;
 
+  /// Son (henüz bitmemiş) döngü: [cycleDays] bugüne kadar geçen gün sayısı.
+  final bool ongoing;
+
   const CycleRecord({
     required this.start,
     required this.periodDays,
     required this.cycleDays,
+    this.ongoing = false,
   });
 
   Map<String, dynamic> toMap() => {
@@ -111,7 +122,18 @@ class CycleProvider extends ChangeNotifier {
   bool _reminderFertile = false;
   final Map<String, String> _dayNotes = {};
   final Map<String, String> _dayMoods = {};
+  // Eski sürümün kaydettiği döngüler; yalnızca periodDays'e taşımak için okunur.
   final List<CycleRecord> _cycleHistory = [];
+  // İşaretlenmiş regl günleri ('yyyy-MM-dd'). Alan henüz yoksa (eski kullanıcı)
+  // günler eski verilerden türetilir, ilk düzenlemede kalıcı olarak yazılır.
+  final Set<String> _periodDayKeys = {};
+  bool _hasPeriodDaysField = false;
+  PeriodLog? _logCache;
+  // Ana takvimde regl günlerini düzenleme modu: değişiklikler Kaydet'e kadar
+  // yalnızca bu taslakta tutulur.
+  bool _editingPeriodDays = false;
+  final Set<String> _draftPeriodKeys = {};
+  PeriodLog? _draftLogCache;
 
   // ── Getters (same public surface as before) ──
   DateTime get focusedMonth => _focusedMonth;
@@ -211,13 +233,56 @@ class CycleProvider extends ChangeNotifier {
   bool get reminderFertile => _reminderFertile;
   String noteForDay(DateTime day) => _dayNotes[_dateKey(day)] ?? '';
   String moodForDay(DateTime day) => _dayMoods[_dateKey(day)] ?? '';
-  List<CycleRecord> get cycleHistory => List.unmodifiable(_cycleHistory);
+  /// Kayıtlı regl günleri ve bunlardan çıkan dönemler.
+  PeriodLog get periodLog => _logCache ??= _hasPeriodDaysField
+      ? PeriodLog.fromKeys(_periodDayKeys)
+      : PeriodLog(_legacyPeriodDays());
 
-  CycleModel get cycle => CycleModel(
+  /// Tahminlerde kullanılan döngü uzunluğu: gerçek döngülerin ortalaması,
+  /// yeterli kayıt yoksa ayarlardaki değer.
+  int get predictedCycleLength =>
+      periodLog.averageCycleLength() ?? _cycleLength;
+
+  /// Tahminlerde kullanılan regl süresi (devam eden regl hariç ortalama).
+  int get predictedPeriodLength =>
+      periodLog.averagePeriodLength(
+        excludeOngoingFrom: _isPeriodActive ? _periodActualStart : null,
+      ) ??
+      _periodLength;
+
+  /// Dönem kayıtlarından türetilen geçmiş (eskiden yeniye).
+  List<CycleRecord> get cycleHistory {
+    final spans = periodLog.spans;
+    final today = PeriodLog.dateOnly(DateTime.now());
+    return List.unmodifiable([
+      for (var i = 0; i < spans.length; i++)
+        CycleRecord(
+          start: spans[i].start,
+          periodDays: spans[i].length,
+          cycleDays: i + 1 < spans.length
+              ? PeriodLog.daysBetween(spans[i].start, spans[i + 1].start)
+              : math.max(PeriodLog.daysBetween(spans[i].start, today) + 1,
+                  spans[i].length),
+          ongoing: i + 1 == spans.length,
+        ),
+    ]);
+  }
+
+  CycleModel get cycle {
+    final spans = periodLog.spans;
+    if (spans.isEmpty) {
+      return CycleModel(
         cycleStart: _cycleStart,
         cycleLength: _cycleLength,
         periodLength: _periodLength,
       );
+    }
+    return CycleModel(
+      cycleStart: spans.last.start,
+      cycleLength: predictedCycleLength,
+      periodLength: predictedPeriodLength,
+    );
+  }
 
   String _dateKey(DateTime d) =>
       '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
@@ -265,6 +330,10 @@ class CycleProvider extends ChangeNotifier {
     _dayNotes.clear();
     _dayMoods.clear();
     _cycleHistory.clear();
+    _periodDayKeys.clear();
+    _hasPeriodDaysField = false;
+    _editingPeriodDays = false;
+    _draftPeriodKeys.clear();
   }
 
   DocumentReference<Map<String, dynamic>> _userRef(String uid) =>
@@ -282,6 +351,13 @@ class CycleProvider extends ChangeNotifier {
       _isPeriodActive = cycle['isPeriodActive'] as bool? ?? false;
       _periodActualStart = (cycle['periodActualStart'] as Timestamp?)?.toDate();
       _periodEndDate = (cycle['periodEndDate'] as Timestamp?)?.toDate();
+
+      final periodDays = data['periodDays'];
+      _periodDayKeys.clear();
+      _hasPeriodDaysField = periodDays is List;
+      if (periodDays is List) {
+        _periodDayKeys.addAll(periodDays.whereType<String>());
+      }
 
       _appMode = _parseAppMode(data['appMode'] as String?);
 
@@ -403,48 +479,160 @@ class CycleProvider extends ChangeNotifier {
   }
 
   // ── Period start/end ──
+  /// Regli [date] gününde başlatır. Seçim temizlenir ki daha sonra "Bitir"e
+  /// basıldığında başlangıç günü yanlışlıkla bitiş günü sayılmasın.
   void startPeriod(DateTime date) {
-    _periodActualStart = date;
-    _cycleStart = date;
+    final day = PeriodLog.dateOnly(date);
+    _periodActualStart = day;
+    _cycleStart = day;
     _periodEndDate = null;
     _isPeriodActive = true;
-    notifyListeners();
-    _updateUserDoc(_currentCycleDataMap());
+    _selectedDay = null;
+    _mutatePeriodDays((keys) => keys.add(PeriodLog.keyOf(day)));
   }
 
-  void endPeriod() {
-    final now = DateTime.now();
-    _periodEndDate = now;
-    final startForCalc = _periodActualStart ?? _cycleStart;
-    final actualDays = now.difference(startForCalc).inDays + 1;
-    final newPeriodLen = actualDays.clamp(1, 15);
-    _periodLength = ((_periodLength + newPeriodLen) / 2).round();
-
-    final record = CycleRecord(
-      start: _cycleStart,
-      periodDays: newPeriodLen,
-      cycleDays: _cycleLength,
-    );
-    _cycleHistory.add(record);
-    if (_cycleHistory.length > 12) _cycleHistory.removeAt(0);
+  /// Devam eden regli [endDate] gününde bitirir (verilmezse / gelecekteyse
+  /// bugün). Yalnızca başlangıç ile bitiş arası işaretlenir; sonraki günler
+  /// doldurulmaz. Bitiş başlangıçtan önceyse hiçbir şey yapmaz ve null döner;
+  /// aksi halde kullanılan bitiş gününü döndürür.
+  DateTime? endPeriod([DateTime? endDate]) {
+    final start = PeriodLog.dateOnly(_periodActualStart ?? _cycleStart);
+    final today = PeriodLog.dateOnly(DateTime.now());
+    var end = PeriodLog.dateOnly(endDate ?? today);
+    if (end.isAfter(today)) end = today;
+    if (end.isBefore(start)) return null;
 
     _isPeriodActive = false;
-    notifyListeners();
+    _selectedDay = null;
+    _mutatePeriodDays((keys) {
+      // Kaydetmeden önce atanmalı; kayıt _periodEndDate'i de yazar.
+      _periodEndDate = PeriodLog.applyPeriodEnd(keys, start, end);
+    });
+    return _periodEndDate;
+  }
 
-    _updateUserDoc(_currentCycleDataMap());
-    final uid = _uid;
-    if (uid != null) {
-      _userRef(uid)
-          .collection(FirestorePaths.cycleHistory)
-          .add(record.toMap())
-          .catchError((e) {
-        debugPrint('cycleHistory add error: $e');
-        // Needed because catchError must return a DocumentReference<Map<String,dynamic>>
-        return _userRef(uid)
-            .collection(FirestorePaths.cycleHistory)
-            .doc();
-      });
+  // ── Ana takvimde regl günlerini düzenleme ──
+  bool get isEditingPeriodDays => _editingPeriodDays;
+
+  bool get hasPeriodDraftChanges {
+    final saved = periodLog.sortedKeys.toSet();
+    return saved.length != _draftPeriodKeys.length ||
+        !saved.containsAll(_draftPeriodKeys);
+  }
+
+  void beginPeriodDaysEdit() {
+    _draftPeriodKeys
+      ..clear()
+      ..addAll(periodLog.sortedKeys);
+    _editingPeriodDays = true;
+    _selectedDay = null;
+    notifyListeners();
+  }
+
+  /// Taslakta günü regl olarak işaretler / kaldırır. Gelecek günler yok sayılır.
+  void togglePeriodDraftDay(DateTime day) {
+    if (!_editingPeriodDays) return;
+    final d = PeriodLog.dateOnly(day);
+    if (d.isAfter(PeriodLog.dateOnly(DateTime.now()))) return;
+    final key = PeriodLog.keyOf(d);
+    if (!_draftPeriodKeys.remove(key)) _draftPeriodKeys.add(key);
+    notifyListeners();
+  }
+
+  void cancelPeriodDaysEdit() {
+    _editingPeriodDays = false;
+    _draftPeriodKeys.clear();
+    notifyListeners();
+  }
+
+  void savePeriodDaysEdit() {
+    if (!_editingPeriodDays) return;
+    final days = PeriodLog.fromKeys(_draftPeriodKeys).days;
+    _editingPeriodDays = false;
+    _draftPeriodKeys.clear();
+    setPeriodDays(days);
+  }
+
+  /// Düzenleme modunda takvim rengi: yalnızca taslakta işaretli günler regl
+  /// rengi alır (dönemin kaçıncı günü olduğuna göre); tahmin gösterilmez.
+  DayPhase draftPhaseOf(DateTime date) {
+    final log = _draftLogCache ??= PeriodLog.fromKeys(_draftPeriodKeys);
+    if (!log.contains(date)) return DayPhase.none;
+    final span = log.spanCovering(date)!;
+    return CycleModel.periodPhaseFor(
+        PeriodLog.daysBetween(span.start, date) + 1);
+  }
+
+  /// Regl günlerinin tamamını verilen günlerle değiştirip kaydeder.
+  void setPeriodDays(Iterable<DateTime> days) {
+    final log = PeriodLog(days);
+    final keys = log.sortedKeys.toSet();
+    // Devam eden reglin başlangıç günü kaldırıldıysa artık aktif değildir.
+    final activeStart = _periodActualStart;
+    if (_isPeriodActive &&
+        activeStart != null &&
+        !keys.contains(PeriodLog.keyOf(activeStart))) {
+      _isPeriodActive = false;
     }
+    if (!log.isEmpty) _cycleStart = log.spans.last.start;
+    _hasPeriodDaysField = true;
+    _periodDayKeys
+      ..clear()
+      ..addAll(keys);
+    notifyListeners();
+    _savePeriodDays();
+  }
+
+  /// Regl günlerini değiştirir; eski kullanıcının türetilmiş kayıtları önce
+  /// kalıcı listeye taşınır ki hiçbir geçmiş dönem kaybolmasın.
+  void _mutatePeriodDays(void Function(Set<String> keys) change) {
+    if (!_hasPeriodDaysField) {
+      final legacy = periodLog.sortedKeys;
+      _periodDayKeys
+        ..clear()
+        ..addAll(legacy);
+      _hasPeriodDaysField = true;
+    }
+    change(_periodDayKeys);
+    notifyListeners();
+    _savePeriodDays();
+  }
+
+  void _savePeriodDays() {
+    _updateUserDoc({
+      ..._currentCycleDataMap(),
+      'periodDays': (_periodDayKeys.toList()..sort()),
+    });
+  }
+
+  /// periodDays alanı olmayan (eski sürüm) kullanıcılar için regl günlerini
+  /// eski döngü geçmişinden ve son başlatılan reglden türetir.
+  List<DateTime> _legacyPeriodDays() {
+    final days = <DateTime>[];
+    void addRange(DateTime start, int length) {
+      for (var i = 0; i < length; i++) {
+        days.add(DateTime(start.year, start.month, start.day + i));
+      }
+    }
+
+    for (final r in _cycleHistory) {
+      addRange(PeriodLog.dateOnly(r.start), r.periodDays.clamp(1, 15));
+    }
+    final actualStart = _periodActualStart;
+    if (actualStart != null) {
+      final start = PeriodLog.dateOnly(actualStart);
+      final int length;
+      if (_isPeriodActive) {
+        final today = PeriodLog.dateOnly(DateTime.now());
+        length = PeriodLog.daysBetween(start, today) + 1;
+      } else if (_periodEndDate != null) {
+        length = PeriodLog.daysBetween(start, _periodEndDate!) + 1;
+      } else {
+        length = _periodLength;
+      }
+      addRange(start, length.clamp(1, 15));
+    }
+    return days;
   }
 
   // ── Cycle settings ──
@@ -558,79 +746,41 @@ class CycleProvider extends ChangeNotifier {
   }
 
   // ── Phase lookup ──
-  DayPhase phaseOf(DateTime date) {
-    final d = DateTime(date.year, date.month, date.day);
-    final actualStart = _periodActualStart;
-
-    if (actualStart != null) {
-      final start = DateTime(actualStart.year, actualStart.month, actualStart.day);
-
-      if (_isPeriodActive) {
-        // Regl aktif: başlangıçtan periodLength gün boyunca regl rengi
-        final periodEnd = start.add(Duration(days: _periodLength - 1));
-
-        if (!d.isBefore(start) && !d.isAfter(periodEnd)) {
-          // Aktif regl günleri (tüm periodLength günü)
-          final dayNum = d.difference(start).inDays + 1;
-          if (dayNum <= 2) return DayPhase.periodPeak;
-          if (dayNum <= 3) return DayPhase.periodMid;
-          return DayPhase.periodLight;
-        }
-
-        // Regl bittikten sonraki günler: ovulasyon/doğurganlık göster
-        // Bir sonraki döngü başlangıcını baz al (start + cycleLength)
-        final nextCycleStart = start.add(Duration(days: _cycleLength));
-        final model = CycleModel(
-          cycleStart: nextCycleStart,
-          cycleLength: _cycleLength,
-          periodLength: _periodLength,
-        );
-        final dayInNextCycle = model.dayOfCycle(date);
-        // Bir sonraki döngünün regl günlerini henüz gösterme
-        if (dayInNextCycle <= _periodLength) return DayPhase.none;
-        return model.phaseOf(date);
-      } else {
-        // Regl bitti: gerçek regl aralığını boya
-        final endDate = _periodEndDate != null
-            ? DateTime(_periodEndDate!.year, _periodEndDate!.month, _periodEndDate!.day)
-            : start.add(Duration(days: _periodLength - 1));
-
-        if (!d.isBefore(start) && !d.isAfter(endDate)) {
-          final dayNum = d.difference(start).inDays + 1;
-          if (dayNum <= 2) return DayPhase.periodPeak;
-          if (dayNum <= 3) return DayPhase.periodMid;
-          return DayPhase.periodLight;
-        }
-
-        // Regl bittikten sonra doğurganlık/ovulasyon: actualStart baz alarak hesapla
-        // Regl günlerini (1..periodLength) tekrar renklendirme — zaten yukarıda renklendirildi.
-        final model = CycleModel(
-          cycleStart: start,
-          cycleLength: _cycleLength,
-          periodLength: _periodLength,
-        );
-        final phase = model.phaseOf(date);
-        final dayInCycle = model.dayOfCycle(date);
-        if (dayInCycle <= _periodLength) return DayPhase.none;
-        return phase;
-      }
-    }
-
-    // Hiç regl girilmemişse varsayılan hesap
-    return cycle.phaseOf(date);
-  }
+  DayPhase phaseOf(DateTime date) => phaseForDay(
+        date: date,
+        log: periodLog,
+        cycleLength: predictedCycleLength,
+        periodLength: predictedPeriodLength,
+        fallback: cycle,
+        activePeriodStart: _isPeriodActive ? _periodActualStart : null,
+      );
 
   // ── Statistics helpers ──
+  /// Son [n] tamamlanmış döngünün gerçek uzunlukları.
   List<int> lastCycleLengths({int n = 6}) {
-    final records = _cycleHistory.reversed.take(n).toList().reversed.toList();
-    if (records.isEmpty) return List.filled(n, _cycleLength);
-    return records.map((r) => r.cycleDays).toList();
+    final lengths = periodLog.cycleLengths();
+    if (lengths.isEmpty) return List.filled(n, predictedCycleLength);
+    return lengths.length <= n ? lengths : lengths.sublist(lengths.length - n);
   }
 
+  /// Son [n] regl döneminin süreleri (devam eden regl hariç).
   List<int> lastPeriodLengths({int n = 6}) {
-    final records = _cycleHistory.reversed.take(n).toList().reversed.toList();
-    if (records.isEmpty) return List.filled(n, _periodLength);
-    return records.map((r) => r.periodDays).toList();
+    final activeStart = _isPeriodActive ? _periodActualStart : null;
+    final lengths = [
+      for (final s in periodLog.spans)
+        if (activeStart == null || PeriodLog.daysBetween(s.start, activeStart) != 0)
+          s.length,
+    ];
+    if (lengths.isEmpty) return List.filled(n, predictedPeriodLength);
+    return lengths.length <= n ? lengths : lengths.sublist(lengths.length - n);
+  }
+
+  @override
+  void notifyListeners() {
+    // Her durum değişikliğinde regl kaydı önbellekleri yeniden hesaplanır.
+    _logCache = null;
+    _draftLogCache = null;
+    super.notifyListeners();
   }
 
   @override

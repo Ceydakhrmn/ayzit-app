@@ -20,15 +20,24 @@ class CycleSummaryCard extends StatelessWidget {
     final isEn     = !l10n.isTurkish;
     final now      = DateTime.now();
     final start    = provider.cycle.cycleStart;
-    final cLen     = provider.cycleLength;
-    final pLen     = provider.periodLength;
+    final cLen     = provider.predictedCycleLength;
+    final pLen     = provider.predictedPeriodLength;
+    final elapsed  = now.difference(start).inDays + 1;
 
-    final List<DateTime> pastStarts = [];
-    DateTime s = start;
-    while (pastStarts.length < 3) {
-      pastStarts.add(s);
-      s = s.subtract(Duration(days: cLen));
-    }
+    // Son 3 döngü (en yenisi önce). Kayıt varsa gerçek süreler gösterilir;
+    // hiç kayıt yoksa ayarlardaki sürelerle tahmini döngüler gösterilir.
+    final history = provider.cycleHistory;
+    final List<CycleRecord> entries = history.isEmpty
+        ? [
+            for (var i = 0; i < 3; i++)
+              CycleRecord(
+                start: start.subtract(Duration(days: cLen * i)),
+                periodDays: pLen,
+                cycleDays: i == 0 ? elapsed : cLen,
+                ongoing: i == 0,
+              ),
+          ]
+        : history.reversed.take(3).toList();
 
     final daysAgo = now.difference(start).inDays;
 
@@ -97,14 +106,13 @@ class CycleSummaryCard extends StatelessWidget {
           ),
 
           // ── Döngü listesi ──
-          ...pastStarts.asMap().entries.map((e) {
+          ...entries.asMap().entries.map((e) {
             final idx            = e.key;
-            final cycleStart     = e.value;
-            final cycleEnd       = cycleStart.add(Duration(days: cLen - 1));
-            final isCurrentCycle = idx == 0;
-            final actualLen      = isCurrentCycle
-                ? now.difference(cycleStart).inDays + 1
-                : cLen;
+            final record         = e.value;
+            final cycleStart     = record.start;
+            final isCurrentCycle = record.ongoing;
+            final actualLen      = record.cycleDays;
+            final cycleEnd       = cycleStart.add(Duration(days: actualLen - 1));
 
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -134,7 +142,7 @@ class CycleSummaryCard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(left: 16, bottom: 2),
                   child: Text(
-                    '$pLen ${l10n.periodDurationSuffix}',
+                    '${record.periodDays} ${l10n.periodDurationSuffix}',
                     style: TextStyle(
                       fontSize: 11,
                       color: cs.onSurface.withValues(alpha: 0.45),
@@ -144,13 +152,15 @@ class CycleSummaryCard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
                   child: _CycleBar(
-                    cycleLength: cLen,
-                    periodLength: pLen,
-                    filled: isCurrentCycle ? (now.difference(cycleStart).inDays + 1) : cLen,
+                    cycleLength: isCurrentCycle
+                        ? (actualLen > cLen ? actualLen : cLen)
+                        : actualLen,
+                    periodLength: record.periodDays,
+                    filled: actualLen,
                     isDark: isDark,
                   ),
                 ),
-                if (idx < pastStarts.length - 1)
+                if (idx < entries.length - 1)
                   Divider(height: 1, indent: 16, endIndent: 16,
                       color: cs.onSurface.withValues(alpha: 0.1)),
               ],

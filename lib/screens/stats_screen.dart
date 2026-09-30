@@ -238,8 +238,8 @@ class StatsScreen extends StatelessWidget {
                 ),
                 child: Text(
                   isEn
-                      ? 'No records yet.\nStart and end a period to see your history.'
-                      : 'Henüz kayıt yok.\nRegl başlatıp bitirince buraya işlenir.',
+                      ? 'No records yet.\nStart a period or mark your period days to see your history.'
+                      : 'Henüz kayıt yok.\nRegl başlatınca ya da regl günlerini işaretleyince buraya işlenir.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(color: Colors.black38, fontSize: 13),
                 ),
@@ -273,7 +273,10 @@ class StatsScreen extends StatelessWidget {
                               color: kBlue,
                             )),
                             SizedBox(width: 70, child: _PillBadge(
-                              value: isEn ? '${r.cycleDays}d' : '${r.cycleDays} gün',
+                              // Devam eden döngü: bugüne kadar geçen gün sayısı.
+                              value: isEn
+                                  ? '${r.cycleDays}d${r.ongoing ? '…' : ''}'
+                                  : '${r.cycleDays} gün${r.ongoing ? '…' : ''}',
                               color: kPurple,
                             )),
                           ]),

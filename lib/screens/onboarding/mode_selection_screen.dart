@@ -97,61 +97,73 @@ class _ModeSelectionScreenState extends State<ModeSelectionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const SizedBox(height: 48),
-                Center(
-                  child: Container(
-                    width: 110,
-                    height: 110,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.18),
-                          blurRadius: 20,
-                          offset: const Offset(0, 8),
+                // İçerik küçük ekranda / büyük yazı boyutunda sığmazsa
+                // kaydırılabilir; "Devam Et" butonu her zaman altta görünür.
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(height: 48),
+                        Center(
+                          child: Container(
+                            width: 110,
+                            height: 110,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withValues(alpha: 0.18),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: ClipOval(
+                              child: Image.asset(
+                                'assets/logo_new.png',
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ),
                         ),
+                        const SizedBox(height: 16),
+                        Text(
+                          l10n.appTitle,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.primary,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.appPurpose,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                        ..._modes.map((mode) => _ModeCard(
+                              mode: mode,
+                              title: _modeTitle(l10n, mode.value),
+                              desc: _modeDesc(l10n, mode.value),
+                              selected: _selected == mode.value,
+                              isDark: isDark,
+                              onTap: () => setState(() => _selected = mode.value),
+                            )),
+                        const SizedBox(height: 8),
                       ],
                     ),
-                    child: ClipOval(
-                      child: Image.asset(
-                        'assets/logo_new.png',
-                        fit: BoxFit.cover,
-                      ),
-                    ),
                   ),
                 ),
-                const SizedBox(height: 16),
-                Text(
-                  l10n.appTitle,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.primary,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.appPurpose,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: textSecondary,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 40),
-                ..._modes.map((mode) => _ModeCard(
-                      mode: mode,
-                      title: _modeTitle(l10n, mode.value),
-                      desc: _modeDesc(l10n, mode.value),
-                      selected: _selected == mode.value,
-                      isDark: isDark,
-                      onTap: () => setState(() => _selected = mode.value),
-                    )),
-                const Spacer(),
+                const SizedBox(height: 12),
                 AnimatedOpacity(
                   opacity: _selected != null ? 1.0 : 0.4,
                   duration: const Duration(milliseconds: 200),
@@ -184,7 +196,7 @@ class _ModeSelectionScreenState extends State<ModeSelectionScreen> {
                           ),
                   ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
               ],
             ),
           ),

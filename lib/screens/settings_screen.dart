@@ -344,6 +344,16 @@ class _CycleSettingsSection extends StatelessWidget {
           label: isEn ? '${provider.periodLength}d' : '${provider.periodLength} gün',
           onChanged: (v) => provider.updatePeriodLength(v.round()),
         ),
+        const SizedBox(height: 8),
+        Text(
+          isEn
+              ? 'Once you mark your period days, predictions use your real cycles. These values are used only until there is enough data.'
+              : 'Regl günlerini işaretledikçe tahminler gerçek döngülerinden hesaplanır. Bu değerler yalnızca yeterli kayıt olana kadar kullanılır.',
+          style: TextStyle(
+            fontSize: 12,
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
+          ),
+        ),
       ],
     );
   }

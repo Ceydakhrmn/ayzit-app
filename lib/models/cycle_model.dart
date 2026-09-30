@@ -57,6 +57,19 @@ class CycleModel {
     if (day == 3) return DayPhase.periodMid;
     if (day <= periodLength) return DayPhase.periodLight;
 
+    return fertilePhaseFor(day, cycleLength);
+  }
+
+  /// Kayıtlı bir regl döneminin [dayOfPeriod]. günü için renk (1'den başlar).
+  static DayPhase periodPhaseFor(int dayOfPeriod) {
+    if (dayOfPeriod <= 2) return DayPhase.periodPeak;
+    if (dayOfPeriod <= 3) return DayPhase.periodMid;
+    return DayPhase.periodLight;
+  }
+
+  /// [cycleLength] günlük bir döngünün [day]. günü için ovulasyon /
+  /// doğurganlık fazı; bu pencerenin dışındaysa [DayPhase.none].
+  static DayPhase fertilePhaseFor(int day, int cycleLength) {
     // Ovulasyon günü: döngü bitişinden 14 gün önce (standart luteal faz)
     final ovulationDay = cycleLength - 14;
     if (day == ovulationDay) return DayPhase.ovulation;

@@ -257,29 +257,39 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  /// Regl başlat / bitir butonu.
+  /// Regl başlat / bitir butonu. Takvimde seçili gün varsa başlangıç / bitiş
+  /// o gün olur, yoksa bugün.
   Widget _periodButton(BuildContext context, CycleProvider provider) {
     final l10n = AppLocalizations.of(context)!;
+    final isTr = l10n.isTurkish;
+    void snack(String text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(text), duration: const Duration(seconds: 2)),
+      );
+    }
+
     return ElevatedButton.icon(
       onPressed: () {
+        final today = DateUtils.dateOnly(DateTime.now());
+        final day = provider.selectedDay ?? today;
         if (provider.isPeriodActive) {
-          provider.endPeriod();
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.periodEndedSnack),
-              duration: const Duration(seconds: 2),
-            ),
-          );
+          final end = provider.endPeriod(day);
+          if (end == null) {
+            snack(isTr
+                ? 'Bitiş günü, reglin başladığı günden önce olamaz.'
+                : 'The end day cannot be before the period started.');
+            return;
+          }
+          snack('${l10n.periodEndedSnack} · ${_shortDate(end, isTr)}');
         } else {
-          final selected = provider.selectedDay;
-          final startDate = selected ?? DateTime.now();
-          provider.startPeriod(startDate);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.periodStartedSnack),
-              duration: const Duration(seconds: 2),
-            ),
-          );
+          if (day.isAfter(today)) {
+            snack(isTr
+                ? 'Gelecekteki bir gün seçilemez.'
+                : "You can't choose a future day.");
+            return;
+          }
+          provider.startPeriod(day);
+          snack('${l10n.periodStartedSnack} · ${_shortDate(day, isTr)}');
         }
       },
       icon: const Icon(Icons.water_drop, size: 16),
@@ -300,10 +310,125 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  static String _shortDate(DateTime d, bool isTr) {
+    const tr = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+                'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
+    const en = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+                'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return '${d.day} ${(isTr ? tr : en)[d.month - 1]}';
+  }
+
+  /// Takvimi regl günlerini düzenleme moduna geçiren buton.
+  Widget _editPeriodDaysButton(BuildContext context, CycleProvider provider) {
+    final isTr = AppLocalizations.of(context)!.isTurkish;
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        onPressed: provider.beginPeriodDaysEdit,
+        icon: const Icon(Icons.edit_calendar_outlined, size: 18),
+        label: Text(isTr ? 'Regl günlerini düzenle' : 'Edit period days'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF7C3AED),
+          side: const BorderSide(color: Color(0xFFC4B5FD)),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
+      ),
+    );
+  }
+
+  /// Düzenleme modunda takvimin üstündeki bilgi şeridi.
+  Widget _periodEditBanner(BuildContext context) {
+    final isTr = AppLocalizations.of(context)!.isTurkish;
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF7C3AED).withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: const Color(0xFF7C3AED).withValues(alpha: 0.22),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.edit_calendar_outlined,
+              color: Color(0xFF7C3AED), size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              isTr
+                  ? 'Regl olduğun günlere dokun, yanlış işaretlediğine tekrar dokunarak kaldır. Aylar arasında oklarla geçebilirsin.'
+                  : 'Tap the days you had your period; tap again to remove. Use the arrows to change months.',
+              style: TextStyle(
+                fontSize: 12.5,
+                fontWeight: FontWeight.w600,
+                color: cs.onSurface.withValues(alpha: 0.75),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Düzenleme modunda takvimin altındaki İptal / Kaydet butonları.
+  Widget _periodEditActions(BuildContext context, CycleProvider provider) {
+    final isTr = AppLocalizations.of(context)!.isTurkish;
+    const accent = Color(0xFF7C3AED);
+    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(24));
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton(
+            onPressed: provider.cancelPeriodDaysEdit,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: accent,
+              side: const BorderSide(color: Color(0xFFC4B5FD)),
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: shape,
+            ),
+            child: Text(isTr ? 'İptal' : 'Cancel'),
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: FilledButton(
+            onPressed: provider.hasPeriodDraftChanges
+                ? () {
+                    provider.savePeriodDaysEdit();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(isTr
+                            ? 'Regl günlerin kaydedildi'
+                            : 'Period days saved'),
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                : null,
+            style: FilledButton.styleFrom(
+              backgroundColor: accent,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              shape: shape,
+            ),
+            child: Text(isTr ? 'Kaydet' : 'Save'),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CycleProvider>();
     final isPregnancy = provider.appMode == AppMode.hamileTakip;
+    final isEditingPeriods = provider.isEditingPeriodDays && !isPregnancy;
 
     final l10n = AppLocalizations.of(context)!;
     return SafeArea(
@@ -338,13 +463,19 @@ class HomeScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (isEditingPeriods) _periodEditBanner(context),
                 const MonthHeader(),
                 const SizedBox(height: 8),
                 const CalendarGrid(),
                 const SizedBox(height: 16),
 
+                // ── Regl günlerini düzenleme modu ──
+                if (isEditingPeriods) ...[
+                  _periodEditActions(context, provider),
+                  const SizedBox(height: 20),
+                ]
                 // ── Hamile takip modu ──
-                if (isPregnancy) ...[
+                else if (isPregnancy) ...[
                   const PregnancyWeekEventsCard(),
                   const SizedBox(height: 12),
                   const ImportantDaysCard(),
@@ -367,6 +498,8 @@ class HomeScreen extends StatelessWidget {
                       Expanded(child: _periodButton(context, provider)),
                     ],
                   ),
+                  const SizedBox(height: 10),
+                  _editPeriodDaysButton(context, provider),
                   const SizedBox(height: 16),
                   const CycleSummaryCard(),
                   const SizedBox(height: 20),
@@ -382,6 +515,8 @@ class HomeScreen extends StatelessWidget {
                       Expanded(child: _periodButton(context, provider)),
                     ],
                   ),
+                  const SizedBox(height: 10),
+                  _editPeriodDaysButton(context, provider),
                   const SizedBox(height: 16),
                   const NoteCard(),
                   const SizedBox(height: 16),
