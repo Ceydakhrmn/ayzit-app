@@ -8,6 +8,7 @@ enum DayPhase {
   periodLight,  // Regl hafif — açık mor
   periodMid,    // Regl orta — orta mor
   periodPeak,   // Regl yoğun — koyu mor
+  periodPredicted, // Tahmini regl (henüz işaretlenmemiş) — soluk mor
   fertilelow,   // Düşük doğurganlık — sarı
   fertileMid,   // Orta doğurganlık — turuncu
   fertilePeak,  // En yüksek doğurganlık — kırmızı

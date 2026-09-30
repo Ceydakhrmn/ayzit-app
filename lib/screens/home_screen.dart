@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../l10n/app_localizations.dart';
 import '../providers/cycle_provider.dart';
+import '../utils/phase_colors.dart';
 import '../widgets/calendar_grid.dart';
 import 'symptom_sheet.dart';
 import 'settings_screen.dart';
@@ -38,6 +39,10 @@ void showLegendDialog(BuildContext context) {
           const SizedBox(height: 16),
           _LegendRow(color: const Color(0xFF7C3AED), label: l10n.legendPeriodHeavy),
           _LegendRow(color: const Color(0xFFC084FC), label: l10n.legendPeriodLight),
+          _LegendRow(
+            color: kPeriodPredicted,
+            label: l10n.isTurkish ? 'Tahmini regl günleri' : 'Expected period days',
+          ),
           _LegendRow(color: const Color(0xFF3B82F6), label: l10n.legendOvulation),
           _LegendRow(color: const Color(0xFFDC2626), label: l10n.legendFertileHigh),
           _LegendRow(color: const Color(0xFFF97316), label: l10n.legendFertileMedium),

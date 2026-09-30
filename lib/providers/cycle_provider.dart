@@ -741,6 +741,7 @@ class CycleProvider extends ChangeNotifier {
         cycleLength: _cycleLength,
         periodLength: _periodLength,
         activePeriodStart: _isPeriodActive ? _periodActualStart : null,
+        today: DateTime.now(),
       );
 
   // ── Statistics helpers ──

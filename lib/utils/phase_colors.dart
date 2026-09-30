@@ -24,6 +24,7 @@ class PhaseStyle {
 const Color kPeriodLight = Color(0xFFC084FC); // açık mor
 const Color kPeriodMid   = Color(0xFFA855F7); // orta mor
 const Color kPeriodPeak  = Color(0xFF7C3AED); // koyu mor/lacivert
+const Color kPeriodPredicted = Color(0x59C084FC); // soluk mor (tahmini regl)
 
 // Isı skalası — Doğurganlık
 const Color kFertileLow  = Color(0xFFFDE047); // sarı
@@ -85,6 +86,8 @@ String phaseLabel(DayPhase phase, {required bool isTurkish}) {
       return isTurkish ? 'Regl — orta yoğunluk' : 'Period — medium';
     case DayPhase.periodPeak:
       return isTurkish ? 'Regl — yoğun' : 'Period — heavy';
+    case DayPhase.periodPredicted:
+      return isTurkish ? 'Tahmini regl günü' : 'Expected period day';
     case DayPhase.fertilelow:
       return isTurkish ? 'Doğurganlık — düşük' : 'Fertility — low';
     case DayPhase.fertileMid:
@@ -117,6 +120,12 @@ PhaseStyle phaseStyle(DayPhase phase) {
         background: kPeriodPeak,
         textColor: Colors.white,
         label: 'Regl — yoğun',
+      );
+    case DayPhase.periodPredicted:
+      return const PhaseStyle(
+        background: kPeriodPredicted,
+        textColor: Color(0xFF7E22CE),
+        label: 'Tahmini regl günü',
       );
     case DayPhase.fertilelow:
       return const PhaseStyle(

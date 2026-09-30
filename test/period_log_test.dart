@@ -212,10 +212,29 @@ void main() {
         ...range(DateTime(2026, 1, 29), 5),
       ]);
       expect(phase(log, DateTime(2026, 2, 11)), DayPhase.ovulation); // 14. gün
-      // Tahmini sonraki regl (26 Şubat) boyanmaz.
-      expect(phase(log, DateTime(2026, 2, 26)), DayPhase.none);
+      // Tahmini sonraki regl (26 Şubat – 2 Mart) soluk gösterilir.
+      expect(phase(log, DateTime(2026, 2, 26)), DayPhase.periodPredicted);
+      expect(phase(log, DateTime(2026, 3, 2)), DayPhase.periodPredicted);
+      expect(phase(log, DateTime(2026, 3, 3)), DayPhase.none);
       // Bir sonraki tahmini döngünün ovulasyonu da gösterilir.
       expect(phase(log, DateTime(2026, 3, 11)), DayPhase.ovulation);
+    });
+
+    test('tahmini regl: kayıtlı dönem ve bugünden önceki günler soluk olmaz', () {
+      // 1 Eylül'de 3 gün işaretli, ayar 5 gün: 4–5 Eylül tahmin değil.
+      final log = PeriodLog(range(DateTime(2026, 9, 1), 3));
+      DayPhase p(DateTime d) => phaseForDay(
+          date: d,
+          log: log,
+          cycleLength: 28,
+          periodLength: 5,
+          today: DateTime(2026, 9, 30));
+      expect(p(DateTime(2026, 9, 4)), DayPhase.none);
+      // Tahmini regl 29 Eylül – 3 Ekim; bugün 30 Eylül → 29'u geçmişte kaldı.
+      expect(p(DateTime(2026, 9, 29)), DayPhase.none);
+      expect(p(DateTime(2026, 9, 30)), DayPhase.periodPredicted);
+      expect(p(DateTime(2026, 10, 3)), DayPhase.periodPredicted);
+      expect(p(DateTime(2026, 10, 27)), DayPhase.periodPredicted);
     });
 
     test('ayarlardaki döngü uzunluğu değişince tahmin de değişir', () {
@@ -287,6 +306,14 @@ void main() {
       expect(f.ovulation, DateTime(2026, 10, 12));
       // Pencerenin içindeyken aynı pencere kalır.
       expect(fc(log, DateTime(2026, 9, 15))!.ovulation, DateTime(2026, 9, 14));
+    });
+
+    test('gecikmiş regl: tahmini günler sürerken sonraki regl o dönemdir', () {
+      final log = PeriodLog(range(DateTime(2026, 9, 1), 5));
+      // Tahmini regl 29 Eylül – 3 Ekim; bugün 1 Ekim, henüz işaretlenmedi.
+      expect(fc(log, DateTime(2026, 10, 1))!.nextPeriod, DateTime(2026, 9, 29));
+      // Tahmini dönem bitince bir sonraki döngüye geçer.
+      expect(fc(log, DateTime(2026, 10, 4))!.nextPeriod, DateTime(2026, 10, 27));
     });
 
     test('regl olarak işaretli günler doğurganlık penceresine girmez', () {

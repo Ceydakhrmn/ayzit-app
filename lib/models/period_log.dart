@@ -17,8 +17,10 @@ import 'cycle_model.dart';
 ///    tahmini [periodLength] boyunca regl rengi
 /// 3. Diğer günler → bu günden önceki son döneme göre ovulasyon/doğurganlık.
 ///    İki kayıtlı dönem arasındaysa gerçek döngü uzunluğu, son dönemden
-///    sonrasıysa ayarlardaki [cycleLength] ile ileriye doğru tahmin. Tahmini regl
-///    günleri boyanmaz; yalnızca gerçek kayıtlar regl rengi alır.
+///    sonrasıysa ayarlardaki [cycleLength] ile ileriye doğru tahmin.
+/// 4. Son dönemden sonraki döngülerin ilk [periodLength] günü →
+///    [DayPhase.periodPredicted] (soluk). [today]'den önceki tahmini günler
+///    boyanmaz: işaretlenmediyse o günlerde regl olunmamıştır.
 ///
 /// Hiç kayıt yoksa tüm günler boş kalır; uygulama kimseye varsayılan bir
 /// regl tarihi atamaz.
@@ -28,6 +30,7 @@ DayPhase phaseForDay({
   required int cycleLength,
   required int periodLength,
   DateTime? activePeriodStart,
+  DateTime? today,
 }) {
   final d = PeriodLog.dateOnly(date);
 
@@ -56,13 +59,19 @@ DayPhase phaseForDay({
     cycleLen = cycleLength;
     dayInCycle = sinceAnchor % cycleLen + 1;
   }
-  if (dayInCycle <= periodLength) return DayPhase.none;
+  if (dayInCycle <= periodLength) {
+    final isPredicted = next == null &&
+        sinceAnchor >= cycleLen &&
+        (today == null || !d.isBefore(PeriodLog.dateOnly(today)));
+    return isPredicted ? DayPhase.periodPredicted : DayPhase.none;
+  }
   return CycleModel.fertilePhaseFor(dayInCycle, cycleLen);
 }
 
 /// Son kayıtlı regle ve ayarlardaki sürelere göre yaklaşan tarihler.
 class CycleForecast {
-  /// Sonraki regl (bugün ya da sonrası).
+  /// Takvimde soluk gösterilen sıradaki tahmini reglin ilk günü. Regl
+  /// gecikmişse (tahmini günler sürerken) bugünden önce olabilir.
   final DateTime nextPeriod;
 
   /// Bugünü kapsayan ya da sıradaki doğurganlık penceresi ve ovulasyon günü.
@@ -94,10 +103,10 @@ CycleForecast? forecastCycle({
   DateTime at(int offset) =>
       DateTime(anchor.year, anchor.month, anchor.day + offset);
 
-  // Sonraki regl: son kayıttan itibaren bugüne denk gelen ya da ilk gelecek
-  // döngü başlangıcı (kayıtlı dönemin kendisi sayılmaz).
+  // Sonraki regl: son günü bugünden önce olmayan ilk tahmini dönem (kayıtlı
+  // dönemin kendisi sayılmaz); takvimdeki soluk günlerle aynı.
   var k = 1;
-  while (at(k * cycleLength).isBefore(t)) {
+  while (at(k * cycleLength + math.max<int>(periodLength, 1) - 1).isBefore(t)) {
     k++;
   }
   final nextPeriod = at(k * cycleLength);

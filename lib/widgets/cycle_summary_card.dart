@@ -208,7 +208,11 @@ class CycleSummaryCard extends StatelessWidget {
             _SummaryRow(
               label: isEn ? 'Next period (estimated)' : 'Sonraki regl (tahmini)',
               value: _fmtFull(forecast.nextPeriod, isEn),
-              sub: _relative(forecast.nextPeriod, now, isEn),
+              sub: PeriodLog.daysBetween(forecast.nextPeriod, now) > 0
+                  ? (isEn
+                      ? 'Expected ${PeriodLog.daysBetween(forecast.nextPeriod, now)} days ago'
+                      : '${PeriodLog.daysBetween(forecast.nextPeriod, now)} gün önce bekleniyordu')
+                  : _relative(forecast.nextPeriod, now, isEn),
             ),
             Divider(height: 1, indent: 16, endIndent: 16,
                 color: cs.onSurface.withValues(alpha: 0.1)),
