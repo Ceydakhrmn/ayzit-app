@@ -12,6 +12,7 @@
 import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart' as fb;
 import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import '../core/utils/firestore_stream_error.dart';
 import '../models/app_user.dart';
@@ -123,12 +124,30 @@ class AuthProvider extends ChangeNotifier {
       _fcmService.init();
     }
 
+    _reportAppVersion(user.uid);
+
     // Sync RevenueCat with the signed-in user (best-effort; a purchase
     // service failure must never break authentication).
     try {
       await PurchaseService.instance.loginUser(user.uid);
     } catch (e) {
       debugPrint('AuthProvider: purchases login failed: $e');
+    }
+  }
+
+  /// Kullanıcının hangi uygulama sürümünü kullandığını users/{uid}.appInfo
+  /// alanına yazar (best-effort; hata girişi engellemez).
+  Future<void> _reportAppVersion(String uid) async {
+    try {
+      final info = await PackageInfo.fromPlatform();
+      await _userService.updateAppInfo(
+        uid,
+        version: info.version,
+        build: int.tryParse(info.buildNumber) ?? 0,
+        platform: kIsWeb ? 'web' : defaultTargetPlatform.name,
+      );
+    } catch (e) {
+      debugPrint('AuthProvider: app version report failed: $e');
     }
   }
 

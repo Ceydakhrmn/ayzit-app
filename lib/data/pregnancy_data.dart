@@ -93,7 +93,7 @@ const List<PregnancyWeekInfo> kPregnancyWeeks = [
   ),
   PregnancyWeekInfo(
     week: 2,
-    summary: 'Ovulasyon gerçekleşir; yumurta folikülden serbest bırakılır ve '
+    summary: 'Ovülasyon gerçekleşir; yumurta folikülden serbest bırakılır ve '
         'fallop tüpüne geçer. Spermle karşılaşma olursa döllenme başlayacaktır. '
         'Döllenme için en uygun dönem.',
     sizeText: '',

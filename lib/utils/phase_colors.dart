@@ -95,7 +95,7 @@ String phaseLabel(DayPhase phase, {required bool isTurkish}) {
     case DayPhase.fertilePeak:
       return isTurkish ? 'Doğurganlık — en yüksek' : 'Fertility — peak';
     case DayPhase.ovulation:
-      return isTurkish ? 'Ovulasyon günü' : 'Ovulation day';
+      return isTurkish ? 'Ovülasyon günü' : 'Ovulation day';
     case DayPhase.none:
       return isTurkish ? 'Normal gün' : 'Normal day';
   }
@@ -149,7 +149,7 @@ PhaseStyle phaseStyle(DayPhase phase) {
       return const PhaseStyle(
         background: kOvulation,
         textColor: Colors.white,
-        label: 'Ovulasyon günü',
+        label: 'Ovülasyon günü',
       );
     case DayPhase.none:
       return const PhaseStyle(

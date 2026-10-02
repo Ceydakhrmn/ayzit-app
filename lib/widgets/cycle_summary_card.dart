@@ -218,7 +218,7 @@ class CycleSummaryCard extends StatelessWidget {
                 color: cs.onSurface.withValues(alpha: 0.1)),
             if (forecast.ovulation != null) ...[
               _SummaryRow(
-                label: isEn ? 'Ovulation day (estimated)' : 'Ovulasyon günü (tahmini)',
+                label: isEn ? 'Ovulation day (estimated)' : 'Ovülasyon günü (tahmini)',
                 value: _fmtFull(forecast.ovulation!, isEn),
                 sub: _relative(forecast.ovulation!, now, isEn),
               ),
@@ -235,7 +235,7 @@ class CycleSummaryCard extends StatelessWidget {
               ),
             ] else
               _SummaryRow(
-                label: isEn ? 'Ovulation day' : 'Ovulasyon günü',
+                label: isEn ? 'Ovulation day' : 'Ovülasyon günü',
                 value: isEn ? 'Cannot be estimated' : 'Hesaplanamıyor',
                 sub: isEn
                     ? 'Your cycle length is too short for your period length. Check Settings.'

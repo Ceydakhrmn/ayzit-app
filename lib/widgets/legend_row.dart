@@ -19,7 +19,7 @@ class LegendRow extends StatelessWidget {
       _LegendItem(color: kFertilePeak, label: isEn ? 'Fertility — peak' : 'Doğurganlık — en yüksek'),
       _LegendItem(color: kFertileMid,  label: isEn ? 'Fertility — mid' : 'Doğurganlık — orta'),
       _LegendItem(color: kFertileLow,  label: isEn ? 'Fertility — low' : 'Doğurganlık — düşük'),
-      _LegendItem(color: kOvulation,   label: isEn ? 'Ovulation' : 'Ovulasyon'),
+      _LegendItem(color: kOvulation,   label: isEn ? 'Ovulation' : 'Ovülasyon'),
     ];
 
     return Wrap(

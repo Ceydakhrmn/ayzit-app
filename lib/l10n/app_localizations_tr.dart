@@ -390,7 +390,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get legendPeriodLight => 'Regl dönemi (hafif).';
 
   @override
-  String get legendOvulation => 'Ovulasyon günü.';
+  String get legendOvulation => 'Ovülasyon günü.';
 
   @override
   String get legendFertileHigh => 'Doğurganlık — en yüksek.';

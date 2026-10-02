@@ -205,6 +205,24 @@ class UserService {
     await userDoc(uid).update({'preferences.notifications': prefs.toMap()});
   }
 
+  /// Kullanıcının o an kullandığı uygulama sürümünü kaydeder; Firebase
+  /// Console'da kimin hangi sürümde olduğu `appInfo` alanından görülür.
+  Future<void> updateAppInfo(
+    String uid, {
+    required String version,
+    required int build,
+    required String platform,
+  }) async {
+    await userDoc(uid).update({
+      'appInfo': {
+        'version': version,
+        'build': build,
+        'platform': platform,
+        'lastOpenedAt': FieldValue.serverTimestamp(),
+      },
+    });
+  }
+
   // ── Stats (denorm) ──
   Future<void> incrementPostCount(String uid, int delta) async {
     await userDoc(uid).update({

@@ -9,7 +9,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/theme/app_background.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/cycle_provider.dart';
+import '../services/app_update_service.dart';
 import 'exercise_screen.dart';
 import 'home_screen.dart';
 import 'pregnancy/garden_screen.dart';
@@ -32,6 +34,27 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      AppUpdateService.instance.checkForUpdate(onDownloaded: _showRestartPrompt);
+    });
+  }
+
+  /// Arka planda indirilen güncelleme hazır olunca gösterilir.
+  void _showRestartPrompt() {
+    if (!mounted) return;
+    final isTr = AppLocalizations.of(context)!.isTurkish;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(isTr
+            ? 'Ayzit\'in yeni sürümü hazır 💕'
+            : 'A new version of Ayzit is ready 💕'),
+        duration: const Duration(minutes: 10),
+        action: SnackBarAction(
+          label: isTr ? 'Yeniden başlat' : 'Restart',
+          onPressed: AppUpdateService.instance.installDownloadedUpdate,
+        ),
+      ),
+    );
   }
 
   @override
