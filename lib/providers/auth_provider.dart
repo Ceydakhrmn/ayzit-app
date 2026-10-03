@@ -19,6 +19,7 @@ import '../models/app_user.dart';
 import '../services/auth_service.dart';
 import '../services/fcm_service.dart';
 import '../services/purchase_service.dart';
+import '../services/reminder_notification_service.dart';
 import '../services/user_service.dart';
 
 enum AuthStatus {
@@ -165,6 +166,7 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('AuthProvider.signOut: purchases logout failed: $e');
     }
+    await ReminderNotificationService.instance.cancelAll();
     await _authService.signOut();
   }
 

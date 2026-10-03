@@ -10,8 +10,13 @@ import 'package:provider/provider.dart';
 
 import '../core/theme/app_background.dart';
 import '../l10n/app_localizations.dart';
+import '../models/notification_prefs.dart';
+import '../models/period_log.dart';
+import '../models/reminder_plan.dart';
+import '../providers/auth_provider.dart';
 import '../providers/cycle_provider.dart';
 import '../services/app_update_service.dart';
+import '../services/reminder_notification_service.dart';
 import 'exercise_screen.dart';
 import 'home_screen.dart';
 import 'pregnancy/garden_screen.dart';
@@ -116,10 +121,47 @@ class _MainShellState extends State<MainShell> {
         ),
       ];
 
+  /// Ayarlardaki regl / egzersiz / su hatırlatmalarını telefonda kurar.
+  /// Tercihler, regl kayıtları, dil ya da gün değişince yeniden planlanır.
+  void _syncReminders(CycleProvider cycle, NotificationPrefs prefs, bool isTr) {
+    // Hamile takipte regl hatırlatmaları anlamsız; yalnızca diğerleri kalır.
+    if (cycle.appMode == AppMode.hamileTakip) {
+      prefs = prefs.copyWith(periodStart: false, periodEnd: false);
+    }
+    final now = DateTime.now();
+    final activeStart = cycle.activePeriodStart;
+    final signature = [
+      prefs.toMap().toString(),
+      cycle.periodLog.sortedKeys.join(','),
+      cycle.cycleLength,
+      cycle.periodLength,
+      activeStart?.toIso8601String(),
+      isTr,
+      PeriodLog.keyOf(now),
+    ].join('|');
+    final plan = ReminderPlanner.plan(
+      prefs: prefs,
+      log: cycle.periodLog,
+      cycleLength: cycle.cycleLength,
+      periodLength: cycle.periodLength,
+      activePeriodStart: activeStart,
+      now: now,
+      isTurkish: isTr,
+    );
+    ReminderNotificationService.instance.sync(plan, signature);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isPregnancy =
-        context.watch<CycleProvider>().appMode == AppMode.hamileTakip;
+    final cycle = context.watch<CycleProvider>();
+    final prefs = context.watch<AuthProvider>().appUser?.preferences.notifications;
+    if (prefs != null) {
+      final isTr = AppLocalizations.of(context)!.isTurkish;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _syncReminders(cycle, prefs, isTr);
+      });
+    }
+    final isPregnancy = cycle.appMode == AppMode.hamileTakip;
 
     // Mod değişince index'i sıfırla ve PageController'ı yenile.
     if (_prevIsPregnancy != null && _prevIsPregnancy != isPregnancy) {

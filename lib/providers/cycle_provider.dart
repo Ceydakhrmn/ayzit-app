@@ -242,6 +242,10 @@ class CycleProvider extends ChangeNotifier {
   /// Kullanıcının hiç regl kaydı var mı? Yoksa takvimde tahmin gösterilmez.
   bool get hasPeriodRecords => !periodLog.isEmpty;
 
+  /// Devam eden reglin başlangıcı; aktif regl yoksa null.
+  DateTime? get activePeriodStart =>
+      _isPeriodActive ? _periodActualStart : null;
+
   /// Son kaydedilen reglin başlangıcı; hiç kayıt yoksa null.
   DateTime? get lastPeriodStart =>
       periodLog.isEmpty ? null : periodLog.spans.last.start;

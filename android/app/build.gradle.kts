@@ -55,6 +55,11 @@ android {
     buildTypes {
         release {
             signingConfig = signingConfigs.getByName("release")
+            // Yerel bildirim eklentisi için R8 kuralları (bkz. proguard-rules.pro).
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
         debug {
             signingConfig = signingConfigs.getByName("release")
