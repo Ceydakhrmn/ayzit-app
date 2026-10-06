@@ -147,6 +147,23 @@ class PostService {
     );
   }
 
+  // ── Profile stats ──
+  /// Gönderi sayısı ve bu gönderilerin aldığı toplam beğeni. Kullanıcı
+  /// dokümanındaki postCount / likesReceived sayaçlarını Cloud Functions
+  /// güncelleyecekti ama yayında olmadığı için profil hep 0 gösteriyordu;
+  /// bu yüzden kullanıcının gönderilerinden hesaplanır. (Firestore'un sum()
+  /// sorgusu ek bir bileşik dizin isterdi; kişi başı gönderi sayısı az.)
+  Future<({int posts, int likes})> authorStats(String authorId) async {
+    final snap = await _postsCol
+        .where(FirestorePaths.fAuthorId, isEqualTo: authorId)
+        .get();
+    var likes = 0;
+    for (final doc in snap.docs) {
+      likes += (doc.data()[FirestorePaths.fLikeCount] as num?)?.toInt() ?? 0;
+    }
+    return (posts: snap.docs.length, likes: likes);
+  }
+
   // ── Live single-post listener (used by detail screen) ──
   Stream<Post?> postStream(String postId) {
     return _postRef(postId).snapshots().map(

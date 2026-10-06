@@ -37,6 +37,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   final List<Post> _myPosts = [];
   bool _loading = true;
   String? _lastUidLoaded;
+  // Gönderilerden hesaplanan sayılar; yüklenene kadar null.
+  ({int posts, int likes})? _stats;
 
   @override
   bool get wantKeepAlive => true;
@@ -53,6 +55,7 @@ class _ProfileScreenState extends State<ProfileScreen>
 
   Future<void> _loadMyPosts(String uid) async {
     setState(() => _loading = true);
+    _loadStats(uid);
     try {
       final result = await _postService.fetchByAuthor(uid);
       if (!mounted) return;
@@ -65,6 +68,15 @@ class _ProfileScreenState extends State<ProfileScreen>
     } catch (_) {
       if (!mounted) return;
       setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _loadStats(String uid) async {
+    try {
+      final stats = await _postService.authorStats(uid);
+      if (mounted) setState(() => _stats = stats);
+    } catch (e) {
+      debugPrint('ProfileScreen._loadStats: $e');
     }
   }
 
@@ -101,6 +113,8 @@ class _ProfileScreenState extends State<ProfileScreen>
       await _postService.deletePost(post.id);
       if (!mounted) return;
       setState(() => _myPosts.removeWhere((p) => p.id == post.id));
+      final uid = context.read<AuthProvider>().firebaseUser?.uid;
+      if (uid != null) _loadStats(uid);
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -190,14 +204,14 @@ class _ProfileScreenState extends State<ProfileScreen>
                   Expanded(
                     child: _StatTile(
                       label: l10n.isTurkish ? 'Paylaşım' : 'Posts',
-                      value: '${user?.postCount ?? 0}',
+                      value: _stats == null ? '…' : '${_stats!.posts}',
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _StatTile(
                       label: l10n.isTurkish ? 'Beğeni' : 'Likes',
-                      value: '${user?.likesReceived ?? 0}',
+                      value: _stats == null ? '…' : '${_stats!.likes}',
                     ),
                   ),
                 ],
