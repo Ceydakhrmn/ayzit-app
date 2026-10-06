@@ -192,12 +192,8 @@ class _NotificationsSection extends StatelessWidget {
       title: isEn ? 'Notifications' : 'Bildirimler',
       icon: Icons.notifications_outlined,
       children: [
-        _SwitchRow(
-          title: isEn ? 'Comment on my post' : 'Postuma yorum geldiğinde',
-          subtitle: isEn ? 'Get notified when someone comments on your post' : 'Paylaşımlarına yorum geldiğinde bildirim al',
-          value: prefs.commentOnPost,
-          onChanged: (v) => update(prefs.copyWith(commentOnPost: v)),
-        ),
+        // "Postuma yorum geldiğinde" gizli: yorum bildirimi sunucu (Cloud
+        // Functions, Blaze planı) gerektirir ve henüz yayında değil.
         _SwitchRow(
           title: isEn ? 'Period started' : 'Regl başladı',
           subtitle: isEn ? 'Remind me when my period is due' : 'Regl günün geldiğinde hatırlat',

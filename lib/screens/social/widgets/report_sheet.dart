@@ -133,13 +133,21 @@ class _ReportSheetState extends State<_ReportSheet> {
             style: const TextStyle(fontSize: 13, color: Colors.black54),
           ),
           const SizedBox(height: 16),
-          ...ReportReason.values.map(
-            (r) => RadioListTile<ReportReason>(
-              contentPadding: EdgeInsets.zero,
-              value: r,
-              groupValue: _reason,
-              title: Text(_label(r, isEn: isEn)),
-              onChanged: _loading ? null : (v) => setState(() => _reason = v!),
+          RadioGroup<ReportReason>(
+            groupValue: _reason,
+            onChanged: (v) {
+              if (_loading || v == null) return;
+              setState(() => _reason = v);
+            },
+            child: Column(
+              children: [
+                for (final r in ReportReason.values)
+                  RadioListTile<ReportReason>(
+                    contentPadding: EdgeInsets.zero,
+                    value: r,
+                    title: Text(_label(r, isEn: isEn)),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: 8),

@@ -137,7 +137,7 @@ class _GrowthGardenCardState extends State<GrowthGardenCard>
                         _tree.value = _valueForWeek(week);
                         _ready = true;
                       },
-                      errorBuilder: (_, __, ___) => const Center(
+                      errorBuilder: (_, _, _) => const Center(
                         child: Icon(Icons.park_outlined,
                             size: 44, color: _gardenGreen),
                       ),
