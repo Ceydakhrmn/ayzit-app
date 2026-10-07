@@ -32,15 +32,14 @@
 Hidden or postponed so the first production release only contains features
 that actually work. Re-add in post-launch updates.
 
-- [ ] **Comment notifications** ("Postuma yorum geldiğinde") — P1
-  - Hidden in 1.0.8 (`lib/screens/settings_screen.dart`, see the comment there).
-  - Needs Cloud Functions → upgrade Firebase to the **Blaze** plan
-    (the project is on Spark; the Cloud Functions API was never enabled).
-  - Before deploying `functions/`: run `npm audit fix` there (20 advisories,
-    2 critical) and deploy **only** `onCommentCreated` and `onPostLikeWrite`.
-    Do NOT deploy `scheduledCycleReminders` / `scheduledExerciseReminder`:
-    those reminders now run on the device (1.0.7) and would arrive twice.
-  - Then show the switch again and confirm the like/comment pushes arrive.
+- [x] **Comment / like notifications** without paying (2026-10-07, 1.0.10):
+  the app writes `users/{uid}/activity` records (bell list + in-app alert),
+  and **Google Apps Script** (`apps_script/`) sends the phone push every
+  5 minutes. The project stays on the free Spark plan.
+  - `functions/` (Cloud Functions) is kept for reference only; it needs the
+    paid Blaze plan, which the owner declined. If ever deployed, deploy only
+    `onCommentCreated` / `onPostLikeWrite` and turn off the Apps Script,
+    otherwise every push arrives twice.
 - [ ] **Ads (AdMob)** — P2
   - Consent dialog (UMP) for personalised ads; never use health data for ads.
   - Update Play Console: Ads → Yes, Advertising ID → Yes (+ `AD_ID` permission),

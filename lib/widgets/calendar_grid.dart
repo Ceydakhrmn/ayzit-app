@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/pregnancy_data.dart';
 import '../l10n/app_localizations.dart';
+import '../models/cycle_model.dart';
 import '../providers/appointment_provider.dart';
 import '../providers/cycle_provider.dart';
 import '../utils/phase_colors.dart';
@@ -212,29 +213,44 @@ class CalendarGrid extends StatelessWidget {
       );
     }
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     // ── Regl günlerini düzenleme modu ─────────────────────────────────
     if (provider.isEditingPeriodDays) {
       final isFuture = date.isAfter(DateTime.now());
-      final style = phaseStyle(provider.draftPhaseOf(date));
+      final colors = _phaseColors(provider.draftPhaseOf(date), isDark);
       return DayCell(
         label: '${date.day}',
-        backgroundColor: style.background,
-        textColor: isFuture ? Colors.grey.withValues(alpha: 0.4) : style.textColor,
+        backgroundColor: colors.background,
+        textColor: isFuture ? Colors.grey.withValues(alpha: 0.4) : colors.text,
         isToday: isToday,
         onTap: isFuture ? null : () => provider.togglePeriodDraftDay(date),
       );
     }
 
     // ── Normal mod ───────────────────────────────────────────────────
-    final style = phaseStyle(provider.phaseOf(date));
+    final colors = _phaseColors(provider.phaseOf(date), isDark);
     return DayCell(
       label: '${date.day}',
-      backgroundColor: style.background,
-      textColor: style.textColor,
+      backgroundColor: colors.background,
+      textColor: colors.text,
       isToday: isToday,
       isSelected: isSelected,
       onTap: () => provider.selectDay(date),
     );
+  }
+
+  /// Faz renkleri; koyu modda okunaklı kalacak şekilde ayarlanır.
+  /// Boş gün için null döner → DayCell temaya uygun varsayılanı kullanır
+  /// (sabit açık gri, koyu modda parlak daireler oluşturuyordu).
+  ({Color? background, Color? text}) _phaseColors(DayPhase phase, bool isDark) {
+    if (phase == DayPhase.none) return (background: null, text: null);
+    final style = phaseStyle(phase);
+    if (isDark && phase == DayPhase.periodPredicted) {
+      // Soluk mor zemin üzerinde mor rakam koyu modda okunmuyordu.
+      return (background: style.background, text: const Color(0xFFE9D5FF));
+    }
+    return (background: style.background, text: style.textColor);
   }
 
   // ── SAT seç onay dialogu ────────────────────────────────────────────────

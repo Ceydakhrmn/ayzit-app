@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -14,9 +16,13 @@ Future<void> showSymptomSheet(BuildContext context) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
+    // Klavyenin ya da telefonun alt gezinme çubuğunun üstünde kalsın.
     builder: (sheetContext) => Padding(
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+        bottom: math.max(
+          MediaQuery.viewInsetsOf(sheetContext).bottom,
+          MediaQuery.viewPaddingOf(sheetContext).bottom,
+        ),
       ),
       child: const _SymptomSheet(),
     ),

@@ -36,6 +36,14 @@
   ],
   "fieldOverrides": [
     {
+      "collectionGroup": "activity",
+      "fieldPath": "pushed",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION" },
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    },
+    {
       "collectionGroup": "comments",
       "fieldPath": "authorId",
       "indexes": [

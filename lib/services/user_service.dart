@@ -11,6 +11,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 
 import '../core/utils/firestore_paths.dart';
+import '../models/activity_item.dart';
 import '../models/app_user.dart';
 import '../models/notification_prefs.dart';
 
@@ -262,6 +263,7 @@ class UserService {
     await wipeSub(FirestorePaths.waterIntake);
     await wipeSub(FirestorePaths.cycleMoods);
     await wipeSub(FirestorePaths.appointments);
+    await wipeSub(FirestorePaths.activity);
 
     // ── Sosyal içerik (KVKK: kullanıcının kendi ürettiği içerik) ──
     // Best-effort: buradaki bir hata, aşağıdaki hesap/veri silmeyi
@@ -289,6 +291,15 @@ class UserService {
             tx.update(postRef, {
               FirestorePaths.fCommentCount: FieldValue.increment(-1),
             });
+            // Paylaşım sahibinin zil listesindeki bu yoruma ait kayıt
+            // (kullanıcı adını taşıdığı için o da silinir).
+            final postAuthorId =
+                postSnap.data()?[FirestorePaths.fAuthorId] as String?;
+            if (postAuthorId != null && postAuthorId != uid) {
+              tx.delete(userDoc(postAuthorId)
+                  .collection(FirestorePaths.activity)
+                  .doc(ActivityItem.commentDocId(c.id)));
+            }
           }
         });
       }

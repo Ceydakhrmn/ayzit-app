@@ -9,12 +9,17 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../core/theme/app_colors.dart';
 import '../../l10n/app_localizations.dart';
+import '../../models/activity_item.dart';
 import '../../models/post.dart';
 import '../../models/post_report.dart';
+import '../../providers/auth_provider.dart';
+import '../../services/activity_service.dart';
 import '../../services/post_service.dart';
+import 'activity_screen.dart';
 import 'create_post_sheet.dart';
 import 'post_detail_screen.dart';
 import 'widgets/avatar_circle.dart';
@@ -47,6 +52,8 @@ class SocialScreen extends StatelessWidget {
                               : Colors.black87,
                         ),
                       ),
+                      const Spacer(),
+                      const _ActivityBell(),
                     ],
                   ),
                 ),
@@ -80,6 +87,53 @@ class SocialScreen extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// Yorum / beğeni bildirimleri; okunmamış varsa sayılı kırmızı rozet.
+class _ActivityBell extends StatefulWidget {
+  const _ActivityBell();
+
+  @override
+  State<_ActivityBell> createState() => _ActivityBellState();
+}
+
+class _ActivityBellState extends State<_ActivityBell> {
+  // Her build'de yeni dinleyici açılmasın diye kullanıcı başına bir kez.
+  String? _uid;
+  Stream<List<ActivityItem>>? _stream;
+
+  @override
+  Widget build(BuildContext context) {
+    final uid = context.watch<AuthProvider>().firebaseUser?.uid;
+    final isTr = AppLocalizations.of(context)!.isTurkish;
+    if (uid == null) return const SizedBox.shrink();
+    if (uid != _uid) {
+      _uid = uid;
+      _stream = ActivityService().stream(uid);
+    }
+    return StreamBuilder<List<ActivityItem>>(
+      stream: _stream,
+      builder: (context, snap) {
+        final unread = snap.data?.where((a) => !a.read).length ?? 0;
+        return IconButton(
+          tooltip: isTr ? 'Bildirimler' : 'Notifications',
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const ActivityScreen()),
+          ),
+          icon: Badge(
+            isLabelVisible: unread > 0,
+            label: Text(unread > 9 ? '9+' : '$unread'),
+            child: Icon(
+              unread > 0
+                  ? Icons.notifications
+                  : Icons.notifications_none_outlined,
+              color: AppColors.primary,
+            ),
+          ),
+        );
+      },
     );
   }
 }

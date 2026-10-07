@@ -57,6 +57,57 @@ service cloud.firestore {
       match /appointments/{id} {
         allow read, write: if isOwner(uid);
       }
+
+      // ── Etkinlik (zil listesi): paylaşımına gelen yorum / beğeni ──
+      // Yalnızca sahibi okur. Kaydı, yorumu ya da beğeniyi yapan kişi aynı
+      // işlem içinde yazar; kural bu yorumun / beğeninin gerçekten var
+      // olduğunu, paylaşımın bu kullanıcıya ait olduğunu ve kullanıcı adının
+      // yazanın kendisi olduğunu doğrular (sahte bildirim gönderilemez).
+      // `pushed` alanını Apps Script (IAM yetkisiyle, kurallar dışında)
+      // günceller.
+      match /activity/{activityId} {
+        allow read: if isOwner(uid);
+
+        // Sahibi yalnızca okundu işaretleyebilir.
+        allow update: if isOwner(uid)
+          && request.resource.data.diff(resource.data).affectedKeys()
+               .hasOnly(['read'])
+          && request.resource.data.read is bool;
+
+        // Sahibi silebilir; yapan kişi de beğeniyi geri alınca / yorumu
+        // silince kendi kaydını siler (kayıt yoksa silme zararsızdır).
+        allow delete: if isOwner(uid)
+          || (isAuth() && (resource == null
+                           || resource.data.actorId == request.auth.uid));
+
+        allow create: if isAuth()
+          && request.auth.uid != uid
+          && request.resource.data.keys().hasOnly([
+               'type', 'actorId', 'actorUsername', 'postId', 'commentId',
+               'text', 'createdAt', 'read', 'pushed'])
+          && request.resource.data.actorId == request.auth.uid
+          && request.resource.data.read == false
+          && request.resource.data.pushed == false
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.postId is string
+          && get(/databases/$(database)/documents/posts/$(request.resource.data.postId))
+               .data.authorId == uid
+          && request.resource.data.actorUsername is string
+          && get(/databases/$(database)/documents/usernames/$(request.resource.data.actorUsername))
+               .data.uid == request.auth.uid
+          && (
+            (request.resource.data.type == 'like'
+              && activityId == 'like_' + request.resource.data.postId + '_' + request.auth.uid
+              && existsAfter(/databases/$(database)/documents/posts/$(request.resource.data.postId)/likes/$(request.auth.uid)))
+            || (request.resource.data.type == 'comment'
+              && request.resource.data.commentId is string
+              && activityId == 'comment_' + request.resource.data.commentId
+              && request.resource.data.text is string
+              && request.resource.data.text.size() <= 200
+              && getAfter(/databases/$(database)/documents/posts/$(request.resource.data.postId)/comments/$(request.resource.data.commentId))
+                   .data.authorId == request.auth.uid)
+          );
+      }
     }
 
     // ── Usernames (unique reservation) ─────────────────────

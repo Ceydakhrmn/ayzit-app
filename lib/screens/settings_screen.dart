@@ -192,8 +192,15 @@ class _NotificationsSection extends StatelessWidget {
       title: isEn ? 'Notifications' : 'Bildirimler',
       icon: Icons.notifications_outlined,
       children: [
-        // "Postuma yorum geldiğinde" gizli: yorum bildirimi sunucu (Cloud
-        // Functions, Blaze planı) gerektirir ve henüz yayında değil.
+        // Yorum / beğeni bildirimleri: uygulama içindeki uyarı + Google Apps
+        // Script'in gönderdiği telefon bildirimi (scripts/apps_script/).
+        // Zil listesi bu ayardan bağımsız olarak her zaman tutulur.
+        _SwitchRow(
+          title: isEn ? 'Comments and likes on my posts' : 'Paylaşımıma yorum ya da beğeni gelince',
+          subtitle: isEn ? 'Get notified when someone comments on or likes your post' : 'Paylaşımlarına yorum ya da beğeni geldiğinde bildirim al',
+          value: prefs.commentOnPost,
+          onChanged: (v) => update(prefs.copyWith(commentOnPost: v)),
+        ),
         _SwitchRow(
           title: isEn ? 'Period started' : 'Regl başladı',
           subtitle: isEn ? 'Remind me when my period is due' : 'Regl günün geldiğinde hatırlat',

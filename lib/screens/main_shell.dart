@@ -5,22 +5,27 @@
 //   Hamile mode  (5 tabs): Takvim | Büyüme Bahçem | Egzersiz | Sosyal | Profil
 // =============================================
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../core/theme/app_background.dart';
 import '../l10n/app_localizations.dart';
+import '../models/activity_item.dart';
 import '../models/notification_prefs.dart';
 import '../models/period_log.dart';
 import '../models/reminder_plan.dart';
 import '../providers/auth_provider.dart';
 import '../providers/cycle_provider.dart';
+import '../services/activity_service.dart';
 import '../services/app_update_service.dart';
 import '../services/reminder_notification_service.dart';
 import 'exercise_screen.dart';
 import 'home_screen.dart';
 import 'pregnancy/garden_screen.dart';
 import 'profile/profile_screen.dart';
+import 'social/activity_screen.dart';
 import 'social/social_screen.dart';
 
 class MainShell extends StatefulWidget {
@@ -30,7 +35,7 @@ class MainShell extends StatefulWidget {
   State<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends State<MainShell> with WidgetsBindingObserver {
   int _index = 0;
   bool? _prevIsPregnancy;
   late PageController _pageController;
@@ -39,9 +44,73 @@ class _MainShellState extends State<MainShell> {
   void initState() {
     super.initState();
     _pageController = PageController();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkForUpdate());
+  }
+
+  /// Uygulama arka plandan dönünce de güncelleme kontrol edilir; aksi halde
+  /// yalnızca tamamen kapatılıp açıldığında kontrol ediliyordu.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _checkForUpdate();
+  }
+
+  void _checkForUpdate() =>
       AppUpdateService.instance.checkForUpdate(onDownloaded: _showRestartPrompt);
-    });
+
+  // ── Yorum / beğeni (zil) ──
+  StreamSubscription<List<ActivityItem>>? _activitySub;
+  String? _activityUid;
+  int _unreadActivity = 0;
+  bool _commentAlerts = true;
+  // İlk yüklemede eskiler için uyarı çıkmasın: görülen kayıtlar.
+  Set<String>? _seenActivityIds;
+
+  void _listenActivity(String? uid) {
+    if (uid == _activityUid) return;
+    _activityUid = uid;
+    _activitySub?.cancel();
+    _activitySub = null;
+    _seenActivityIds = null;
+    _unreadActivity = 0;
+    if (uid == null) return;
+    _activitySub = ActivityService().stream(uid).listen((items) {
+      if (!mounted) return;
+      final seen = _seenActivityIds;
+      final fresh = seen == null
+          ? const <ActivityItem>[]
+          : items.where((a) => !a.read && !seen.contains(a.id)).toList();
+      _seenActivityIds = items.map((a) => a.id).toSet();
+      setState(() => _unreadActivity = items.where((a) => !a.read).length);
+      if (fresh.isNotEmpty && _commentAlerts) _showActivityAlert(fresh);
+    }, onError: (Object e) => debugPrint('MainShell.activity: $e'));
+  }
+
+  /// Uygulama açıkken gelen yeni yorum / beğeni için kısa uyarı.
+  void _showActivityAlert(List<ActivityItem> fresh) {
+    final isTr = AppLocalizations.of(context)!.isTurkish;
+    final a = fresh.first;
+    final isComment = a.type == ActivityType.comment;
+    final more = fresh.length > 1 ? ' (+${fresh.length - 1})' : '';
+    final text = isComment
+        ? (isTr
+            ? '💬 ${a.actorUsername} paylaşımına yorum yaptı$more'
+            : '💬 ${a.actorUsername} commented on your post$more')
+        : (isTr
+            ? '💜 ${a.actorUsername} paylaşımını beğendi$more'
+            : '💜 ${a.actorUsername} liked your post$more');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(text),
+        duration: const Duration(seconds: 4),
+        action: SnackBarAction(
+          label: isTr ? 'Gör' : 'View',
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const ActivityScreen()),
+          ),
+        ),
+      ),
+    );
   }
 
   /// Arka planda indirilen güncelleme hazır olunca gösterilir.
@@ -64,6 +133,8 @@ class _MainShellState extends State<MainShell> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _activitySub?.cancel();
     _pageController.dispose();
     super.dispose();
   }
@@ -109,9 +180,16 @@ class _MainShellState extends State<MainShell> {
           activeIcon: Icon(Icons.self_improvement),
           label: '',
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.forum_outlined),
-          activeIcon: Icon(Icons.forum),
+        // Okunmamış yorum / beğeni varsa Sosyal'de kırmızı nokta.
+        BottomNavigationBarItem(
+          icon: Badge(
+            isLabelVisible: _unreadActivity > 0,
+            child: const Icon(Icons.forum_outlined),
+          ),
+          activeIcon: Badge(
+            isLabelVisible: _unreadActivity > 0,
+            child: const Icon(Icons.forum),
+          ),
           label: '',
         ),
         const BottomNavigationBarItem(
@@ -154,7 +232,10 @@ class _MainShellState extends State<MainShell> {
   @override
   Widget build(BuildContext context) {
     final cycle = context.watch<CycleProvider>();
-    final prefs = context.watch<AuthProvider>().appUser?.preferences.notifications;
+    final auth = context.watch<AuthProvider>();
+    final prefs = auth.appUser?.preferences.notifications;
+    _commentAlerts = prefs?.commentOnPost ?? true;
+    _listenActivity(auth.firebaseUser?.uid);
     if (prefs != null) {
       final isTr = AppLocalizations.of(context)!.isTurkish;
       WidgetsBinding.instance.addPostFrameCallback((_) {

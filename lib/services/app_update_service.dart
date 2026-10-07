@@ -20,19 +20,34 @@ class AppUpdateService {
   AppUpdateService._();
   static final AppUpdateService instance = AppUpdateService._();
 
-  bool _checked = false;
+  /// Arka plandan her dönüşte Play'e sorulmasın diye iki kontrol arası.
+  static const Duration minInterval = Duration(minutes: 30);
+
+  bool _inProgress = false;
+  bool _downloaded = false;
+  DateTime? _lastCheck;
 
   bool get _supported => !kIsWeb && Platform.isAndroid && kReleaseMode;
 
-  /// Uygulama açılışında bir kez çağrılır.
+  /// Uygulama açılınca ve arka plandan dönünce çağrılır.
   Future<void> checkForUpdate({required VoidCallback onDownloaded}) async {
-    if (_checked || !_supported) return;
-    _checked = true;
+    if (!_supported || _inProgress) return;
+    if (_downloaded) {
+      onDownloaded(); // indirildi ama kullanıcı henüz yeniden başlatmadı
+      return;
+    }
+    final now = DateTime.now();
+    if (_lastCheck != null && now.difference(_lastCheck!) < minInterval) {
+      return;
+    }
+    _lastCheck = now;
+    _inProgress = true;
     try {
       final info = await InAppUpdate.checkForUpdate();
 
       // Önceki açılışta indirilmiş ama henüz kurulmamış güncelleme.
       if (info.installStatus == InstallStatus.downloaded) {
+        _downloaded = true;
         onDownloaded();
         return;
       }
@@ -43,11 +58,16 @@ class AppUpdateService {
 
       // İndirme tamamlanınca (ya da kullanıcı reddedince) döner.
       final result = await InAppUpdate.startFlexibleUpdate();
-      if (result == AppUpdateResult.success) onDownloaded();
+      if (result == AppUpdateResult.success) {
+        _downloaded = true;
+        onDownloaded();
+      }
     } on PlatformException catch (e) {
       debugPrint('AppUpdateService: ${e.code} ${e.message}');
     } catch (e) {
       debugPrint('AppUpdateService: $e');
+    } finally {
+      _inProgress = false;
     }
   }
 

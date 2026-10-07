@@ -239,7 +239,14 @@ class _LikeButtonState extends State<_LikeButton> {
                   });
                   try {
                     await widget.postService.toggleLike(
-                        postId: widget.post.id, uid: widget.uid!);
+                      postId: widget.post.id,
+                      uid: widget.uid!,
+                      username: context
+                              .read<AuthProvider>()
+                              .appUser
+                              ?.username ??
+                          '',
+                    );
                   } catch (_) {
                     // Revert on error
                     if (mounted) setState(() => _localCount = currentCount);

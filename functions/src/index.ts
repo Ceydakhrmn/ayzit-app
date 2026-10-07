@@ -1,17 +1,18 @@
 // =============================================
 // functions/src/index.ts
-// Cloud Functions for Lunora:
+// Cloud Functions for Ayzit:
 //   • onCommentCreated  — push to post author when a new comment lands
-//   • scheduledCycleReminders — daily sweep for period start / end pushes
-//   • scheduledExerciseReminder — twice-weekly exercise reminder
-//   • onPostLikeWrite — keep users/{uid}.likesReceived in sync
+//   • onPostLikeWrite — keep users/{uid}.likesReceived in sync + push
+//
+// Period / exercise / water reminders are scheduled on the device by the
+// app (lib/services/reminder_notification_service.dart) — do not add server
+// reminders back, users would get every reminder twice.
 // =============================================
 
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 import { onDocumentCreated, onDocumentWritten } from 'firebase-functions/v2/firestore';
-import { onSchedule } from 'firebase-functions/v2/scheduler';
 import { setGlobalOptions } from 'firebase-functions/v2';
 
 setGlobalOptions({region: "europe-west1"}); // Amsterdam, closest to Istanbul with FCM support
@@ -171,82 +172,5 @@ export const onPostLikeWrite = onDocumentWritten(
       },
     });
     await sendToUser(authorId, copy);
-  },
-);
-
-// ── 3. scheduledCycleReminders → daily sweep ─────────────
-export const scheduledCycleReminders = onSchedule(
-  {
-    schedule: 'every day 09:00',
-    timeZone: 'Europe/Istanbul',
-  },
-  async () => {
-    const usersSnap = await db.collection('users').get();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (const userDoc of usersSnap.docs) {
-      const data = userDoc.data();
-      const prefs = (data.preferences?.notifications ?? {}) as NotificationPrefs;
-      const locale = data.preferences?.locale as string | undefined;
-      const cycle = data.cycleData ?? {};
-      const cycleStart = (cycle.cycleStart as FirebaseFirestore.Timestamp | undefined)?.toDate();
-      const cycleLength = (cycle.cycleLength as number | undefined) ?? 28;
-      const periodLength = (cycle.periodLength as number | undefined) ?? 5;
-      if (!cycleStart) continue;
-
-      const start = new Date(cycleStart);
-      start.setHours(0, 0, 0, 0);
-      const msPerDay = 86_400_000;
-      const daysSinceStart = Math.floor(
-        (today.getTime() - start.getTime()) / msPerDay,
-      );
-      if (daysSinceStart < 0) continue;
-
-      const dayInCycle = daysSinceStart % cycleLength; // 0 = start day
-      if (dayInCycle === 0 && prefs.periodStart !== false) {
-        await sendToUser(userDoc.id, pickCopy(locale, {
-          tr: { title: 'Regl gününe merhaba', body: 'Kendine iyi davran, bugün döngünün başlangıcı.' },
-          en: { title: 'Period day', body: 'Be kind to yourself — today starts a new cycle.' },
-          fr: { title: 'Début du cycle', body: 'Un nouveau cycle commence aujourd’hui.' },
-          de: { title: 'Zyklusbeginn', body: 'Dein neuer Zyklus beginnt heute.' },
-          es: { title: 'Inicio del ciclo', body: 'Hoy comienza un nuevo ciclo.' },
-        }));
-      } else if (dayInCycle === periodLength && prefs.periodEnd !== false) {
-        await sendToUser(userDoc.id, pickCopy(locale, {
-          tr: { title: 'Regl bitti', body: 'Bitiş günü. Kendini nasıl hissediyorsun?' },
-          en: { title: 'Period ended', body: 'Your period window has ended.' },
-          fr: { title: 'Règles terminées', body: 'Ta fenêtre de règles est terminée.' },
-          de: { title: 'Periode beendet', body: 'Deine Periode ist heute zu Ende.' },
-          es: { title: 'Fin del período', body: 'Tu período ha terminado.' },
-        }));
-      }
-    }
-  },
-);
-
-// ── 4. scheduledExerciseReminder → 2x weekly ─────────────
-export const scheduledExerciseReminder = onSchedule(
-  {
-    // Tuesday + Friday at 18:00
-    schedule: '0 18 * * 2,5',
-    timeZone: 'Europe/Istanbul',
-  },
-  async () => {
-    const usersSnap = await db.collection('users').get();
-    for (const userDoc of usersSnap.docs) {
-      const data = userDoc.data();
-      const prefs = (data.preferences?.notifications ?? {}) as NotificationPrefs;
-      if (prefs.exerciseReminder === false) continue;
-      const locale = data.preferences?.locale as string | undefined;
-
-      await sendToUser(userDoc.id, pickCopy(locale, {
-        tr: { title: 'Egzersiz vakti', body: 'Bugün 15 dakikalık bir egzersize ne dersin?' },
-        en: { title: 'Workout time', body: 'How about a 15-minute session today?' },
-        fr: { title: 'Heure du sport', body: 'Que dirais-tu de 15 minutes aujourd’hui ?' },
-        de: { title: 'Trainingszeit', body: 'Wie wäre es mit 15 Minuten heute?' },
-        es: { title: 'Hora de entrenar', body: '¿Qué tal una sesión de 15 minutos?' },
-      }));
-    }
   },
 );

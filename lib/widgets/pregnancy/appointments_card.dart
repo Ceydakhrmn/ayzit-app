@@ -5,6 +5,8 @@
 // Eklenen her randevu için bildirimler otomatik planlanır.
 // =============================================
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -362,8 +364,10 @@ class _AddAppointmentSheetState extends State<_AddAppointmentSheet> {
     final l10n = AppLocalizations.of(context)!;
     final isEnglish = !l10n.isTurkish;
     final months = isEnglish ? _monthsShortEn : _monthsShortTr;
-    // Klavye açıldığında içerik klavyenin üstünde kalsın.
-    final keyboard = MediaQuery.of(context).viewInsets.bottom;
+    // Klavye açıldığında içerik klavyenin, kapalıyken telefonun alt gezinme
+    // çubuğunun üstünde kalsın.
+    final keyboard = math.max(MediaQuery.viewInsetsOf(context).bottom,
+        MediaQuery.viewPaddingOf(context).bottom);
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(20, 0, 20, 24 + keyboard),
       child: Column(

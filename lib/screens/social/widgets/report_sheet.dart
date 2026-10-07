@@ -4,6 +4,8 @@
 // then calls ReportService.
 // =============================================
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -26,9 +28,13 @@ Future<void> showReportSheet(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
-    builder: (_) => Padding(
+    // Klavyenin ya da telefonun alt gezinme çubuğunun üstünde kalsın.
+    builder: (sheetContext) => Padding(
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(context).viewInsets.bottom,
+        bottom: math.max(
+          MediaQuery.viewInsetsOf(sheetContext).bottom,
+          MediaQuery.viewPaddingOf(sheetContext).bottom,
+        ),
       ),
       child: _ReportSheet(target: target, targetId: targetId),
     ),
@@ -130,7 +136,10 @@ class _ReportSheetState extends State<_ReportSheet> {
           const SizedBox(height: 4),
           Text(
             isEn ? 'Please select a reason' : 'Lütfen sebebi seç',
-            style: const TextStyle(fontSize: 13, color: Colors.black54),
+            style: TextStyle(
+              fontSize: 13,
+              color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
           ),
           const SizedBox(height: 16),
           RadioGroup<ReportReason>(

@@ -4,6 +4,8 @@
 // Runs the client-side profanity filter before writing to Firestore.
 // =============================================
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -24,9 +26,14 @@ Future<bool?> showCreatePostSheet(BuildContext context, {Post? editPost}) {
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
+    // Klavye açıkken klavyenin, kapalıyken telefonun alt gezinme çubuğunun
+    // (||| ○ <) üstünde kalsın; yoksa PAYLAŞ butonu çubuğun altına giriyordu.
     builder: (sheetContext) => Padding(
       padding: EdgeInsets.only(
-        bottom: MediaQuery.of(sheetContext).viewInsets.bottom,
+        bottom: math.max(
+          MediaQuery.viewInsetsOf(sheetContext).bottom,
+          MediaQuery.viewPaddingOf(sheetContext).bottom,
+        ),
       ),
       child: _CreatePostSheet(editPost: editPost),
     ),
@@ -160,10 +167,17 @@ class _CreatePostSheetState extends State<_CreatePostSheet> {
             maxLines: 8,
             minLines: 4,
             autofocus: true,
-            style: const TextStyle(color: Colors.black87),
+            // Tema rengi: koyu modda beyaz, açık modda siyah (sabit siyah
+            // koyu modda yazılanı görünmez yapıyordu).
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
             decoration: InputDecoration(
               hintText: isEn ? 'What\'s on your mind?' : 'Ne düşünüyorsun?',
-              hintStyle: const TextStyle(color: Colors.black45),
+              hintStyle: TextStyle(
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.45),
+              ),
               border: const OutlineInputBorder(),
             ),
           ),

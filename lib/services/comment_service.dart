@@ -7,6 +7,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../core/utils/firestore_paths.dart';
+import '../models/activity_item.dart';
 import '../models/comment.dart';
 
 class CommentService {
@@ -59,13 +60,37 @@ class CommentService {
     ).toCreateMap();
 
     await _firestore.runTransaction((tx) async {
+      final postSnap = await tx.get(postRef);
+      final postAuthorId =
+          postSnap.data()?[FirestorePaths.fAuthorId] as String?;
       tx.set(newRef, data);
       tx.update(postRef, {
         FirestorePaths.fCommentCount: FieldValue.increment(1),
       });
+      // Paylaşım sahibinin zil listesine kayıt (kendi paylaşımına değilse).
+      if (postAuthorId != null && postAuthorId != authorId) {
+        tx.set(
+          _activityRef(postAuthorId, ActivityItem.commentDocId(newRef.id)),
+          ActivityItem.commentMap(
+            postId: postId,
+            commentId: newRef.id,
+            actorId: authorId,
+            actorUsername: authorUsername,
+            text: content.trim(),
+          ),
+        );
+      }
     });
     return newRef.id;
   }
+
+  DocumentReference<Map<String, dynamic>> _activityRef(
+          String ownerUid, String activityId) =>
+      _firestore
+          .collection(FirestorePaths.users)
+          .doc(ownerUid)
+          .collection(FirestorePaths.activity)
+          .doc(activityId);
 
   // ── Delete (author only per Firestore rules) ──
   Future<void> deleteComment({
@@ -77,10 +102,19 @@ class CommentService {
     await _firestore.runTransaction((tx) async {
       final snap = await tx.get(commentRef);
       if (!snap.exists) return;
+      final postSnap = await tx.get(postRef);
+      final postAuthorId =
+          postSnap.data()?[FirestorePaths.fAuthorId] as String?;
       tx.delete(commentRef);
       tx.update(postRef, {
         FirestorePaths.fCommentCount: FieldValue.increment(-1),
       });
+      // Silinen yorumun bildirimi de paylaşım sahibinin listesinden kalkar.
+      if (postAuthorId != null &&
+          postAuthorId != snap.data()?[FirestorePaths.fAuthorId]) {
+        tx.delete(
+            _activityRef(postAuthorId, ActivityItem.commentDocId(commentId)));
+      }
     });
   }
 

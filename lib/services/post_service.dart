@@ -13,6 +13,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../core/utils/firestore_paths.dart';
+import '../models/activity_item.dart';
 import '../models/post.dart';
 
 class PagedPosts {
@@ -174,9 +175,12 @@ class PostService {
   // ── Like / Unlike ──
   /// Toggles the current user's like on a post. Returns the new like state.
   /// Performs a transaction to keep the denormalised likeCount in sync.
+  /// [username] beğenenin kullanıcı adı; paylaşım sahibinin zil listesinde
+  /// görünür. Boşsa kayıt yazılmaz (güvenlik kuralı kullanıcı adını doğrular).
   Future<bool> toggleLike({
     required String postId,
     required String uid,
+    String username = '',
   }) async {
     final postRef = _postRef(postId);
     final likeRef = postRef.collection(FirestorePaths.likes).doc(uid);
@@ -186,11 +190,21 @@ class PostService {
       final postSnap = await tx.get(postRef);
       if (!postSnap.exists) return false;
 
+      final authorId = postSnap.data()?[FirestorePaths.fAuthorId] as String?;
+      final activityRef = (authorId == null || authorId == uid)
+          ? null
+          : _firestore
+              .collection(FirestorePaths.users)
+              .doc(authorId)
+              .collection(FirestorePaths.activity)
+              .doc(ActivityItem.likeId(postId, uid));
+
       if (likeSnap.exists) {
         tx.delete(likeRef);
         tx.update(postRef, {
           FirestorePaths.fLikeCount: FieldValue.increment(-1),
         });
+        if (activityRef != null) tx.delete(activityRef);
         return false;
       } else {
         tx.set(likeRef, {
@@ -199,6 +213,13 @@ class PostService {
         tx.update(postRef, {
           FirestorePaths.fLikeCount: FieldValue.increment(1),
         });
+        if (activityRef != null && username.isNotEmpty) {
+          tx.set(
+            activityRef,
+            ActivityItem.likeMap(
+                postId: postId, actorId: uid, actorUsername: username),
+          );
+        }
         return true;
       }
     });
