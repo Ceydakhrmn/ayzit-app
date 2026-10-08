@@ -141,6 +141,90 @@ function buildMessage_(items, locale) {
   };
 }
 
+// ── Duyurular (elle çalıştırılır) ─────────────────────────
+// Firebase konsolundaki kampanyalar yerine: her kullanıcıya uygulamada
+// seçtiği dilde (users/{uid}.language) TEK bir bildirim gönderir.
+// Önce metni aşağıda düzenle, sonra:
+//   1. sendAnnouncementTest → yalnızca TEST_USERNAME hesabına gönderir
+//   2. Doğruysa sendAnnouncementToAll → herkese gönderir (bir kez çalıştır!)
+
+const ANNOUNCEMENT = {
+  tr: {
+    title: '✨ Ayzit\'i en son ne zaman güncelledin?',
+    body: 'Buralar biraz değişti! Yeni bildirimler ve yenilikler seni bekliyor.',
+  },
+  en: {
+    title: '✨ When was the last time you updated Ayzit?',
+    body: 'Things got an upgrade around here! Discover new notifications and updates inside.',
+  },
+};
+
+/** Deneme bildiriminin gideceği kullanıcı adı. */
+const TEST_USERNAME = 'ceyouw';
+
+function sendAnnouncementTest() {
+  const owner = getDoc_('usernames/' + TEST_USERNAME);
+  const uid = owner && stringValue_(owner.fields, 'uid', '');
+  if (!uid) throw new Error('Kullanıcı bulunamadı: ' + TEST_USERNAME);
+  const sent = announceToUser_(uid);
+  console.log(TEST_USERNAME + ': ' + sent + ' cihaza gönderildi');
+}
+
+function sendAnnouncementToAll() {
+  // Bildirim adresi olan herkes (users/*/fcmTokens).
+  const tokenDocs = runQuery_({
+    structuredQuery: { from: [{ collectionId: 'fcmTokens', allDescendants: true }] },
+  });
+  const uids = {};
+  tokenDocs.forEach((d) => { uids[d.name.split('/users/')[1].split('/')[0]] = true; });
+  let users = 0, devices = 0;
+  Object.keys(uids).forEach((uid) => {
+    try {
+      const sent = announceToUser_(uid);
+      if (sent > 0) { users++; devices += sent; }
+    } catch (e) {
+      console.error('announce ' + uid + ': ' + e);
+    }
+  });
+  console.log(users + ' kullanıcıya (' + devices + ' cihaz) gönderildi');
+}
+
+/** Kullanıcının dilinde duyuruyu tüm cihazlarına gönderir; cihaz sayısını döner. */
+function announceToUser_(uid) {
+  const user = getDoc_('users/' + uid);
+  if (!user) return 0;
+  const lang = stringValue_(user.fields, 'language',
+    stringValue_(mapValue_(user.fields, 'preferences'), 'locale', 'tr'));
+  const msg = lang.toLowerCase().indexOf('tr') === 0 ? ANNOUNCEMENT.tr : ANNOUNCEMENT.en;
+  let sent = 0;
+  listDocs_('users/' + uid + '/fcmTokens').forEach((d) => {
+    const token = stringValue_(d.fields, 'token', '');
+    if (!token) return;
+    const res = UrlFetchApp.fetch(FCM_SEND, {
+      method: 'post',
+      contentType: 'application/json',
+      headers: authHeaders_(),
+      muteHttpExceptions: true,
+      payload: JSON.stringify({
+        message: {
+          token: token,
+          notification: { title: msg.title, body: msg.body },
+          android: { priority: 'high' },
+        },
+      }),
+    });
+    const code = res.getResponseCode();
+    if (code === 404 || /UNREGISTERED/.test(res.getContentText())) {
+      deleteDocByName_(d.name);
+    } else if (code < 300) {
+      sent++;
+    } else {
+      console.warn('FCM ' + code + ' ' + res.getContentText());
+    }
+  });
+  return sent;
+}
+
 // ── Firestore REST yardımcıları ─────────────────────────
 
 function authHeaders_() {
