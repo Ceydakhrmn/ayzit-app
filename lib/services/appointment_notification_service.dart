@@ -18,12 +18,18 @@ class AppointmentNotificationService {
       AppointmentNotificationService._();
 
   final _plugin = FlutterLocalNotificationsPlugin();
-  bool _initialized = false;
+  /// Sets up time zones and the notification plugin. Does not ask for the
+  /// notification permission: on Android 13+ that dialog is shown by
+  /// FcmService after sign-in (same POST_NOTIFICATIONS permission). Asking
+  /// here, before the first frame, could leave the app on a white screen.
+  Future<void> init() => _initFuture ??= _init().catchError((Object e) {
+        _initFuture = null; // allow a retry on the next call
+        throw e;
+      });
 
-  Future<void> init() async {
-    if (_initialized) return;
-    _initialized = true;
+  Future<void>? _initFuture;
 
+  Future<void> _init() async {
     tzdata.initializeTimeZones();
     // Uygulama Türkçe — varsayılan olarak Türkiye saat dilimi kullanılır.
     try {
@@ -44,12 +50,6 @@ class AppointmentNotificationService {
     await _plugin.initialize(
       const InitializationSettings(android: android, iOS: ios),
     );
-
-    // Android 13+ bildirim izni iste.
-    await _plugin
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestNotificationsPermission();
   }
 
   NotificationDetails _details() {

@@ -41,15 +41,8 @@ Future<void> main() async {
       systemNavigationBarColor: Colors.transparent,
       statusBarColor: Colors.transparent,
     ));
-    await initializeDateFormatting('tr');
-    await AppointmentNotificationService.instance.init();
-    try {
-      await PurchaseService.instance.init();
-    } catch (e) {
-      // RevenueCat must never block app startup; premium checks degrade
-      // gracefully when uninitialized.
-      debugPrint('main: PurchaseService init failed: $e');
-    }
+    // Firebase comes first so Crashlytics can record anything that fails
+    // during the rest of startup.
     try {
       await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,
@@ -57,6 +50,24 @@ Future<void> main() async {
     } catch (_) {
       // Already initialized
     }
+
+    // Crashlytics is disabled automatically in debug builds to keep
+    // dev noise out of the dashboard.
+    try {
+      await FirebaseCrashlytics.instance
+          .setCrashlyticsCollectionEnabled(!kDebugMode);
+    } catch (e) {
+      debugPrint('main: Crashlytics setup failed: $e');
+    }
+
+    FlutterError.onError = (errorDetails) {
+      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
+    };
+
+    PlatformDispatcher.instance.onError = (error, stack) {
+      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
+      return true;
+    };
 
     // App Check: yalnızca gerçek Ayzit uygulamasından gelen isteklerin
     // Firebase'e (Firestore/Auth) ulaşmasını sağlar; çalınmış config ile
@@ -75,21 +86,30 @@ Future<void> main() async {
       // App Check hiçbir zaman uygulama açılışını engellememeli.
       debugPrint('main: AppCheck activate failed: $e');
     }
-    // Crashlytics is disabled automatically in debug builds to keep
-    // dev noise out of the dashboard.
-    await FirebaseCrashlytics.instance
-        .setCrashlyticsCollectionEnabled(!kDebugMode);
 
-    FlutterError.onError = (errorDetails) {
-      FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
-    };
+    try {
+      await initializeDateFormatting('tr');
+    } catch (e) {
+      debugPrint('main: initializeDateFormatting failed: $e');
+    }
 
-    PlatformDispatcher.instance.onError = (error, stack) {
-      FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
-      return true;
-    };
+    try {
+      await PurchaseService.instance.init();
+    } catch (e) {
+      // RevenueCat must never block app startup; premium checks degrade
+      // gracefully when uninitialized.
+      debugPrint('main: PurchaseService init failed: $e');
+    }
 
+    // Nothing that can hang or throw may run before runApp: until the first
+    // frame the user only sees a blank white window. Notification setup runs
+    // after the app is on screen.
     runApp(const AyzitApp());
+
+    unawaited(AppointmentNotificationService.instance.init().catchError(
+      (Object e, StackTrace s) => FirebaseCrashlytics.instance
+          .recordError(e, s, reason: 'notification init'),
+    ));
   }, (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
   });

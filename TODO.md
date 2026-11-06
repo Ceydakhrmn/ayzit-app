@@ -44,10 +44,14 @@ that actually work. Re-add in post-launch updates.
   - Consent dialog (UMP) for personalised ads; never use health data for ads.
   - Update Play Console: Ads → Yes, Advertising ID → Yes (+ `AD_ID` permission),
     and Data Safety (device IDs shared with ad partners, purpose: advertising).
+  - Ads make the app commercial: switch the Play Console **trader status**
+    (EU DSA) to "trader" first — public phone number + address on the store
+    page, and the per-app trader declaration with a Terms of Service link.
 - [ ] **Premium / subscriptions** — P2
   - Create subscription products in Play Console, put real RevenueCat keys in
     `lib/services/purchase_service.dart`, make the paywall reachable.
   - Update Data Safety: Financial info → purchase history.
+  - Same as ads: declare trader status before selling anything.
 - [ ] Profile counters: `users/{uid}.postCount` / `likesReceived` are never
   updated without Cloud Functions; since 1.0.8 the profile computes them from
   the user's posts. If `onPostLikeWrite` is deployed, either keep the computed
